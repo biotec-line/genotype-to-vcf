@@ -1,6 +1,6 @@
 # Genotype-to-VCF Pro Converter
 
-Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdaten in das standardisierte **VCF 4.2** Format. Mit moderner PyQt6-Oberflaeche, Unterstuetzung fuer GRCh37 und GRCh38 Referenzgenome und automatischer Build-Erkennung.
+Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdaten in das standardisierte **VCF 4.2** Format. Mit moderner PySide6-Oberflaeche, Unterstuetzung fuer GRCh37 und GRCh38 Referenzgenome und automatischer Build-Erkennung.
 
 Urspruenglich fuer 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbieter**, der das gleiche Tab-separierte Format verwendet (`rsid  chromosome  position  genotype`).
 
@@ -16,7 +16,7 @@ Urspruenglich fuer 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbie
 | **Persistenter Cache** | Lokaler Cache fuer schnelle wiederholte Konvertierungen |
 | **Adaptives Threading** | 4-200 Worker-Threads, Ziel 70% CPU-Auslastung |
 | **FASTA-Referenz** | Optionale lokale FASTA-Datei fuer Offline-REF-Abfrage |
-| **Moderne GUI** | PyQt6 Dark Theme mit Fortschrittsanzeige und Abbruch-Option |
+| **Moderne GUI** | PySide6 Dark Theme mit Fortschrittsanzeige und Abbruch-Option |
 
 ## Unterstuetzte Eingabeformate
 
@@ -151,7 +151,7 @@ Der persistente `cache.json` speichert dbSNP API-Antworten mit Zeitstempeln. Fol
 ## Technische Details
 
 - **Sprache:** Python 3.8+
-- **GUI:** PyQt6 mit Fusion Dark Theme
+- **GUI:** PySide6 mit Fusion Dark Theme
 - **Bioinformatik:** pyfaidx fuer FASTA-Indexierung
 - **API:** NCBI dbSNP REST API (`https://api.ncbi.nlm.nih.gov/variation/v0/`)
 - **Threading:** `ThreadPoolExecutor` mit CPU-adaptiver Worker-Anzahl
@@ -169,7 +169,7 @@ Genotyp-Daten, persoenliche Identifikatoren oder Rohdateien werden niemals ueber
 
 ## English
 
-A desktop application for converting DTC (Direct-to-Consumer) DNA raw data files into the standardized **VCF 4.2** format. Built with a modern PyQt6 GUI, it supports both GRCh37 and GRCh38 reference genomes with automatic build detection.
+A desktop application for converting DTC (Direct-to-Consumer) DNA raw data files into the standardized **VCF 4.2** format. Built with a modern PySide6 GUI, it supports both GRCh37 and GRCh38 reference genomes with automatic build detection.
 
 Originally designed for 23andMe exports, it works with **any provider** that uses the same tab-separated format (`rsid  chromosome  position  genotype`).
 
@@ -185,7 +185,7 @@ Originally designed for 23andMe exports, it works with **any provider** that use
 | **Persistent Cache** | Local cache for fast repeated conversions |
 | **Adaptive Threading** | 4-200 worker threads, targeting 70% CPU usage |
 | **FASTA Reference** | Optional local FASTA for offline REF base lookup |
-| **Modern GUI** | PyQt6 dark theme with progress tracking and cancel support |
+| **Modern GUI** | PySide6 dark theme with progress tracking and cancel support |
 
 ### Supported Input Formats
 
@@ -320,7 +320,7 @@ The persistent `cache.json` stores dbSNP API responses with timestamps. Subseque
 ### Technical Details
 
 - **Language:** Python 3.8+
-- **GUI:** PyQt6 with Fusion dark theme
+- **GUI:** PySide6 with Fusion dark theme
 - **Bioinformatics:** pyfaidx for FASTA indexing
 - **API:** NCBI dbSNP REST API (`https://api.ncbi.nlm.nih.gov/variation/v0/`)
 - **Threading:** `ThreadPoolExecutor` with CPU-adaptive worker count
