@@ -16,7 +16,7 @@ Ein Bioinformatik-Tool zur Konvertierung von 23andMe Genotypisierungsdaten in da
 | **Multi-Threading** | CPU-adaptive Parallelisierung |
 | **Geschlechts-Erkennung** | Aus Y-Chromosom-Varianten |
 | **Build-Erkennung** | Automatisch aus Datei-Header |
-| **PyQt6 GUI** | Moderne Benutzeroberfläche |
+| **PySide6 GUI** | Moderne Benutzeroberfläche |
 
 ---
 
@@ -60,7 +60,7 @@ Ein Bioinformatik-Tool zur Konvertierung von 23andMe Genotypisierungsdaten in da
 ## 💻 Technische Details
 
 ```
-Framework:      PyQt6
+Framework:      PySide6
 Bioinformatik:  pyfaidx (FASTA-Index)
 API:            NCBI dbSNP REST API
 Threading:      ThreadPoolExecutor

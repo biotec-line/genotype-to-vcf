@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-04-30
+
+### Repository Hygiene
+
+- Restored the current `Make23toVCF3.py` source file to the public repository
+- Added the Windows launcher, PyInstaller spec, and application icon
+- Updated GitHub links from `lukisch` to `biotec-line`
+- Replaced direct contact email references with GitHub-native reporting paths
+- Expanded `.gitignore` for genetic data, local caches, credentials, and internal coordination files
+- Documented the PySide6 migration and repository contents
+
 ## [1.0.0] - 2026-02-13
 
 ### Initial Public Release

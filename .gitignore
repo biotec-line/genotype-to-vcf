@@ -17,9 +17,10 @@ genome_*
 cache.json
 cache.json.tmp*
 
-# Compiled executables
+# Compiled executables and build outputs
 *.exe
-*.spec
+*.msi
+*.msix
 dist/
 build/
 __pycache__/
@@ -41,21 +42,28 @@ desktop.ini
 # Old development versions
 Make23toVCF.py
 Make23toVCF2.py
-Make23toVCF3.py
+Make23toVCF_konvert.txt
 _ul
 
-# Development notes (internal)
+# Development notes and internal coordination
 AUFGABEN.txt
-Make23toVCF_konvert.txt
-START.bat
+TEST.txt
+TESTS.txt
+TESTERGEBNISSE.txt
+BUGREPORT.md
+DIAGNOSE_REPORT.md
 nul
 
 # Internal planning files
 PLAN.txt
+Plan.txt
+CORE.txt
 
 # Private / Archive
 _archive/
 _private/
+_partners/
+removed_sections/
 
 # Virtual Environment
 .venv/
@@ -67,8 +75,16 @@ venv/
 # Logs
 *.log
 
-# Environment Variables
+# Environment variables, credentials, and local stores
 .env
+.env.*
+credentials.json
+client_secret*.json
+token.json
+*.pem
+*.key
+*.db
+keyring/
 
 # Claude Code local settings
 .claude/

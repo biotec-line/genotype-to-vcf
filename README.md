@@ -4,6 +4,8 @@ Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdat
 
 Urspruenglich fuer 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbieter**, der das gleiche Tab-separierte Format verwendet (`rsid  chromosome  position  genotype`).
 
+![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
+
 ## Funktionen
 
 | Funktion | Beschreibung |
@@ -56,7 +58,7 @@ Die aktuelle `23toVCF_Pro.exe` von der [Releases](../../releases)-Seite herunter
 **Voraussetzungen:** Python 3.8+
 
 ```bash
-git clone https://github.com/lukisch/genotype-to-vcf.git
+git clone https://github.com/biotec-line/genotype-to-vcf.git
 cd genotype-to-vcf
 pip install -r requirements.txt
 python Make23toVCF3.py
@@ -165,6 +167,15 @@ Dieses Tool verarbeitet genetische Daten lokal auf Ihrem Rechner. Keine Daten we
 
 Genotyp-Daten, persoenliche Identifikatoren oder Rohdateien werden niemals uebertragen.
 
+## Repository-Inhalt
+
+- `Make23toVCF3.py`: aktuelle PySide6-Anwendung und Konvertierungslogik
+- `23toVCF_Pro.spec`: PyInstaller-Buildkonfiguration
+- `START.bat`: Windows-Startdatei fuer Quellcode-Nutzung
+- `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
+
+Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien, API-Caches und lokale Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
+
 ---
 
 ## English
@@ -225,7 +236,7 @@ Download the latest `23toVCF_Pro.exe` from the [Releases](../../releases) page a
 **Requirements:** Python 3.8+
 
 ```bash
-git clone https://github.com/lukisch/genotype-to-vcf.git
+git clone https://github.com/biotec-line/genotype-to-vcf.git
 cd genotype-to-vcf
 pip install -r requirements.txt
 python Make23toVCF3.py
@@ -333,6 +344,15 @@ This tool processes genetic data locally on your machine. No data is sent to ext
 - **Ensembl FTP** for optional FASTA reference genome downloads
 
 No genotype data, personal identifiers, or raw files are ever transmitted.
+
+### Repository Contents
+
+- `Make23toVCF3.py`: current PySide6 application and conversion logic
+- `23toVCF_Pro.spec`: PyInstaller build configuration
+- `START.bat`: Windows launcher for source checkouts
+- `README/screenshots/main.png`: screenshot without personal data
+
+Raw genomic data, VCF outputs, FASTA reference files, API caches, and local coordination files are excluded through `.gitignore`.
 
 ### Contributing
 
