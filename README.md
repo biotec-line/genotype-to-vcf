@@ -1,8 +1,8 @@
 # Genotype-to-VCF Pro Converter
 
-Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdaten in das standardisierte **VCF 4.2** Format. Mit moderner PySide6-Oberflaeche, Unterstuetzung fuer GRCh37 und GRCh38 Referenzgenome und automatischer Build-Erkennung.
+Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdaten in das standardisierte **VCF 4.2**-Format. Mit moderner PySide6-Oberfläche, Unterstützung für GRCh37 und GRCh38 Referenzgenome, automatischer Build-Erkennung sowie optionalem Offline-FASTA-Modus.
 
-Urspruenglich fuer 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbieter**, der das gleiche Tab-separierte Format verwendet (`rsid  chromosome  position  genotype`).
+Ursprünglich für 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbieter**, der das gleiche Tab-separierte Format verwendet (`rsid  chromosome  position  genotype`).
 
 ![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
 
@@ -13,14 +13,14 @@ Urspruenglich fuer 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbie
 | **Dual-Referenzgenom** | GRCh37 (hg19) und GRCh38 (hg38) |
 | **Auto Build-Erkennung** | Erkennt Genom-Build via dbSNP-Positionsvalidierung |
 | **Auto Geschlechtserkennung** | Bestimmt biologisches Geschlecht anhand Y-Chromosom-Varianten |
-| **PAR-Region-Behandlung** | Korrekte Ploidie fuer pseudoautosomale Regionen auf X/Y |
-| **dbSNP-Integration** | NCBI REST API fuer rsID-Abfragen und REF-Basen |
-| **Persistenter Cache** | Lokaler Cache fuer schnelle wiederholte Konvertierungen |
+| **PAR-Region-Behandlung** | Korrekte Ploidie für pseudoautosomale Regionen auf X/Y |
+| **dbSNP-Integration** | NCBI REST API für rsID-Abfragen und REF-Basen |
+| **Persistenter Cache** | Lokaler Cache für schnelle wiederholte Konvertierungen |
 | **Adaptives Threading** | 4-200 Worker-Threads, Ziel 70% CPU-Auslastung |
-| **FASTA-Referenz** | Optionale lokale FASTA-Datei fuer Offline-REF-Abfrage |
+| **FASTA-Referenz** | Optionale lokale FASTA-Datei für Offline-REF-Abfrage |
 | **Moderne GUI** | PySide6 Dark Theme mit Fortschrittsanzeige und Abbruch-Option |
 
-## Unterstuetzte Eingabeformate
+## Unterstützte Eingabeformate
 
 Das Tool liest Tab-separierte Dateien (TSV) mit vier Spalten:
 
@@ -30,7 +30,7 @@ rs12564807	1	734462	AA
 rs3131972	1	752721	AG
 ```
 
-Zeilen, die mit `#` beginnen, werden als Kommentare uebersprungen.
+Zeilen, die mit `#` beginnen, werden als Kommentare übersprungen.
 
 ### Getestete Anbieter
 
@@ -45,13 +45,13 @@ Zeilen, die mit `#` beginnen, werden als Kommentare uebersprungen.
 | **AncestryDNA** | Nein | Verwendet 5 Spalten (allele1, allele2 getrennt) |
 | **LivingDNA** | Nein | Andere Spaltenreihenfolge |
 
-> **Tipp:** TSV (Tab-separiert) und CSV (Komma-separiert) werden automatisch erkannt. Jede Datei mit vier Spalten (`rsid, chrom, pos, genotype`) funktioniert, unabhaengig vom Anbieter.
+> **Tipp:** TSV (Tab-separiert) und CSV (Komma-separiert) werden automatisch erkannt. Jede Datei mit vier Spalten (`rsid, chrom, pos, genotype`) funktioniert, unabhängig vom Anbieter.
 
 ## Installation
 
-### Option 1: Windows Executable (kein Python noetig)
+### Option 1: Windows Executable (kein Python nötig)
 
-Die aktuelle `23toVCF_Pro.exe` von der [Releases](../../releases)-Seite herunterladen und direkt starten.
+Veröffentlichte EXE-Builds gehören auf die [GitHub-Release-Seite](https://github.com/biotec-line/genotype-to-vcf/releases). Lokale Builds erzeugen `dist/23toVCF_Pro.exe`; diese Artefakte werden nicht versioniert.
 
 ### Option 2: Aus dem Quellcode
 
@@ -68,23 +68,28 @@ python Make23toVCF3.py
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --name 23toVCF_Pro Make23toVCF3.py
+build_exe.bat
+
+# oder direkt
+python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 ```
+
+Die fertige EXE liegt anschließend in `dist/23toVCF_Pro.exe` und wird durch `build_exe.bat` zusätzlich nach `23toVCF_Pro.exe` im Projektwurzelverzeichnis kopiert. `build/`, `dist/`, `releases/` und `*.exe` bleiben lokale Build-Artefakte.
 
 ## Verwendung
 
 1. Anwendung starten
-2. **"Open File"** klicken und Rohdatendatei (`.txt`) auswaehlen
-3. **Geschlecht** (`Auto` / `female` / `male`) und **Build** (`Auto` / `GRCh37` / `GRCh38`) waehlen
+2. **"Open File"** klicken und Rohdatendatei (`.txt`) auswählen
+3. **Geschlecht** (`Auto` / `female` / `male`) und **Build** (`Auto` / `GRCh37` / `GRCh38`) wählen
 4. **"Start Conversion"** klicken
 5. Die VCF-Datei wird neben der Eingabedatei gespeichert
 
 ### Erster Start
 
 Beim ersten Start ohne lokale FASTA-Referenz:
-- Verwendung der **NCBI dbSNP API** fuer Referenzbasen-Abfrage (langsamer, Internet erforderlich)
-- Angebot zum **FASTA-Download** (~850 MB pro Build) fuer schnellere Offline-Konvertierungen
-- Aufbau eines **lokalen Caches** (`cache.json`) fuer alle folgenden Konvertierungen
+- Verwendung der **NCBI dbSNP API** für Referenzbasen-Abfrage (langsamer, Internet erforderlich)
+- Angebot zum **FASTA-Download** (~850 MB pro Build) für schnellere Offline-Konvertierungen
+- Aufbau eines **lokalen Caches** (`cache.json`) für alle folgenden Konvertierungen
 
 ### Konvertierungs-Pipeline
 
@@ -101,7 +106,7 @@ Build erkennen (GRCh37 vs GRCh38) via dbSNP-Validierung
 Geschlecht erkennen (Y-Chromosom-Varianten-Anzahl)
     |
     v
-REF-Basen aufloesen (FASTA > Cache > dbSNP API > ueberspringen)
+REF-Basen auflösen (FASTA > Cache > dbSNP API > überspringen)
     |
     v
 VCF 4.2 schreiben mit korrekter Ploidie und Genotyp-Calls
@@ -128,53 +133,54 @@ Ausgabe: sample_GRCh37_20260213_143000.vcf
 | Ploidie | Kontext | Beispiel |
 |---|---|---|
 | Diploid (0/0, 0/1, 1/1) | Autosomen, weibliches X, PAR-Regionen | `0/1` |
-| Haploid (0, 1) | Maennliches X (non-PAR), maennliches Y (non-PAR), MT | `1` |
-| Uebersprungen | Weibliche Y-Varianten | - |
+| Haploid (0, 1) | Männliches X (non-PAR), männliches Y (non-PAR), MT | `1` |
+| Übersprungen | Weibliche Y-Varianten | - |
 
 ## Funktionsweise
 
 ### Build-Erkennung
 
-Das Tool nimmt bis zu 200 Varianten mit rsIDs und fragt die NCBI dbSNP API nach deren genomischen Positionen auf GRCh37 und GRCh38. Der Build mit den meisten Positionsuebereinstimmungen (Toleranz 5 bp) wird gewaehlt.
+Das Tool nimmt bis zu 200 Varianten mit rsIDs und fragt die NCBI dbSNP API nach deren genomischen Positionen auf GRCh37 und GRCh38. Der Build mit den meisten Positionsübereinstimmungen (Toleranz 5 bp) wird gewählt.
 
-### REF-Basen-Aufloesung
+### REF-Basen-Auflösung
 
-Referenzbasen werden in dieser Prioritaet aufgeloest:
+Referenzbasen werden in dieser Priorität aufgelöst:
 
 1. **Lokale FASTA** - Byte-exakter Lookup via `.fai`-Index (schnellste)
 2. **Lokaler Cache** - Zuvor abgerufene dbSNP-Daten
 3. **dbSNP API** - Live NCBI REST API Abfrage
-4. **Ueberspringen** - Varianten ohne aufgeloeste REF-Base werden ausgeschlossen
+4. **Überspringen** - Varianten ohne aufgelöste REF-Base werden ausgeschlossen
 
 ### Caching
 
-Der persistente `cache.json` speichert dbSNP API-Antworten mit Zeitstempeln. Folgekonvertierungen von Dateien mit ueberlappenden SNPs sind deutlich schneller. Der Cache nutzt atomare Schreibvorgaenge mit File-Locking fuer Thread-Sicherheit.
+Der persistente `cache.json` speichert dbSNP API-Antworten mit Zeitstempeln. Folgekonvertierungen von Dateien mit überlappenden SNPs sind deutlich schneller. Der Cache nutzt atomare Schreibvorgänge mit File-Locking für Thread-Sicherheit.
 
 ## Technische Details
 
 - **Sprache:** Python 3.8+
 - **GUI:** PySide6 mit Fusion Dark Theme
-- **Bioinformatik:** pyfaidx fuer FASTA-Indexierung
+- **Bioinformatik:** pyfaidx für FASTA-Indexierung
 - **API:** NCBI dbSNP REST API (`https://api.ncbi.nlm.nih.gov/variation/v0/`)
 - **Threading:** `ThreadPoolExecutor` mit CPU-adaptiver Worker-Anzahl
 - **VCF-Standard:** v4.2 ([Spezifikation](https://samtools.github.io/hts-specs/VCFv4.2.pdf))
 
 ## Datenschutz
 
-Dieses Tool verarbeitet genetische Daten lokal auf Ihrem Rechner. Keine Daten werden an externe Server gesendet, ausser:
-- **NCBI dbSNP API** Abfragen, die ausschliesslich rsIDs enthalten (z.B. `rs12345`) zur Positionsaufloesung
-- **Ensembl FTP** fuer optionale FASTA-Referenzgenom-Downloads
+Dieses Tool verarbeitet genetische Daten lokal auf Ihrem Rechner. Keine Daten werden an externe Server gesendet, außer:
+- **NCBI dbSNP API** Abfragen, die ausschließlich rsIDs enthalten (z.B. `rs12345`) zur Positionsauflösung
+- **Ensembl FTP** für optionale FASTA-Referenzgenom-Downloads
 
-Genotyp-Daten, persoenliche Identifikatoren oder Rohdateien werden niemals uebertragen.
+Genotyp-Daten, persönliche Identifikatoren oder Rohdateien werden niemals übertragen.
 
 ## Repository-Inhalt
 
 - `Make23toVCF3.py`: aktuelle PySide6-Anwendung und Konvertierungslogik
 - `23toVCF_Pro.spec`: PyInstaller-Buildkonfiguration
-- `START.bat`: Windows-Startdatei fuer Quellcode-Nutzung
+- `build_exe.bat`: reproduzierbarer Windows-Build über die Spec-Datei
+- `START.bat`: Windows-Startdatei für Quellcode-Nutzung
 - `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
 
-Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien, API-Caches und lokale Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
+Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
 
 ---
 
@@ -246,8 +252,13 @@ python Make23toVCF3.py
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --name 23toVCF_Pro Make23toVCF3.py
+build_exe.bat
+
+# or directly
+python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 ```
+
+The executable is written to `dist/23toVCF_Pro.exe`; local `build/`, `dist/`, `releases/`, and `*.exe` artifacts are intentionally ignored.
 
 ### Usage
 
@@ -349,10 +360,11 @@ No genotype data, personal identifiers, or raw files are ever transmitted.
 
 - `Make23toVCF3.py`: current PySide6 application and conversion logic
 - `23toVCF_Pro.spec`: PyInstaller build configuration
+- `build_exe.bat`: reproducible Windows build wrapper around the spec file
 - `START.bat`: Windows launcher for source checkouts
 - `README/screenshots/main.png`: screenshot without personal data
 
-Raw genomic data, VCF outputs, FASTA reference files, API caches, and local coordination files are excluded through `.gitignore`.
+Raw genomic data, VCF outputs, FASTA reference files, API caches, local release artifacts, and internal coordination files are excluded through `.gitignore`.
 
 ### Contributing
 

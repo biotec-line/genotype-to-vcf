@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-05-01
+
+### Build and Repository Hygiene
+
+- Added a guarded `build_exe.bat` PyInstaller wrapper for reproducible Windows builds
+- Extended `.gitignore` to keep local release folders and raw genotype exports out of Git
+- Updated README build instructions to match the tracked PyInstaller spec
+- Bilingualized contributor and security guidance for the current GitHub repository
+- Confirmed local genome data, reference FASTA files, caches, and build outputs remain untracked
+
 ## [1.0.1] - 2026-04-30
 
 ### Repository Hygiene

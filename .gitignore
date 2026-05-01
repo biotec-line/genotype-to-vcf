@@ -2,6 +2,12 @@
 *.vcf
 *.vcf.gz
 genome_*
+*_raw.txt
+*_raw.csv
+*23andMe*.txt
+*23andme*.txt
+*MyHeritage*.csv
+*FamilyTreeDNA*.csv
 *.23andme
 *.23andme.txt
 
@@ -23,6 +29,7 @@ cache.json.tmp*
 *.msix
 dist/
 build/
+releases/
 __pycache__/
 *.pyc
 *.pyo
