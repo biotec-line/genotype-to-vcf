@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Updated README build instructions to match the tracked PyInstaller spec
 - Bilingualized contributor and security guidance for the current GitHub repository
 - Confirmed local genome data, reference FASTA files, caches, and build outputs remain untracked
+- Aligned the application version constant and README with the 1.0.2 release metadata
 
 ## [1.0.1] - 2026-04-30
 

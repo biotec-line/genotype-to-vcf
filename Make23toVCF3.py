@@ -37,7 +37,7 @@ from PySide6.QtGui import QColor, QPalette, QFont, QIcon
 # Konfiguration
 # -----------------------------
 APP_TITLE = "Genotype → VCF Pro Converter"
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 FASTA_URLS = {
     "GRCh37": "http://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.primary_assembly.fa.gz",
     "GRCh38": "http://ftp.ensembl.org/pub/current_fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz",

@@ -4,6 +4,8 @@ Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdat
 
 Ursprünglich für 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbieter**, der das gleiche Tab-separierte Format verwendet (`rsid  chromosome  position  genotype`).
 
+Aktuelle Version: **1.0.2**
+
 ![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
 
 ## Funktionen
@@ -189,6 +191,8 @@ Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien, API-Caches, lokale Release-
 A desktop application for converting DTC (Direct-to-Consumer) DNA raw data files into the standardized **VCF 4.2** format. Built with a modern PySide6 GUI, it supports both GRCh37 and GRCh38 reference genomes with automatic build detection.
 
 Originally designed for 23andMe exports, it works with **any provider** that uses the same tab-separated format (`rsid  chromosome  position  genotype`).
+
+Current version: **1.0.2**
 
 ### Features
 
