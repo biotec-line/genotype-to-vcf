@@ -382,11 +382,15 @@ def ensure_fasta_with_choice(build, signal_callback, ask_callback, stop_event=No
             signal_callback.emit(f"[ERROR] Indexierung fehlgeschlagen: {e}")
             return None
 
-    # Frage über Signal an GUI
-    should_download = ask_callback.emit(
-        "Referenz laden?",
-        f"Die Referenz-Datei für {build} fehlt (~850 MB).\nHerunterladen? (Empfohlen)"
-    )
+    # Worker passes a callable wrapper; keep signal-like objects compatible.
+    title = "Referenz laden?"
+    message = f"Die Referenz-Datei für {build} fehlt (~850 MB).\nHerunterladen? (Empfohlen)"
+    if callable(ask_callback):
+        should_download = ask_callback(title, message)
+    elif hasattr(ask_callback, "emit"):
+        should_download = ask_callback.emit(title, message)
+    else:
+        should_download = False
 
     if not should_download: return None
 

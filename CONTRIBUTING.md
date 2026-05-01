@@ -71,6 +71,13 @@ pip install -r requirements.txt
 python Make23toVCF3.py
 ```
 
+For regression tests:
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q
+```
+
 For Windows executable builds:
 
 ```bash

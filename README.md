@@ -66,6 +66,14 @@ pip install -r requirements.txt
 python Make23toVCF3.py
 ```
 
+Optionaler Schnellcheck für die aktuelle GUI-/FASTA-Dialoglogik
+(wenn `pytest` lokal installiert ist):
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q
+```
+
 ### Option 3: Eigene EXE erstellen
 
 ```bash
@@ -180,6 +188,9 @@ Genotyp-Daten, persönliche Identifikatoren oder Rohdateien werden niemals über
 - `23toVCF_Pro.spec`: PyInstaller-Buildkonfiguration
 - `build_exe.bat`: reproduzierbarer Windows-Build über die Spec-Datei
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung
+- `requirements-dev.txt`: lokale Test-Abhängigkeiten für Regressionstests
+- `.github/workflows/ci.yml`: GitHub Actions Testmatrix für Python 3.10 bis 3.12
+- `tests/test_fasta_dialog.py`: Regressionstest für FASTA-Pfad- und Dialog-Handling
 - `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
 
 Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
@@ -250,6 +261,14 @@ git clone https://github.com/biotec-line/genotype-to-vcf.git
 cd genotype-to-vcf
 pip install -r requirements.txt
 python Make23toVCF3.py
+```
+
+Optional quick regression check for the current GUI/FASTA dialog flow
+(if `pytest` is installed locally):
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q
 ```
 
 #### Option 3: Build Your Own Executable
@@ -366,6 +385,9 @@ No genotype data, personal identifiers, or raw files are ever transmitted.
 - `23toVCF_Pro.spec`: PyInstaller build configuration
 - `build_exe.bat`: reproducible Windows build wrapper around the spec file
 - `START.bat`: Windows launcher for source checkouts
+- `requirements-dev.txt`: local test dependencies for regression tests
+- `.github/workflows/ci.yml`: GitHub Actions test matrix for Python 3.10 through 3.12
+- `tests/test_fasta_dialog.py`: regression test for FASTA path and dialog handling
 - `README/screenshots/main.png`: screenshot without personal data
 
 Raw genomic data, VCF outputs, FASTA reference files, API caches, local release artifacts, and internal coordination files are excluded through `.gitignore`.

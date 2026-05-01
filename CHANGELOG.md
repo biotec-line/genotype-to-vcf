@@ -9,9 +9,14 @@ All notable changes to this project will be documented in this file.
 - Added a guarded `build_exe.bat` PyInstaller wrapper for reproducible Windows builds
 - Extended `.gitignore` to keep local release folders and raw genotype exports out of Git
 - Updated README build instructions to match the tracked PyInstaller spec
+- Added optional pytest regression coverage for FASTA path and dialog handling
+- Added a GitHub Actions CI matrix for the new regression tests
+- Added `requirements-dev.txt` for local test setup and expanded test cache ignores
+- Hardened `START.bat` with UTF-8 output and a Python availability check
 - Bilingualized contributor and security guidance for the current GitHub repository
 - Confirmed local genome data, reference FASTA files, caches, and build outputs remain untracked
 - Aligned the application version constant and README with the 1.0.2 release metadata
+- Fixed the reference download prompt path so worker callables and signal-like callbacks both work
 
 ## [1.0.1] - 2026-04-30
 
