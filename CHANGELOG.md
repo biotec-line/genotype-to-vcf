@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Fixed CSV genotype parsing for fully quoted provider exports and uppercase `CHR` chromosome prefixes.
+
 ## [1.0.2] - 2026-05-01
 
 ### Build and Repository Hygiene

@@ -12,6 +12,7 @@ import sys
 import os
 import re
 import gzip
+import csv
 import json
 import time
 import random
@@ -570,19 +571,19 @@ def parse_genotype_file(file_path):
     Also handles comma-separated (CSV) files from MyHeritage, FTDNA, tellmeGen.
     """
     variants = []
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, "r", encoding="utf-8-sig") as f:
         for line in f:
-            if line.startswith("#") or line.startswith('"') or not line.strip(): continue
-            # Try tab first, fall back to comma
-            parts = line.strip().split("\t")
-            if len(parts) < 4:
-                parts = line.strip().split(",")
+            line = line.strip()
+            if line.startswith("#") or not line: continue
+            # Try tab first, fall back to CSV parsing for quoted provider exports.
+            parts = line.split("\t") if "\t" in line else next(csv.reader([line]))
             if len(parts) < 4: continue
             # Strip quotes from CSV fields
             rsid, chrom, pos, gt = (p.strip().strip('"') for p in parts[:4])
             # Skip header rows
             if rsid.lower() in ("rsid", "snp", "marker", "name"): continue
-            chrom = chrom.replace("chr", "").upper()
+            chrom = chrom.upper()
+            if chrom.startswith("CHR"): chrom = chrom[3:]
             if chrom == "M": chrom = "MT"
             try: variants.append((rsid, chrom, int(pos), gt.strip()))
             except ValueError: continue
