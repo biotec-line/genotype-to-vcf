@@ -17,3 +17,10 @@ def test_parse_genotype_file_normalizes_uppercase_chr_prefix(tmp_path):
     raw.write_text("rs456\tCHR2\t67890\tCC\n", encoding="utf-8")
 
     assert converter.parse_genotype_file(str(raw)) == [("rs456", "2", 67890, "CC")]
+
+
+def test_parse_genotype_file_normalizes_lowercase_genotype(tmp_path):
+    raw = tmp_path / "lowercase-genotype.tsv"
+    raw.write_text("rs789\t3\t13579\tag\n", encoding="utf-8")
+
+    assert converter.parse_genotype_file(str(raw)) == [("rs789", "3", 13579, "AG")]

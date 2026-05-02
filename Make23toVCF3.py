@@ -585,7 +585,7 @@ def parse_genotype_file(file_path):
             chrom = chrom.upper()
             if chrom.startswith("CHR"): chrom = chrom[3:]
             if chrom == "M": chrom = "MT"
-            try: variants.append((rsid, chrom, int(pos), gt.strip()))
+            try: variants.append((rsid, chrom, int(pos), gt.strip().upper()))
             except ValueError: continue
     return variants
 
@@ -671,7 +671,7 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
                 if progress_signal:
                     progress_signal.emit(int((idx / total_variants) * 100))
 
-            genotype = genotype.replace("_", "-")
+            genotype = genotype.strip().upper().replace("_", "-")
             if genotype in ("--", "-", "00"): continue
 
             ref_base = get_ref(chrom, pos)
