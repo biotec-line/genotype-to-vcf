@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.ico binary
+*.exe binary
+*.vcf binary
+*.vcf.gz binary
+*.fa binary
+*.fa.gz binary
+*.fasta binary
+*.fasta.gz binary
+*.zip binary

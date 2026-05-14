@@ -182,6 +182,8 @@ Dieses Tool verarbeitet genetische Daten lokal auf Ihrem Rechner. Keine Daten we
 
 Genotyp-Daten, persönliche Identifikatoren oder Rohdateien werden niemals übertragen.
 
+Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome (`*.fa`, `*.fasta`), Caches, EXE-/Release-Artefakte und interne Arbeitsdateien (`AUFGABEN.txt`, `TEST.txt`, Diagnoseberichte) sind per `.gitignore` ausgeschlossen. Die neue `.gitattributes` hält Textdateien und große Binärartefakte zusätzlich sauber getrennt.
+
 ## Repository-Inhalt
 
 - `Make23toVCF3.py`: aktuelle PySide6-Anwendung und Konvertierungslogik
@@ -189,6 +191,7 @@ Genotyp-Daten, persönliche Identifikatoren oder Rohdateien werden niemals über
 - `build_exe.bat`: reproduzierbarer Windows-Build über die Spec-Datei
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung
 - `requirements-dev.txt`: lokale Test-Abhängigkeiten für Regressionstests
+- `.gitattributes`: Zeilenend- und Binärdatei-Regeln für stabile Git-Diffs
 - `.github/workflows/ci.yml`: GitHub Actions Testmatrix für Python 3.10 bis 3.12
 - `tests/test_fasta_dialog.py`: Regressionstest für FASTA-Pfad- und Dialog-Handling
 - `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
@@ -379,6 +382,8 @@ This tool processes genetic data locally on your machine. No data is sent to ext
 
 No genotype data, personal identifiers, or raw files are ever transmitted.
 
+Local raw data (`genome_*`, `*.vcf`, provider exports), reference genomes (`*.fa`, `*.fasta`), caches, executable/release artifacts, and internal work files (`AUFGABEN.txt`, `TEST.txt`, diagnostic reports) are excluded through `.gitignore`. The added `.gitattributes` keeps text files and large binary artifacts separated for stable diffs.
+
 ### Repository Contents
 
 - `Make23toVCF3.py`: current PySide6 application and conversion logic
@@ -386,6 +391,7 @@ No genotype data, personal identifiers, or raw files are ever transmitted.
 - `build_exe.bat`: reproducible Windows build wrapper around the spec file
 - `START.bat`: Windows launcher for source checkouts
 - `requirements-dev.txt`: local test dependencies for regression tests
+- `.gitattributes`: line-ending and binary-file rules for stable Git diffs
 - `.github/workflows/ci.yml`: GitHub Actions test matrix for Python 3.10 through 3.12
 - `tests/test_fasta_dialog.py`: regression test for FASTA path and dialog handling
 - `README/screenshots/main.png`: screenshot without personal data

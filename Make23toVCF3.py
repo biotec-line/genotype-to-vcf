@@ -619,7 +619,7 @@ def detect_build_robust(variants, cache, signal_callback, stop_event):
         if signal_callback:
             signal_callback.emit(
                 "⚠ Genome Build konnte nicht erkannt werden (Score 0/0). "
-                "Kein dbSNP-Treffer fuer die geprüften Varianten. "
+                "Kein dbSNP-Treffer für die geprüften Varianten. "
                 "Bitte Build manuell über das Dropdown angeben (GRCh37 / GRCh38)."
             )
         return None
