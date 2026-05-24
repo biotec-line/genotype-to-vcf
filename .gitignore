@@ -18,6 +18,7 @@ genome_*
 *.fasta
 *.fasta.gz
 *.fasta.fai
+*.fai
 
 # dbSNP cache (contains API responses, can be regenerated)
 cache.json

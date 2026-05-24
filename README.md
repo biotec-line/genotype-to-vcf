@@ -19,7 +19,7 @@ Aktuelle Version: **1.0.2**
 | **dbSNP-Integration** | NCBI REST API für rsID-Abfragen und REF-Basen |
 | **Persistenter Cache** | Lokaler Cache für schnelle wiederholte Konvertierungen |
 | **Adaptives Threading** | 4-200 Worker-Threads, Ziel 70% CPU-Auslastung |
-| **FASTA-Referenz** | Optionale lokale FASTA-Datei für Offline-REF-Abfrage |
+| **FASTA-Referenz** | Optionale lokale FASTA-Datei für Offline-REF-Abfrage inklusive `MT`/`chrM`-Aliasauflösung |
 | **Moderne GUI** | PySide6 Dark Theme mit Fortschrittsanzeige und Abbruch-Option |
 
 ## Unterstützte Eingabeformate
@@ -156,7 +156,7 @@ Das Tool nimmt bis zu 200 Varianten mit rsIDs und fragt die NCBI dbSNP API nach 
 
 Referenzbasen werden in dieser Priorität aufgelöst:
 
-1. **Lokale FASTA** - Byte-exakter Lookup via `.fai`-Index (schnellste)
+1. **Lokale FASTA** - Byte-exakter Lookup via `.fai`-Index (schnellste), mit Aliasauflösung für mitochondriale Sequenzen (`M`, `MT`, `chrM`, `chrMT`)
 2. **Lokaler Cache** - Zuvor abgerufene dbSNP-Daten
 3. **dbSNP API** - Live NCBI REST API Abfrage
 4. **Überspringen** - Varianten ohne aufgelöste REF-Base werden ausgeschlossen
@@ -182,7 +182,7 @@ Dieses Tool verarbeitet genetische Daten lokal auf Ihrem Rechner. Keine Daten we
 
 Genotyp-Daten, persönliche Identifikatoren oder Rohdateien werden niemals übertragen.
 
-Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome (`*.fa`, `*.fasta`), Caches, EXE-/Release-Artefakte und interne Arbeitsdateien (`AUFGABEN.txt`, `TEST.txt`, Diagnoseberichte) sind per `.gitignore` ausgeschlossen. Die neue `.gitattributes` hält Textdateien und große Binärartefakte zusätzlich sauber getrennt.
+Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Indexdateien (`*.fa`, `*.fasta`, `*.fai`), Caches, EXE-/Release-Artefakte und interne Arbeitsdateien (`AUFGABEN.txt`, `TEST.txt`, Diagnoseberichte) sind per `.gitignore` ausgeschlossen. Die neue `.gitattributes` hält Textdateien und große Binärartefakte zusätzlich sauber getrennt.
 
 ## Repository-Inhalt
 
@@ -193,10 +193,10 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome (`*.fa`,
 - `requirements-dev.txt`: lokale Test-Abhängigkeiten für Regressionstests
 - `.gitattributes`: Zeilenend- und Binärdatei-Regeln für stabile Git-Diffs
 - `.github/workflows/ci.yml`: GitHub Actions Testmatrix für Python 3.10 bis 3.12
-- `tests/test_fasta_dialog.py`: Regressionstest für FASTA-Pfad- und Dialog-Handling
+- `tests/test_fasta_dialog.py`: Regressionstest für FASTA-Pfad-, Dialog- und mitochondriales Alias-Handling
 - `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
 
-Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
+Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien samt `.fai`-Indexdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
 
 ---
 
@@ -219,7 +219,7 @@ Current version: **1.0.2**
 | **dbSNP Integration** | NCBI REST API for rsID lookup and REF base retrieval |
 | **Persistent Cache** | Local cache for fast repeated conversions |
 | **Adaptive Threading** | 4-200 worker threads, targeting 70% CPU usage |
-| **FASTA Reference** | Optional local FASTA for offline REF base lookup |
+| **FASTA Reference** | Optional local FASTA for offline REF base lookup, including `MT`/`chrM` alias resolution |
 | **Modern GUI** | PySide6 dark theme with progress tracking and cancel support |
 
 ### Supported Input Formats
@@ -356,7 +356,7 @@ The tool samples up to 200 variants with rsIDs and queries the NCBI dbSNP API fo
 
 Reference bases are resolved in this priority order:
 
-1. **Local FASTA** - Byte-exact lookup via `.fai` index (fastest)
+1. **Local FASTA** - Byte-exact lookup via `.fai` index (fastest), with mitochondrial alias resolution (`M`, `MT`, `chrM`, `chrMT`)
 2. **Local Cache** - Previously fetched dbSNP data
 3. **dbSNP API** - Live NCBI REST API query
 4. **Skip** - Variants without a resolved REF base are excluded
@@ -382,7 +382,7 @@ This tool processes genetic data locally on your machine. No data is sent to ext
 
 No genotype data, personal identifiers, or raw files are ever transmitted.
 
-Local raw data (`genome_*`, `*.vcf`, provider exports), reference genomes (`*.fa`, `*.fasta`), caches, executable/release artifacts, and internal work files (`AUFGABEN.txt`, `TEST.txt`, diagnostic reports) are excluded through `.gitignore`. The added `.gitattributes` keeps text files and large binary artifacts separated for stable diffs.
+Local raw data (`genome_*`, `*.vcf`, provider exports), reference genomes and indexes (`*.fa`, `*.fasta`, `*.fai`), caches, executable/release artifacts, and internal work files (`AUFGABEN.txt`, `TEST.txt`, diagnostic reports) are excluded through `.gitignore`. The added `.gitattributes` keeps text files and large binary artifacts separated for stable diffs.
 
 ### Repository Contents
 
@@ -393,10 +393,10 @@ Local raw data (`genome_*`, `*.vcf`, provider exports), reference genomes (`*.fa
 - `requirements-dev.txt`: local test dependencies for regression tests
 - `.gitattributes`: line-ending and binary-file rules for stable Git diffs
 - `.github/workflows/ci.yml`: GitHub Actions test matrix for Python 3.10 through 3.12
-- `tests/test_fasta_dialog.py`: regression test for FASTA path and dialog handling
+- `tests/test_fasta_dialog.py`: regression test for FASTA path, dialog, and mitochondrial alias handling
 - `README/screenshots/main.png`: screenshot without personal data
 
-Raw genomic data, VCF outputs, FASTA reference files, API caches, local release artifacts, and internal coordination files are excluded through `.gitignore`.
+Raw genomic data, VCF outputs, FASTA reference files plus `.fai` indexes, API caches, local release artifacts, and internal coordination files are excluded through `.gitignore`.
 
 ### Contributing
 

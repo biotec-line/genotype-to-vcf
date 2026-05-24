@@ -6,12 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fixed FASTA chromosome alias resolution so mitochondrial `MT` / `M` lookups can resolve against `chrM` / `chrMT` references.
 - Fixed CSV genotype parsing for fully quoted provider exports and uppercase `CHR` chromosome prefixes.
 - Normalized the German build-detection warning so the UI consistently uses real UTF-8 umlauts.
 
 ### Repository Hygiene
 
 - Added `.gitattributes` for stable text line endings and binary handling of screenshots, icons, executables, VCF files, and FASTA references.
+- Extended `.gitignore` to cover generic `.fai` FASTA index files.
 - Refreshed README privacy notes to make the ignored local genome-data and build-artifact boundary explicit.
 
 ## [1.0.2] - 2026-05-01

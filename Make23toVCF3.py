@@ -319,6 +319,38 @@ def load_fai_index(fai_path):
                 idx[parts[0]] = (int(parts[1]), int(parts[2]), int(parts[3]), int(parts[4]))
     return idx
 
+def _fasta_chrom_aliases(chrom):
+    """Return likely FASTA record names for a chromosome label."""
+    raw = str(chrom).strip()
+    upper = raw.upper()
+    if upper.startswith("CHR"):
+        base = upper[3:]
+        stripped = raw[3:]
+    else:
+        base = upper
+        stripped = raw
+
+    aliases = []
+
+    def add(value):
+        if value and value not in aliases:
+            aliases.append(value)
+
+    add(raw)
+
+    if upper.startswith("CHR"):
+        add(stripped)
+    elif stripped:
+        add("chr" + stripped)
+
+    if base in {"M", "MT"}:
+        add("M")
+        add("MT")
+        add("chrM")
+        add("chrMT")
+
+    return aliases
+
 def fetch_base_from_fasta(fasta_path, fai_index, chrom, pos):
     """Fetch a single reference base from a FASTA file by position.
 
@@ -333,9 +365,13 @@ def fetch_base_from_fasta(fasta_path, fai_index, chrom, pos):
     Returns:
         Uppercase single base character, or 'N' if unavailable.
     """
-    if chrom not in fai_index:
-        if "chr" + chrom in fai_index: chrom = "chr" + chrom
-        else: return "N"
+    for alias in _fasta_chrom_aliases(chrom):
+        if alias in fai_index:
+            chrom = alias
+            break
+    else:
+        return "N"
+
     length, offset, line_bases, line_width = fai_index[chrom]
     if pos < 1 or pos > length: return "N"
     pos0 = pos - 1
