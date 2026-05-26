@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added `PORTIERUNGSPLAN.md` with the platform strategy: GitHub and Windows EXE stay primary, macOS/Linux are planned as source-smoke targets, and Windows Store/mobile/public upload webapps are explicitly out of scope.
+
 ### Fixed
 
 - Fixed FASTA chromosome alias resolution so mitochondrial `MT` / `M` lookups can resolve against `chrM` / `chrMT` references.

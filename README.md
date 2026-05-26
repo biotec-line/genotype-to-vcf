@@ -187,6 +187,7 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 ## Repository-Inhalt
 
 - `Make23toVCF3.py`: aktuelle PySide6-Anwendung und Konvertierungslogik
+- `PORTIERUNGSPLAN.md`: Plattformstrategie für Windows, macOS, Linux, Web und Mobile
 - `23toVCF_Pro.spec`: PyInstaller-Buildkonfiguration
 - `build_exe.bat`: reproduzierbarer Windows-Build über die Spec-Datei
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung
@@ -373,6 +374,10 @@ The persistent `cache.json` stores dbSNP API responses with timestamps. Subseque
 - **API:** NCBI dbSNP REST API (`https://api.ncbi.nlm.nih.gov/variation/v0/`)
 - **Threading:** `ThreadPoolExecutor` with CPU-adaptive worker count
 - **VCF Standard:** v4.2 ([specification](https://samtools.github.io/hts-specs/VCFv4.2.pdf))
+
+### Platform Strategy
+
+The platform plan is documented in [PORTIERUNGSPLAN.md](PORTIERUNGSPLAN.md). GitHub releases and the Windows executable remain the primary channel; macOS and Linux are planned as source-smoke targets. Windows Store, native mobile apps, and public upload webapps are intentionally out of scope because this tool handles genetic raw data and large reference genomes.
 
 ### Privacy
 
