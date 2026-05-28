@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Added `PORTIERUNGSPLAN.md` with the platform strategy: GitHub and Windows EXE stay primary, macOS/Linux are planned as source-smoke targets, and Windows Store/mobile/public upload webapps are explicitly out of scope.
 
+### Changed
+
+- Reordered the public README so the English project overview is the default GitHub landing section and the German documentation remains available below it.
+
 ### Fixed
 
 - Fixed FASTA chromosome alias resolution so mitochondrial `MT` / `M` lookups can resolve against `chrM` / `chrMT` references.
@@ -16,6 +20,7 @@ All notable changes to this project will be documented in this file.
 
 ### Repository Hygiene
 
+- Added an explicit local-data hygiene note for ignored FASTA references, dbSNP caches, VCF outputs, and provider raw-data exports.
 - Added `.gitattributes` for stable text line endings and binary handling of screenshots, icons, executables, VCF files, and FASTA references.
 - Extended `.gitignore` to cover generic `.fai` FASTA index files.
 - Refreshed README privacy notes to make the ignored local genome-data and build-artifact boundary explicit.
