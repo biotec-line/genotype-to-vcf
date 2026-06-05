@@ -10,6 +10,21 @@ Originally designed for 23andMe exports, it works with **any provider** that use
 
 Current version: **1.0.2**
 
+![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
+
+### Start Here
+
+| Need | Start with |
+|---|---|
+| Convert a 23andMe-style raw genotype export | [Installation](#installation) -> [Usage](#usage) |
+| Check whether your provider format is supported | [Tested Providers](#tested-providers) and [Supported Input Formats](#supported-input-formats) |
+| Understand privacy boundaries before using genetic data | [Privacy](#privacy) and the legal notice |
+| Package or test the Windows desktop app | [Build Your Own Executable](#option-3-build-your-own-executable) |
+
+### Search Context
+
+This repository is the public home of **Genotype-to-VCF Pro**, a local-first 23andMe to VCF converter for DTC genotype exports, personal genomics research workflows, and privacy-preserving VCF 4.2 conversion. It is not related to clinical variant interpretation services, cloud genotype upload portals, or medical decision support products.
+
 ### Features
 
 | Feature | Description |
@@ -95,6 +110,10 @@ The executable is written to `dist/23toVCF_Pro.exe`; local `build/`, `dist/`, `r
 3. Choose **Sex** (`Auto` / `female` / `male`) and **Build** (`Auto` / `GRCh37` / `GRCh38`)
 4. Click **"Start Conversion"**
 5. The VCF file is saved alongside the input file
+
+#### CLI / Headless Usage
+
+The public release is a desktop-first tool. If you need automated conversion in a local pipeline, keep it source-based and privacy-preserving: run the Python converter locally, keep raw genotype files outside Git, and use only synthetic data in tests and issue reports.
 
 #### First Run
 
@@ -227,6 +246,19 @@ Ursprünglich für 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbie
 Aktuelle Version: **1.0.2**
 
 ![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
+
+## Einstieg
+
+| Bedarf | Einstieg |
+|---|---|
+| 23andMe-artige Rohdaten in VCF konvertieren | [Installation](#installation) -> [Verwendung](#verwendung) |
+| Anbieterformat prüfen | [Getestete Anbieter](#getestete-anbieter) und [Unterstützte Eingabeformate](#unterstützte-eingabeformate) |
+| Datenschutzgrenzen vor Nutzung genetischer Daten verstehen | [Datenschutz](#datenschutz) und rechtlicher Hinweis |
+| Windows-Desktop-App paketieren oder testen | [Eigene EXE erstellen](#option-3-eigene-exe-erstellen) |
+
+## Suchkontext
+
+Dieses Repository ist der öffentliche Ort für **Genotype-to-VCF Pro**, einen lokalen 23andMe-zu-VCF-Konverter für DTC-Genotyp-Exporte, Personal-Genomics-Forschungsworkflows und datenschutzfreundliche VCF-4.2-Konvertierung. Es ist kein klinischer Interpretationsdienst, kein Cloud-Upload-Portal und kein Medizinprodukt.
 
 ## Funktionen
 

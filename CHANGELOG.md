@@ -7,10 +7,13 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Added `PORTIERUNGSPLAN.md` with the platform strategy: GitHub and Windows EXE stay primary, macOS/Linux are planned as source-smoke targets, and Windows Store/mobile/public upload webapps are explicitly out of scope.
+- Added a README start-here table, top-level GUI screenshot placement, and explicit search context for 23andMe-style DTC genotype to VCF conversion.
+- Added `llms.txt` with canonical repository, discovery phrases, file map, and non-medical-device boundaries for LLM and search-index readers.
 
 ### Changed
 
 - Reordered the public README so the English project overview is the default GitHub landing section and the German documentation remains available below it.
+- Clarified that automated or headless conversion should remain local and source-based with raw genotype data kept outside Git.
 
 ### Fixed
 
