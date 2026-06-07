@@ -8,6 +8,9 @@ if errorlevel 1 (
     exit /b 1
 )
 echo Baue 23toVCF_Pro.exe...
+if not defined LOCAL_BUILD set "LOCAL_BUILD=%~dp0_build"
+set "LOCAL_WORK=%LOCAL_BUILD%\build"
+set "LOCAL_DIST=%LOCAL_BUILD%\dist"
 python -c "import PyInstaller" >nul 2>&1
 if errorlevel 1 (
     echo [FEHLER] PyInstaller ist nicht installiert.
@@ -15,11 +18,12 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-powershell -NoProfile -Command "Get-ChildItem -LiteralPath 'build','dist' -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force"
-python -m PyInstaller --noconfirm 23toVCF_Pro.spec
+powershell -NoProfile -Command "Remove-Item -LiteralPath '%LOCAL_BUILD%' -Recurse -Force -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path '%LOCAL_WORK%','%LOCAL_DIST%','dist' | Out-Null"
+python -m PyInstaller --noconfirm --workpath "%LOCAL_WORK%" --distpath "%LOCAL_DIST%" 23toVCF_Pro.spec
 if errorlevel 1 (
     pause
     exit /b 1
 )
+if exist "%LOCAL_DIST%\23toVCF_Pro.exe" copy /Y "%LOCAL_DIST%\23toVCF_Pro.exe" "dist\23toVCF_Pro.exe" >nul
 if exist "dist\23toVCF_Pro.exe" copy /Y "dist\23toVCF_Pro.exe" "23toVCF_Pro.exe" >nul
 echo Fertig: dist\23toVCF_Pro.exe

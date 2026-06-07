@@ -1,4 +1,4 @@
-# Genetic data - NEVER commit personal genomic data
+﻿# Genetic data - NEVER commit personal genomic data
 *.vcf
 *.vcf.gz
 genome_*
@@ -30,6 +30,7 @@ cache.json.tmp*
 *.msix
 dist/
 build/
+_build/
 releases/
 __pycache__/
 .pytest_cache/
@@ -100,3 +101,8 @@ keyring/
 
 # Claude Code local settings
 .claude/
+# ---- Interne Steuerungsdateien ----
+DECISIONS.md
+PORTIERUNGSPLAN.md
+TODO.md
+DONE.md

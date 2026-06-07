@@ -8,6 +8,7 @@ tellmeGen) into standard VCF 4.2 format. Supports auto-detection of genome build
 (GRCh37/GRCh38) and sex via dbSNP API and optional local FASTA reference.
 """
 
+import argparse
 import sys
 import os
 import re
@@ -59,6 +60,153 @@ _cache_lock = threading.Lock()
 
 BUILD_HINTS_37 = [r"\bgrch\s*37\b", r"\bgrch37\b", r"\bbuild\s*37\b", r"\bhg19\b", r"\bb37\b", r"\bncb[iy]\s*build\s*37\b"]
 BUILD_HINTS_38 = [r"\bgrch\s*38\b", r"\bgrch38\b", r"\bbuild\s*38\b", r"\bhg38\b", r"\bb38\b", r"\bncb[iy]\s*build\s*38\b"]
+
+
+class CallbackSignal:
+    """Wrap a plain callback in a signal-like object with an emit method."""
+
+    def __init__(self, callback=None):
+        self.callback = callback or (lambda *_: None)
+
+    def emit(self, value):
+        self.callback(value)
+
+
+def make_signal(target=None):
+    """Return an object with emit(), regardless of the original callback type."""
+    if hasattr(target, "emit"):
+        return target
+    if callable(target):
+        return CallbackSignal(target)
+    return CallbackSignal()
+
+
+def default_output_path(file_path, build, now=None):
+    """Build the default output path used by GUI and CLI conversions."""
+    timestamp = (now or datetime.now()).strftime("%Y%m%d_%H%M%S")
+    stem, _ = os.path.splitext(file_path)
+    return f"{stem}_{build}_{timestamp}.vcf"
+
+
+def resolve_fasta_path_for_run(build, signal_callback, stop_event=None, ask_callback=None):
+    """Resolve a FASTA path for the current run."""
+    signal_callback = make_signal(signal_callback)
+    if ask_callback is not None:
+        return ensure_fasta_with_choice(build, signal_callback, ask_callback, stop_event)
+
+    fasta_path = FASTA_PATHS.get(build)
+    if not fasta_path:
+        return None
+
+    fai_path = fasta_path + ".fai"
+    if os.path.exists(fasta_path) and os.path.exists(fai_path):
+        return fasta_path
+
+    if os.path.exists(fasta_path):
+        signal_callback.emit(f"Erstelle Index für {fasta_path}...")
+        try:
+            build_fasta_index(fasta_path)
+            return fasta_path
+        except Exception as exc:
+            signal_callback.emit(f"[ERROR] Indexierung fehlgeschlagen: {exc}")
+            return None
+
+    signal_callback.emit(
+        f"Keine lokale FASTA für {build} gefunden. Nutze dbSNP-Fallback ohne Download-Prompt."
+    )
+    return None
+
+
+def run_conversion_pipeline(
+    file_path,
+    sex,
+    build,
+    cache,
+    output_path=None,
+    stop_event=None,
+    log_signal=None,
+    progress_signal=None,
+    ask_callback=None,
+):
+    """Run the shared genotype-to-VCF conversion pipeline for GUI and CLI."""
+    log_signal = make_signal(log_signal)
+    progress_signal = make_signal(progress_signal)
+    stop_event = stop_event or threading.Event()
+
+    log_signal.emit("Loading variants...")
+    variants = parse_genotype_file(file_path)
+    if not variants:
+        raise ValueError("Keine gültigen Varianten in Datei gefunden.")
+
+    resolved_sex = sex
+    if resolved_sex == "Auto":
+        log_signal.emit("Ermittle Geschlecht (Y-Check)...")
+        resolved_sex = detect_sex_from_variants(variants)
+        log_signal.emit(f"Geschlecht erkannt: {resolved_sex}")
+
+    resolved_build = build
+    if resolved_build == "Auto":
+        log_signal.emit("Ermittle Build (dbSNP Check)...")
+        resolved_build = detect_build_robust(variants, cache, log_signal, stop_event)
+        if not resolved_build:
+            if stop_event.is_set():
+                return None
+            raise ValueError("Build konnte nicht erkannt werden.")
+
+    log_signal.emit(f"Build: {resolved_build}")
+    if resolved_build not in FASTA_PATHS:
+        raise ValueError("Ungültiger Build.")
+
+    fasta_path = resolve_fasta_path_for_run(
+        resolved_build,
+        log_signal,
+        stop_event=stop_event,
+        ask_callback=ask_callback,
+    )
+    if stop_event.is_set():
+        return None
+
+    if fasta_path:
+        log_signal.emit("Lokale FASTA wird genutzt (Schnellmodus).")
+        log_signal.emit("Überspringe dbSNP-Download für SNPs.")
+    else:
+        log_signal.emit("Keine FASTA. Fallback Modus (langsamer).")
+        missing = [v[0] for v in variants if is_rs_id(v[0]) and v[0] not in cache]
+        if missing:
+            log_signal.emit(f"Lade {len(missing)} Metadaten nach...")
+            adaptive_parallel_fetch(missing, cache, log_signal, stop_event)
+
+    if stop_event.is_set():
+        return None
+
+    out_name = output_path or default_output_path(file_path, resolved_build)
+    out_dir = os.path.dirname(os.path.abspath(out_name))
+    if out_dir and not os.path.exists(out_dir):
+        os.makedirs(out_dir, exist_ok=True)
+        log_signal.emit(f"Erstelle Zielordner: {out_dir}")
+    log_signal.emit(f"Schreibe VCF: {os.path.basename(out_name)}...")
+    count = create_vcf(
+        variants,
+        resolved_build,
+        out_name,
+        cache,
+        fasta_path,
+        resolved_sex,
+        log_signal,
+        stop_event,
+        progress_signal,
+    )
+
+    if not stop_event.is_set():
+        progress_signal.emit(100)
+
+    return {
+        "output_path": out_name,
+        "written": count,
+        "build": resolved_build,
+        "sex": resolved_sex,
+        "used_fasta": bool(fasta_path),
+    }
 
 # -----------------------------
 # Hilfsfunktionen & Logik
@@ -799,69 +947,21 @@ class ConversionWorker(QThread):
     def run(self):
         """Execute the full conversion pipeline in the background thread."""
         try:
-            self.log_signal.emit("Loading variants...")
-            variants = parse_genotype_file(self.file_path)
-
-            if not variants:
-                self.error_signal.emit("Keine gültigen Varianten in Datei gefunden.")
-                return
-
-            if self.is_interrupted.is_set(): return
-
-            # Sex Detection
-            if self.sex == "Auto":
-                self.log_signal.emit("Ermittle Geschlecht (Y-Check)...")
-                self.sex = detect_sex_from_variants(variants)
-                self.log_signal.emit(f"Geschlecht erkannt: {self.sex}")
-
-            # Build Detection
-            if self.build_input == "Auto":
-                self.log_signal.emit("Ermittle Build (dbSNP Check)...")
-                detected_build = detect_build_robust(variants, self.cache, self.log_signal, self.is_interrupted)
-                if not detected_build:
-                    if self.is_interrupted.is_set(): return
-                    self.error_signal.emit("Build konnte nicht erkannt werden.")
-                    return
-                self.build_input = detected_build
-
-            self.log_signal.emit(f"Build: {self.build_input}")
-            if self.build_input not in FASTA_PATHS:
-                self.error_signal.emit("Ungültiger Build.")
-                return
-
-            # FASTA
-            fasta_path = ensure_fasta_with_choice(
-                self.build_input, self.log_signal, self.ask_wrapper, self.is_interrupted
-            )
-
-            if self.is_interrupted.is_set(): return
-
-            if fasta_path:
-                self.log_signal.emit("Lokale FASTA wird genutzt (Schnellmodus).")
-                self.log_signal.emit("Überspringe dbSNP-Download für SNPs.")
-            else:
-                self.log_signal.emit("Keine FASTA. Fallback Modus (langsamer).")
-                # Cache Fill nur wenn keine FASTA da
-                missing = [v[0] for v in variants if is_rs_id(v[0]) and v[0] not in self.cache]
-                if missing:
-                    self.log_signal.emit(f"Lade {len(missing)} Metadaten nach...")
-                    adaptive_parallel_fetch(missing, self.cache, self.log_signal, self.is_interrupted)
-
-            if self.is_interrupted.is_set(): return
-
-            # Convert
-            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-            out_name = f"{os.path.splitext(self.file_path)[0]}_{self.build_input}_{ts}.vcf"
-
-            self.log_signal.emit(f"Schreibe VCF: {os.path.basename(out_name)}...")
-            count = create_vcf(
-                variants, self.build_input, out_name, self.cache,
-                fasta_path, self.sex, self.log_signal, self.is_interrupted, self.progress_signal
+            result = run_conversion_pipeline(
+                self.file_path,
+                self.sex,
+                self.build_input,
+                self.cache,
+                stop_event=self.is_interrupted,
+                log_signal=self.log_signal,
+                progress_signal=self.progress_signal,
+                ask_callback=self.ask_wrapper,
             )
 
             if not self.is_interrupted.is_set():
-                self.progress_signal.emit(100)
-                self.finished_signal.emit(f"Erfolg! {count} Varianten geschrieben.\nDatei: {out_name}")
+                self.finished_signal.emit(
+                    f"Erfolg! {result['written']} Varianten geschrieben.\nDatei: {result['output_path']}"
+                )
             else:
                 self.log_signal.emit("Vorgang abgebrochen.")
 
@@ -1104,8 +1204,80 @@ class MainWindow(QMainWindow):
         self.btn_cancel.setEnabled(False)
         self.worker = None
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
+def build_cli_parser():
+    """Create the command-line argument parser."""
+    parser = argparse.ArgumentParser(
+        description="Konvertiert DTC-Genotypdateien in VCF 4.2 oder prüft den Genome-Build."
+    )
+    parser.add_argument("--input", help="Pfad zur Genotypdatei (.txt/.csv/.tsv).")
+    parser.add_argument("--output", help="Pfad zur Ausgabedatei (.vcf).")
+    parser.add_argument(
+        "--build",
+        default="Auto",
+        choices=["Auto", "GRCh37", "GRCh38"],
+        help="Genome-Build explizit setzen oder automatisch erkennen.",
+    )
+    parser.add_argument(
+        "--sex",
+        default="Auto",
+        choices=["Auto", "female", "male"],
+        help="Biologisches Geschlecht explizit setzen oder automatisch erkennen.",
+    )
+    parser.add_argument(
+        "--detect-build",
+        action="store_true",
+        help="Nur den erkannten Build ausgeben, keine VCF-Datei schreiben.",
+    )
+    parser.add_argument(
+        "--gui",
+        action="store_true",
+        help="GUI explizit starten, auch wenn weitere CLI-Argumente übergeben werden.",
+    )
+    return parser
+
+
+def run_cli(args):
+    """Execute the non-interactive CLI mode."""
+    log_signal = CallbackSignal(lambda message: print(message, file=sys.stderr))
+    cache = load_cache()
+
+    try:
+        if args.detect_build:
+            variants = parse_genotype_file(args.input)
+            if not variants:
+                raise ValueError("Keine gültigen Varianten in Datei gefunden.")
+            detected_build = detect_build_robust(variants, cache, log_signal, threading.Event())
+            if not detected_build:
+                raise ValueError("Build konnte nicht erkannt werden.")
+            print(detected_build)
+            return 0
+
+        result = run_conversion_pipeline(
+            args.input,
+            args.sex,
+            args.build,
+            cache,
+            output_path=args.output,
+            log_signal=log_signal,
+        )
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    if result is None:
+        print("Konvertierung abgebrochen.", file=sys.stderr)
+        return 1
+
+    print(f"VCF geschrieben: {result['output_path']}")
+    print(f"Varianten: {result['written']}")
+    print(f"Build: {result['build']}")
+    print(f"Geschlecht: {result['sex']}")
+    return 0
+
+
+def launch_gui():
+    """Start the desktop GUI."""
+    app = QApplication([sys.argv[0]])
     if os.path.exists(APP_ICON_PATH):
         icon = QIcon(APP_ICON_PATH)
         if not icon.isNull():
@@ -1116,4 +1288,25 @@ if __name__ == "__main__":
         if not icon.isNull():
             window.setWindowIcon(icon)
     window.show()
-    sys.exit(app.exec())
+    return app.exec()
+
+
+def main(argv=None):
+    """Dispatch to GUI or CLI mode."""
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if not argv:
+        return launch_gui()
+
+    parser = build_cli_parser()
+    args = parser.parse_args(argv)
+
+    if args.gui:
+        return launch_gui()
+    if not args.input:
+        parser.error("--input ist erforderlich, wenn nicht die GUI gestartet wird.")
+
+    return run_cli(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

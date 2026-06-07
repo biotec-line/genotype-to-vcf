@@ -113,7 +113,30 @@ The executable is written to `dist/23toVCF_Pro.exe`; local `build/`, `dist/`, `r
 
 #### CLI / Headless Usage
 
-The public release is a desktop-first tool. If you need automated conversion in a local pipeline, keep it source-based and privacy-preserving: run the Python converter locally, keep raw genotype files outside Git, and use only synthetic data in tests and issue reports.
+For Linux/macOS source runs, batch workflows, or LLM-driven automation, the
+same conversion pipeline is also available without launching the GUI:
+
+```bash
+python Make23toVCF3.py --input sample.txt --build GRCh37 --sex female --output sample.vcf
+python Make23toVCF3.py --input sample.txt --detect-build
+```
+
+- `--build Auto` and `--sex Auto` keep the existing auto-detection behavior.
+- If a local FASTA plus `.fai` index already exists, the CLI uses it automatically.
+- Without a local FASTA, the CLI stays non-interactive and falls back to dbSNP lookups instead of opening a download prompt.
+- Keep raw genotype files outside Git and use only synthetic data in tests and issue reports.
+
+#### Verified macOS / Linux Source Smoke
+
+Validated on **2026-06-03** with Python **3.12** on:
+- **macOS 15.4 (arm64, Mac Studio)**: `python -m pytest -q` and `python tests/source_platform_smoke.py`
+- **Ubuntu 24.04 (WSL2)**: `python -m pytest -q` and `python tests/source_platform_smoke.py`
+
+The smoke runner covers the two critical non-Windows source paths:
+- headless VCF generation from a tiny synthetic input file
+- `--detect-build` execution without launching the GUI
+
+This keeps macOS and Linux support intentionally at the source-smoke level instead of shipping extra store packages.
 
 #### First Run
 
@@ -197,7 +220,7 @@ The persistent `cache.json` stores dbSNP API responses with timestamps. Subseque
 
 ### Platform Strategy
 
-The platform plan is documented in [PORTIERUNGSPLAN.md](PORTIERUNGSPLAN.md). GitHub releases and the Windows executable remain the primary channel; macOS and Linux are planned as source-smoke targets. Windows Store, native mobile apps, and public upload webapps are intentionally out of scope because this tool handles genetic raw data and large reference genomes.
+GitHub releases and the Windows executable remain the primary channel. macOS and Linux are covered by source-smoke CI (ubuntu-latest, macos-latest — see `.github/workflows/ci.yml`). Windows Store, native mobile apps, and public upload webapps are intentionally out of scope because this tool handles genetic raw data and large reference genomes.
 
 ### Privacy
 
@@ -346,6 +369,32 @@ Die fertige EXE liegt anschließend in `dist/23toVCF_Pro.exe` und wird durch `bu
 4. **"Start Conversion"** klicken
 5. Die VCF-Datei wird neben der Eingabedatei gespeichert
 
+### CLI / Headless-Nutzung
+
+Für Linux-/macOS-Source-Starts, Batch-Workflows oder LLM-/Pipeline-Nutzung
+steht dieselbe Konvertierungslogik auch ohne GUI zur Verfügung:
+
+```bash
+python Make23toVCF3.py --input sample.txt --build GRCh37 --sex female --output sample.vcf
+python Make23toVCF3.py --input sample.txt --detect-build
+```
+
+- `--build Auto` und `--sex Auto` behalten die bestehende Auto-Erkennung bei.
+- Wenn eine lokale FASTA samt `.fai`-Index existiert, nutzt die CLI sie automatisch.
+- Ohne lokale FASTA bleibt die CLI nichtinteraktiv und fällt statt eines Download-Dialogs auf dbSNP-Lookups zurück.
+
+### Verifizierter macOS- / Linux-Source-Smoke
+
+Geprüft am **2026-06-03** mit Python **3.12** auf:
+- **macOS 15.4 (arm64, Mac Studio)**: `python -m pytest -q` und `python tests/source_platform_smoke.py`
+- **Ubuntu 24.04 (WSL2)**: `python -m pytest -q` und `python tests/source_platform_smoke.py`
+
+Der Smoke-Runner deckt die beiden kritischen Nicht-Windows-Pfade ab:
+- headless VCF-Erzeugung aus einer kleinen synthetischen Eingabedatei
+- `--detect-build` ohne GUI-Start
+
+Damit bleiben macOS und Linux bewusst auf dem dokumentierten Source-Smoke-Niveau statt zusätzliche Store- oder App-Pakete zu erzwingen.
+
 ### Erster Start
 
 Beim ersten Start ohne lokale FASTA-Referenz:
@@ -439,7 +488,6 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 ## Repository-Inhalt
 
 - `Make23toVCF3.py`: aktuelle PySide6-Anwendung und Konvertierungslogik
-- `PORTIERUNGSPLAN.md`: Plattformstrategie für Windows, macOS, Linux, Web und Mobile
 - `23toVCF_Pro.spec`: PyInstaller-Buildkonfiguration
 - `build_exe.bat`: reproduzierbarer Windows-Build über die Spec-Datei
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung

@@ -1,25 +1,37 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Build / Release
+- EXE neu gebaut 2026-06-01 (PyInstaller, 23toVCF_Pro.spec); 9/9 Tests grün, Smoke OK. EXE war 2026-05-01; Anlass: Make23toVCF3.py 2026-05-30.
+
 ### Added
 
-- Added `PORTIERUNGSPLAN.md` with the platform strategy: GitHub and Windows EXE stay primary, macOS/Linux are planned as source-smoke targets, and Windows Store/mobile/public upload webapps are explicitly out of scope.
 - Added a README start-here table, top-level GUI screenshot placement, and explicit search context for 23andMe-style DTC genotype to VCF conversion.
 - Added `llms.txt` with canonical repository, discovery phrases, file map, and non-medical-device boundaries for LLM and search-index readers.
+- Added a real headless CLI entrypoint to `Make23toVCF3.py` with `--input`, `--output`, `--build`, `--sex`, `--detect-build`, and `--gui`.
+- Added `tests/test_cli_headless.py` to cover VCF generation and build detection without launching the GUI.
+- Added `tests/source_platform_smoke.py` as a reproducible macOS/Linux source smoke for headless VCF generation and `--detect-build`.
 
 ### Changed
 
 - Reordered the public README so the English project overview is the default GitHub landing section and the German documentation remains available below it.
-- Clarified that automated or headless conversion should remain local and source-based with raw genotype data kept outside Git.
+- Moved GUI and CLI runs onto the shared `run_conversion_pipeline()` path so the conversion logic is no longer split across separate execution flows.
+- Documented the new CLI/headless workflow in the English and German README sections plus the platform plan and task list.
+- Extended GitHub Actions with a dedicated `platform-smoke` job on Ubuntu and macOS and recorded the 2026-06-03 source-smoke results in the README/task docs.
 
 ### Fixed
 
+- Fixed the shared GUI/CLI conversion pipeline so explicit `--output` paths create missing parent folders before writing the VCF instead of failing with `Errno 2`.
 - Fixed FASTA chromosome alias resolution so mitochondrial `MT` / `M` lookups can resolve against `chrM` / `chrMT` references.
 - Fixed CSV genotype parsing for fully quoted provider exports and uppercase `CHR` chromosome prefixes.
 - Normalized the German build-detection warning so the UI consistently uses real UTF-8 umlauts.
+
+### Removed
+
+- Removed `PORTIERUNGSPLAN.md`; its content is now covered by `AUFGABEN.txt` and the platform section in `README.md`.
 
 ### Repository Hygiene
 
