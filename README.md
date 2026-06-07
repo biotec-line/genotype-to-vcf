@@ -260,6 +260,27 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 - [Ensembl](https://www.ensembl.org/) for reference genome sequences
 - [pyfaidx](https://github.com/mdshw5/pyfaidx) for FASTA indexing
 
+## Release Checklist
+
+### Windows
+
+1. Build the EXE: `build_exe.bat`
+2. Generate checksums: `python scripts/make_sha256sums.py dist/`
+3. Verify: `sha256sum --check dist/SHA256SUMS`
+4. Create a GitHub release, attach `dist/23toVCF_Pro.exe` and `dist/SHA256SUMS`.
+
+### macOS and Linux (Source)
+
+No separate binary is distributed for macOS or Linux. Users run from source:
+
+```bash
+python -m pip install -r requirements.txt
+python Make23toVCF3.py --input data.txt --output out.vcf --build GRCh37 --sex female
+```
+
+A reproducible headless smoke is in `tests/source_platform_smoke.py` and runs on
+GitHub Actions (ubuntu-latest, macos-latest) on every push.
+
 ## Deutsch
 
 Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdaten in das standardisierte **VCF 4.2**-Format. Mit moderner PySide6-Oberfläche, Unterstützung für GRCh37 und GRCh38 Referenzgenome, automatischer Build-Erkennung sowie optionalem Offline-FASTA-Modus.

@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Added `scripts/make_sha256sums.py` to generate SHA256SUMS for `dist/` artifacts before GitHub releases; `tests/test_make_sha256sums.py` covers the four core functions.
+- Added Release Checklist section to README with Windows EXE + SHA256SUMS workflow and macOS/Linux source instructions.
 - Added a README start-here table, top-level GUI screenshot placement, and explicit search context for 23andMe-style DTC genotype to VCF conversion.
 - Added `llms.txt` with canonical repository, discovery phrases, file map, and non-medical-device boundaries for LLM and search-index readers.
 - Added a real headless CLI entrypoint to `Make23toVCF3.py` with `--input`, `--output`, `--build`, `--sex`, `--detect-build`, and `--gui`.
