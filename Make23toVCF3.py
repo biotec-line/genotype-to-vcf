@@ -836,6 +836,7 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
         entry = cache.get(rsid, {}).get("assemblies", {}).get(build)
         return entry.get("ref", "N") if entry else "N"
 
+    signal_callback = make_signal(signal_callback)
     written = 0
     total_variants = len(variants)
 

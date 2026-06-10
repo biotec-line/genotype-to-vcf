@@ -55,6 +55,10 @@ Make23toVCF2.py
 Make23toVCF_konvert.txt
 _ul
 
+# Bugsweep temporary backups
+*_BUGSWEEP_PRE_*.py
+*_BUGSWEEP_FINAL_*.py
+
 # Development notes and internal coordination
 AUFGABEN.txt
 TEST.txt
