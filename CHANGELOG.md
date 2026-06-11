@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fixed `signal_callback` None-Crash in `create_vcf`: wraps the callback in `make_signal` at function start so `signal_callback.emit()` never raises `AttributeError` when `stop_event` is set and `signal_callback=None` is passed; regression test added in `tests/test_create_vcf.py`.
+- Fixed `_is_german` false positives: now checks for real UTF-8 umlauts (`äöüÄÖÜß`) instead of ASCII substitutes (`ae/oe/ue/...`), preventing false hits on English text with common trigrams; regression test added in `tests/test_translator.py`.
 - Fixed the shared GUI/CLI conversion pipeline so explicit `--output` paths create missing parent folders before writing the VCF instead of failing with `Errno 2`.
 - Fixed FASTA chromosome alias resolution so mitochondrial `MT` / `M` lookups can resolve against `chrM` / `chrMT` references.
 - Fixed CSV genotype parsing for fully quoted provider exports and uppercase `CHR` chromosome prefixes.

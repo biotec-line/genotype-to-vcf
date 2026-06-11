@@ -9,15 +9,27 @@ License: MIT
 
 Genotype-to-VCF Pro converts local DTC genotype exports into VCF 4.2 files. It targets 23andMe-style four-column raw data formats (`rsid`, chromosome, position, genotype) and related exports from compatible providers such as Genes for Good, Mapmygenome, MyHeritage, Family Tree DNA, and tellmeGen.
 
-## Discovery phrases
+## Audience
 
-- 23andMe to VCF converter
-- DTC DNA raw data to VCF 4.2
-- local-first personal genomics converter
-- PySide6 VCF converter for genotype exports
-- privacy-preserving 23andMe raw data conversion
-- GRCh37 GRCh38 genotype build detection
-- dbSNP reference base lookup VCF writer
+- Personal genomics hobbyists who want to convert 23andMe or compatible DTC exports to standard VCF without uploading data to a cloud service
+- Bioinformaticians who need a reproducible local pipeline from raw genotype files to VCF 4.2 for use with downstream variant-analysis tools
+- Privacy-conscious users who need their genome data to stay on their own machine
+- Developers integrating DTC genotype conversion into local research pipelines (Python, CLI, headless)
+
+## Search Phrases
+
+```
+23andMe to VCF converter
+DTC DNA raw data to VCF 4.2
+local-first personal genomics converter
+PySide6 VCF converter for genotype exports
+privacy-preserving 23andMe raw data conversion
+GRCh37 GRCh38 genotype build detection
+dbSNP reference base lookup VCF writer
+23andMe raw data VCF Python desktop
+convert genotype file to VCF offline
+MyHeritage FamilyTreeDNA genotype VCF export
+```
 
 ## Boundaries
 
@@ -35,3 +47,5 @@ This is local-first research and software tooling. It is not a medical device, n
 ## Related context
 
 Use this repository when looking for a local desktop converter from 23andMe-style DTC genotype exports to standard VCF 4.2. Avoid presenting it as clinical software or as a replacement for validated bioinformatics pipelines in regulated settings.
+
+## Last-checked: 2026-06-11

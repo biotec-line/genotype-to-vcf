@@ -60,6 +60,7 @@ _ul
 *_BUGSWEEP_FINAL_*.py
 
 # Development notes and internal coordination
+docs/
 AUFGABEN.txt
 TEST.txt
 TESTS.txt
