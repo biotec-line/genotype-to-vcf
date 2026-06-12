@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Added README positioning tables and search phrases for 23andMe raw-data-to-VCF, DTC-DNA genotype conversion, MyHeritage/FamilyTreeDNA-compatible exports, and disambiguation against Illumina IDAT/GTC tools, cloud upload portals, and clinical interpretation services.
+- Updated `llms.txt` with 2026-06-12 discovery notes, headless CLI framing, broader search phrases, and explicit boundaries for non-clinical local VCF conversion.
 - Added `scripts/make_sha256sums.py` to generate SHA256SUMS for `dist/` artifacts before GitHub releases; `tests/test_make_sha256sums.py` covers the four core functions.
 - Added Release Checklist section to README with Windows EXE + SHA256SUMS workflow and macOS/Linux source instructions.
 - Added a README start-here table, top-level GUI screenshot placement, and explicit search context for 23andMe-style DTC genotype to VCF conversion.

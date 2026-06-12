@@ -18,12 +18,25 @@ Current version: **1.0.2**
 |---|---|
 | Convert a 23andMe-style raw genotype export | [Installation](#installation) -> [Usage](#usage) |
 | Check whether your provider format is supported | [Tested Providers](#tested-providers) and [Supported Input Formats](#supported-input-formats) |
+| Run a headless conversion in CI or a local batch pipeline | [CLI / Headless Usage](#cli--headless-usage) |
 | Understand privacy boundaries before using genetic data | [Privacy](#privacy) and the legal notice |
 | Package or test the Windows desktop app | [Build Your Own Executable](#option-3-build-your-own-executable) |
 
 ### Search Context
 
 This repository is the public home of **Genotype-to-VCF Pro**, a local-first 23andMe to VCF converter for DTC genotype exports, personal genomics research workflows, and privacy-preserving VCF 4.2 conversion. It is not related to clinical variant interpretation services, cloud genotype upload portals, or medical decision support products.
+
+Useful discovery phrases include **23andMe raw data to VCF**, **DTC DNA genotype converter**, **offline personal genomics VCF writer**, **MyHeritage genotype to VCF**, and **GRCh37 GRCh38 build detection for genotype exports**.
+
+### Positioning
+
+| If you need... | Use this repo? | Notes |
+|---|---|---|
+| Convert 23andMe-style four-column raw genotype files to VCF 4.2 | Yes | Main use case for GUI and CLI workflows |
+| Convert MyHeritage, FamilyTreeDNA, tellmeGen, or similar four-column exports | Usually | CSV/TSV auto-detection handles compatible layouts |
+| Convert Illumina IDAT/GTC arrays | No | Use Illumina/DRAGEN/GTCtoVCF-style tooling instead |
+| Run clinical interpretation, risk scoring, or trait reporting | No | This project writes VCF files; it does not interpret variants |
+| Upload raw DNA to a cloud analysis portal | No | This is intentionally local-first and avoids raw-genotype uploads |
 
 ### Features
 
@@ -297,12 +310,25 @@ Aktuelle Version: **1.0.2**
 |---|---|
 | 23andMe-artige Rohdaten in VCF konvertieren | [Installation](#installation) -> [Verwendung](#verwendung) |
 | Anbieterformat prüfen | [Getestete Anbieter](#getestete-anbieter) und [Unterstützte Eingabeformate](#unterstützte-eingabeformate) |
+| Konvertierung ohne GUI in CI oder lokaler Batch-Pipeline ausführen | [CLI / Headless-Nutzung](#cli--headless-nutzung) |
 | Datenschutzgrenzen vor Nutzung genetischer Daten verstehen | [Datenschutz](#datenschutz) und rechtlicher Hinweis |
 | Windows-Desktop-App paketieren oder testen | [Eigene EXE erstellen](#option-3-eigene-exe-erstellen) |
 
 ## Suchkontext
 
 Dieses Repository ist der öffentliche Ort für **Genotype-to-VCF Pro**, einen lokalen 23andMe-zu-VCF-Konverter für DTC-Genotyp-Exporte, Personal-Genomics-Forschungsworkflows und datenschutzfreundliche VCF-4.2-Konvertierung. Es ist kein klinischer Interpretationsdienst, kein Cloud-Upload-Portal und kein Medizinprodukt.
+
+Hilfreiche Suchphrasen sind **23andMe-Rohdaten zu VCF**, **DTC-DNA-Genotyp-Konverter**, **Offline-VCF-Writer für Personal Genomics**, **MyHeritage-Genotyp zu VCF** und **GRCh37-GRCh38-Build-Erkennung für Genotyp-Exporte**.
+
+## Einordnung
+
+| Wenn Sie ... brauchen | Dieses Repo nutzen? | Hinweis |
+|---|---|---|
+| 23andMe-artige Rohdaten mit vier Spalten in VCF 4.2 umwandeln | Ja | Hauptanwendungsfall für GUI und CLI |
+| MyHeritage-, FamilyTreeDNA-, tellmeGen- oder ähnliche Vier-Spalten-Exporte konvertieren | Meistens | CSV-/TSV-Erkennung deckt kompatible Layouts ab |
+| Illumina-IDAT-/GTC-Arrays konvertieren | Nein | Dafür sind Illumina-/DRAGEN-/GTCtoVCF-Werkzeuge passender |
+| Klinische Interpretation, Risiko-Scoring oder Trait-Reports erzeugen | Nein | Dieses Projekt schreibt VCF-Dateien und interpretiert Varianten nicht |
+| Rohdaten in ein Cloud-Analyseportal hochladen | Nein | Das Projekt ist bewusst lokal-first und vermeidet Rohdaten-Uploads |
 
 ## Funktionen
 
