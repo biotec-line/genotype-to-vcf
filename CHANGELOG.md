@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Build / Release
 - EXE neu gebaut 2026-06-01 (PyInstaller, 23toVCF_Pro.spec); 9/9 Tests grün, Smoke OK. EXE war 2026-05-01; Anlass: Make23toVCF3.py 2026-05-30.
+- `build_exe.bat` nutzt nun standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als lokalen Build-Root außerhalb des OneDrive-Projektbaums und führt PyInstaller mit `--clean` aus.
 
 ### Added
 
@@ -28,6 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fixed `manage_translations.py` so a damaged `locales/translations.json` no longer aborts the scan; the file is rebuilt from detected GUI strings instead. Regression coverage is in `tests/test_bug_regressions.py`.
 - Fixed `signal_callback` None-Crash in `create_vcf`: wraps the callback in `make_signal` at function start so `signal_callback.emit()` never raises `AttributeError` when `stop_event` is set and `signal_callback=None` is passed; regression test added in `tests/test_create_vcf.py`.
 - Fixed `_is_german` false positives: now checks for real UTF-8 umlauts (`äöüÄÖÜß`) instead of ASCII substitutes (`ae/oe/ue/...`), preventing false hits on English text with common trigrams; regression test added in `tests/test_translator.py`.
 - Fixed the shared GUI/CLI conversion pipeline so explicit `--output` paths create missing parent folders before writing the VCF instead of failing with `Errno 2`.
@@ -41,6 +43,7 @@ All notable changes to this project will be documented in this file.
 
 ### Repository Hygiene
 
+- Checked repository privacy and Git hygiene on 2026-06-24: local genome exports, FASTA references, `cache.json`, EXE/release artifacts, internal docs, and `LOCK*.txt` remain ignored and untracked.
 - Added an explicit local-data hygiene note for ignored FASTA references, dbSNP caches, VCF outputs, and provider raw-data exports.
 - Added `.gitattributes` for stable text line endings and binary handling of screenshots, icons, executables, VCF files, and FASTA references.
 - Extended `.gitignore` to cover generic `.fai` FASTA index files.

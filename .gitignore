@@ -1,4 +1,4 @@
-﻿# Genetic data - NEVER commit personal genomic data
+# Genetic data - NEVER commit personal genomic data
 *.vcf
 *.vcf.gz
 genome_*
@@ -61,6 +61,7 @@ _ul
 
 # Development notes and internal coordination
 docs/
+LOCK*.txt
 AUFGABEN.txt
 TEST.txt
 TESTS.txt

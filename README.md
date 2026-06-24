@@ -116,6 +116,8 @@ python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 
 The executable is written to `dist/23toVCF_Pro.exe`; local `build/`, `dist/`, `releases/`, and `*.exe` artifacts are intentionally ignored.
 
+The build wrapper uses `C:\_Local_DEV\codex_build\23tovcf_pro` as its default temporary build root on Windows, so PyInstaller work files stay outside the OneDrive-synced project tree.
+
 ### Usage
 
 1. Launch the application
@@ -263,6 +265,8 @@ Raw genomic data, VCF outputs, FASTA reference files plus `.fai` indexes, API ca
 
 Keep downloaded FASTA references, dbSNP caches, converted VCF outputs, and provider raw-data exports local only. The repository `.gitignore` excludes these files, but contributors should still keep them outside commits and use only synthetic or public sample data in tests and issues.
 
+Repository hygiene was rechecked on 2026-06-24: local genome exports, reference FASTA files, indexes, `cache.json`, EXE/release artifacts, internal planning docs, and `LOCK*.txt` files are ignored and must remain out of Git.
+
 ### Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
@@ -408,6 +412,8 @@ python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 
 Die fertige EXE liegt anschließend in `dist/23toVCF_Pro.exe` und wird durch `build_exe.bat` zusätzlich nach `23toVCF_Pro.exe` im Projektwurzelverzeichnis kopiert. `build/`, `dist/`, `releases/` und `*.exe` bleiben lokale Build-Artefakte.
 
+Das Build-Skript nutzt auf Windows standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als temporären Build-Root, damit PyInstaller-Arbeitsdateien nicht im OneDrive-synchronisierten Projektbaum entstehen.
+
 ## Verwendung
 
 1. Anwendung starten
@@ -545,6 +551,8 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 - `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
 
 Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien samt `.fai`-Indexdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
+
+Der Repo-Hygiene-Check vom 2026-06-24 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
 
 ## License
 

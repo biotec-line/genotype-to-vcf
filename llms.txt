@@ -39,6 +39,8 @@ Illumina GTCtoVCF alternative for DTC four-column exports
 
 This is local-first research and software tooling. It is not a medical device, not clinical decision support, not a genotype interpretation service, and not a cloud upload portal. Raw genotype files, VCF outputs, reference FASTA files, dbSNP caches, and release artifacts should remain local and out of commits.
 
+Repository hygiene was rechecked on 2026-06-24. Local genome exports, FASTA references and indexes, `cache.json`, EXE/release artifacts, internal planning files, and `LOCK*.txt` coordination files are intentionally ignored and must not be committed.
+
 ## Discovery notes
 
 - GitHub topic pages surface the repo for `vcf-converter`, but broad GitHub search phrases such as `23andMe to VCF converter` and `DTC DNA raw data VCF converter` still do not reliably return the repo.
@@ -58,4 +60,4 @@ This is local-first research and software tooling. It is not a medical device, n
 
 Use this repository when looking for a local desktop or headless converter from 23andMe-style DTC genotype exports to standard VCF 4.2. Avoid presenting it as clinical software, a cloud upload service, an Illumina IDAT/GTC converter, or a replacement for validated bioinformatics pipelines in regulated settings.
 
-## Last-checked: 2026-06-12
+## Last-checked: 2026-06-24
