@@ -38,7 +38,8 @@ def test_main_cli_writes_vcf_with_explicit_build(tmp_path, monkeypatch, capsys):
     stdout = capsys.readouterr().out
 
     assert exit_code == 0
-    assert "VCF geschrieben:" in stdout
+    assert "VCF geschrieben." in stdout
+    assert str(out_path) not in stdout
     records = [
         line
         for line in Path(out_path).read_text(encoding="utf-8").splitlines()
@@ -83,7 +84,8 @@ def test_main_cli_creates_missing_output_directory(tmp_path, monkeypatch, capsys
 
     assert exit_code == 0
     assert out_path.exists()
-    assert "VCF geschrieben:" in stdout
+    assert "VCF geschrieben." in stdout
+    assert str(out_path) not in stdout
     records = [
         line
         for line in Path(out_path).read_text(encoding="utf-8").splitlines()

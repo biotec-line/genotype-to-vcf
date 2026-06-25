@@ -29,6 +29,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Reduced CLI success output so headless conversions no longer print local
+  output paths, variant counts, genome build, or sex metadata by default.
 - Fixed `manage_translations.py` so a damaged `locales/translations.json` no longer aborts the scan; the file is rebuilt from detected GUI strings instead. Regression coverage is in `tests/test_bug_regressions.py`.
 - Fixed `signal_callback` None-Crash in `create_vcf`: wraps the callback in `make_signal` at function start so `signal_callback.emit()` never raises `AttributeError` when `stop_event` is set and `signal_callback=None` is passed; regression test added in `tests/test_create_vcf.py`.
 - Fixed `_is_german` false positives: now checks for real UTF-8 umlauts (`äöüÄÖÜß`) instead of ASCII substitutes (`ae/oe/ue/...`), preventing false hits on English text with common trigrams; regression test added in `tests/test_translator.py`.

@@ -1269,10 +1269,7 @@ def run_cli(args):
         print("Konvertierung abgebrochen.", file=sys.stderr)
         return 1
 
-    print(f"VCF geschrieben: {result['output_path']}")
-    print(f"Varianten: {result['written']}")
-    print(f"Build: {result['build']}")
-    print(f"Geschlecht: {result['sex']}")
+    print("VCF geschrieben.")
     return 0
 
 

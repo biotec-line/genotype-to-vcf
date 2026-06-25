@@ -71,7 +71,8 @@ def run_cli_write_smoke(tmp_dir: Path) -> None:
         records == ["1\t100\trs1\tA\tG\t.\tPASS\t.\tGT\t0/1"],
         f"Unexpected VCF records: {records!r}",
     )
-    _assert("VCF geschrieben:" in stdout.getvalue(), "CLI success message missing.")
+    _assert("VCF geschrieben." in stdout.getvalue(), "CLI success message missing.")
+    _assert(str(out_path) not in stdout.getvalue(), "CLI stdout must not expose the output path.")
 
 
 def run_detect_build_smoke(tmp_dir: Path) -> None:
