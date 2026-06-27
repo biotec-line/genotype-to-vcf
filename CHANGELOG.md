@@ -31,6 +31,9 @@ All notable changes to this project will be documented in this file.
 
 - Reduced CLI success output so headless conversions no longer print local
   output paths, variant counts, genome build, or sex metadata by default.
+- Fixed `parse_genotype_file` encoding fallback (Bug B): files encoded in latin-1/cp1252 (some FTDNA exports) previously raised `UnicodeDecodeError`; now retries with `latin-1` after a failed `utf-8-sig` attempt. Regression test: `test_parse_genotype_file_latin1_fallback`.
+- Fixed `create_vcf` i-type SNP ordering (Bug C): internal 23andMe IDs (`i...`) were silently dropped when no FASTA was present because `get_ref()` was called before the `i→rs` cache mapping, so it always returned `"N"` and triggered a `continue`. The mapping block now runs before `get_ref()`. Regression test: `test_create_vcf_i_type_snp_resolved_from_cache`.
+- Fixed `create_vcf` hemizygous het-call inconsistency (Bug A): heterozygous genotypes on haploid sites (e.g. chrY outside PAR for males) produced inconsistent VCF records with `ALT="G"` but `GT="0"`. These are probe artifacts; they are now skipped. Regression tests: `test_create_vcf_hemizygous_het_call_skipped` + `test_create_vcf_hemizygous_homozygous_alt_written`.
 - Fixed `manage_translations.py` so a damaged `locales/translations.json` no longer aborts the scan; the file is rebuilt from detected GUI strings instead. Regression coverage is in `tests/test_bug_regressions.py`.
 - Fixed `signal_callback` None-Crash in `create_vcf`: wraps the callback in `make_signal` at function start so `signal_callback.emit()` never raises `AttributeError` when `stop_event` is set and `signal_callback=None` is passed; regression test added in `tests/test_create_vcf.py`.
 - Fixed `_is_german` false positives: now checks for real UTF-8 umlauts (`äöüÄÖÜß`) instead of ASCII substitutes (`ae/oe/ue/...`), preventing false hits on English text with common trigrams; regression test added in `tests/test_translator.py`.

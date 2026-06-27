@@ -755,22 +755,35 @@ def parse_genotype_file(file_path):
     Also handles comma-separated (CSV) files from MyHeritage, FTDNA, tellmeGen.
     """
     variants = []
-    with open(file_path, "r", encoding="utf-8-sig") as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith("#") or not line: continue
-            # Try tab first, fall back to CSV parsing for quoted provider exports.
-            parts = line.split("\t") if "\t" in line else next(csv.reader([line]))
-            if len(parts) < 4: continue
-            # Strip quotes from CSV fields
-            rsid, chrom, pos, gt = (p.strip().strip('"') for p in parts[:4])
-            # Skip header rows
-            if rsid.lower() in ("rsid", "snp", "marker", "name"): continue
-            chrom = chrom.upper()
-            if chrom.startswith("CHR"): chrom = chrom[3:]
-            if chrom == "M": chrom = "MT"
-            try: variants.append((rsid, chrom, int(pos), gt.strip().upper()))
-            except ValueError: continue
+    # Versuche UTF-8 mit BOM-Stripping (Standard 23andMe/MyHeritage/tellmeGen);
+    # Fallback auf latin-1 für Windows-ANSI-Exporte (z.B. einige FTDNA-Versionen).
+    raw_lines = None
+    for encoding in ("utf-8-sig", "latin-1"):
+        try:
+            with open(file_path, "r", encoding=encoding) as f:
+                raw_lines = f.readlines()
+            break
+        except UnicodeDecodeError:
+            continue
+    if raw_lines is None:
+        raise ValueError(
+            f"Genotyp-Datei konnte nicht gelesen werden (unbekanntes Encoding): {file_path}"
+        )
+    for line in raw_lines:
+        line = line.strip()
+        if line.startswith("#") or not line: continue
+        # Try tab first, fall back to CSV parsing for quoted provider exports.
+        parts = line.split("\t") if "\t" in line else next(csv.reader([line]))
+        if len(parts) < 4: continue
+        # Strip quotes from CSV fields
+        rsid, chrom, pos, gt = (p.strip().strip('"') for p in parts[:4])
+        # Skip header rows
+        if rsid.lower() in ("rsid", "snp", "marker", "name"): continue
+        chrom = chrom.upper()
+        if chrom.startswith("CHR"): chrom = chrom[3:]
+        if chrom == "M": chrom = "MT"
+        try: variants.append((rsid, chrom, int(pos), gt.strip().upper()))
+        except ValueError: continue
     return variants
 
 def detect_build_robust(variants, cache, signal_callback, stop_event):
@@ -859,6 +872,16 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
             genotype = genotype.strip().upper().replace("_", "-")
             if genotype in ("--", "-", "00"): continue
 
+            FILTER, INFO = "PASS", "."
+            # Bug C fix: i-Typ-SNPs (interne IDs) VOR get_ref auf rs-ID mappen,
+            # damit der Cache-Lookup in get_ref greift (i-IDs sind nie im Cache).
+            if rsid.startswith("i"):
+                mapped = lookup_rsid_from_cache(chrom, pos, build, cache)
+                if mapped:
+                    INFO, rsid = f"I_ID={rsid}", mapped
+                else:
+                    rsid = "."
+
             ref_base = get_ref(chrom, pos)
             if not ref_base or ref_base in (".", "N", "-"): continue
             ref_base = ref_base.upper()
@@ -867,12 +890,11 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
             if ploid == 0: continue
 
             alleles = list(genotype)
-            FILTER, INFO = "PASS", "."
-
-            if rsid.startswith("i"):
-                mapped = lookup_rsid_from_cache(chrom, pos, build, cache)
-                if mapped: INFO, rsid = f"I_ID={rsid}", mapped
-                else: rsid = "."
+            # Bug A fix: Heterozygote Genotypen auf haploiden Stellen (ploid==1,
+            # z.B. chrY außerhalb PAR für Männer) sind Probe-Artefakte und können
+            # nicht korrekt als VCF-GT kodiert werden → überspringen.
+            if ploid == 1 and len(set(alleles)) > 1:
+                continue
 
             is_simple_snp = all(a in "ACGT" for a in alleles) and ref_base in "ACGT"
 

@@ -57,3 +57,83 @@ def test_create_vcf_accepts_lowercase_genotype(tmp_path):
         if not line.startswith("#")
     ]
     assert records == ["1\t100\trs1\tA\tG\t.\tPASS\t.\tGT\t0/1"]
+
+
+def test_create_vcf_i_type_snp_resolved_from_cache(tmp_path):
+    """Bug C: i-Typ-SNP (interne 23andMe-ID) soll geschrieben werden, wenn die
+    rs-ID per Position aus dem Cache auflösbar ist.
+
+    Bisher wurde get_ref() mit der i-ID aufgerufen (nie im Cache) → ref_base='N'
+    → continue, bevor das i→rs-Mapping lief. Fix: Mapping VOR get_ref() ausführen.
+    """
+    out_path = tmp_path / "out.vcf"
+    variants = [("i7002762", "1", 500, "CT")]
+    cache = {
+        "rs123456": {
+            "assemblies": {
+                "GRCh37": {"chrom": "1", "pos": 500, "ref": "C"}
+            }
+        }
+    }
+
+    written = converter.create_vcf(variants, "GRCh37", str(out_path), cache, sex="unknown")
+
+    assert written == 1, "i-Typ-SNP mit auflösbarer rs-ID soll als VCF-Eintrag geschrieben werden"
+    records = [
+        line
+        for line in Path(out_path).read_text(encoding="utf-8").splitlines()
+        if not line.startswith("#")
+    ]
+    assert len(records) == 1
+    fields = records[0].split("\t")
+    assert fields[2] == "rs123456", "rsid soll auf rs123456 gemappt sein"
+    assert "I_ID=i7002762" in fields[7], "INFO soll Original-ID als I_ID enthalten"
+    assert fields[9] == "0/1", "Genotyp CT mit Ref C soll 0/1 ergeben"
+
+
+def test_create_vcf_hemizygous_het_call_skipped(tmp_path):
+    """Bug A: Heterozygote Genotypen auf haploiden Stellen (z.B. chrY, male)
+    sind Probe-Artefakte und sollen übersprungen werden.
+
+    Bisher: 'AG' auf ploid=1-Stelle → ALT='G', GT='0' (inkonsistenter VCF-Eintrag).
+    Nach Fix: Het-Call auf ploid=1 wird als no-call behandelt → kein Eintrag.
+    """
+    out_path = tmp_path / "out.vcf"
+    variants = [("rs1", "Y", 2_700_000, "AG")]  # Position außerhalb PAR1/PAR2
+    cache = {
+        "rs1": {
+            "assemblies": {
+                "GRCh37": {"chrom": "Y", "pos": 2_700_000, "ref": "A"}
+            }
+        }
+    }
+
+    written = converter.create_vcf(variants, "GRCh37", str(out_path), cache, sex="male")
+
+    assert written == 0, "Heterozygote Genotypen auf haploiden chrY-Stellen sollen übersprungen werden"
+
+
+def test_create_vcf_hemizygous_homozygous_alt_written(tmp_path):
+    """Komplementärtest zu test_create_vcf_hemizygous_het_call_skipped:
+    Homozygote Alt-Calls auf ploid=1-Stellen sollen korrekt als GT '1' erscheinen.
+    """
+    out_path = tmp_path / "out.vcf"
+    variants = [("rs2", "Y", 2_700_000, "GG")]  # homozygot alt
+    cache = {
+        "rs2": {
+            "assemblies": {
+                "GRCh37": {"chrom": "Y", "pos": 2_700_000, "ref": "A"}
+            }
+        }
+    }
+
+    written = converter.create_vcf(variants, "GRCh37", str(out_path), cache, sex="male")
+
+    assert written == 1
+    records = [
+        line
+        for line in Path(out_path).read_text(encoding="utf-8").splitlines()
+        if not line.startswith("#")
+    ]
+    assert len(records) == 1
+    assert records[0].split("\t")[9] == "1", "Homozygot-Alt 'GG' auf ploid=1 soll GT '1' ergeben"
