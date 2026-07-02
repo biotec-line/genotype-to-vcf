@@ -4,6 +4,7 @@ Canonical repository: https://github.com/biotec-line/genotype-to-vcf
 Primary language: Python
 Interface: PySide6 desktop GUI plus headless CLI
 License: MIT
+Last repo hygiene check: 2026-07-02
 
 ## Purpose
 
@@ -27,6 +28,7 @@ local-first personal genomics converter
 PySide6 VCF converter for genotype exports
 privacy-preserving 23andMe raw data conversion
 GRCh37 GRCh38 genotype build detection
+hg19 hg38 CLI alias genotype converter
 dbSNP reference base lookup VCF writer
 23andMe raw data VCF Python desktop
 convert genotype file to VCF offline
@@ -39,13 +41,14 @@ Illumina GTCtoVCF alternative for DTC four-column exports
 
 This is local-first research and software tooling. It is not a medical device, not clinical decision support, not a genotype interpretation service, and not a cloud upload portal. Raw genotype files, VCF outputs, reference FASTA files, dbSNP caches, and release artifacts should remain local and out of commits.
 
-Repository hygiene was rechecked on 2026-06-24. Local genome exports, FASTA references and indexes, `cache.json`, EXE/release artifacts, internal planning files, and `LOCK*.txt` coordination files are intentionally ignored and must not be committed.
+Repository hygiene was rechecked on 2026-07-02. Local genome exports, FASTA references and indexes, `cache.json`, EXE/release artifacts, internal planning files, and `LOCK*.txt` coordination files are intentionally ignored and must not be committed.
 
 ## Discovery notes
 
 - GitHub topic pages surface the repo for `vcf-converter`, but broad GitHub search phrases such as `23andMe to VCF converter` and `DTC DNA raw data VCF converter` still do not reliably return the repo.
 - Web search finds the canonical GitHub repository and README, while wider VCF-conversion searches collide with Illumina IDAT/GTC tooling, PLINK workflows, cloud raw-DNA analysis portals, and clinical interpretation services.
 - Preferred framing: local-first conversion from four-column DTC genotype exports to VCF 4.2, with GUI and CLI paths, no raw-genotype upload, and no clinical interpretation.
+- CLI build and sex arguments are intentionally forgiving: build accepts case-insensitive `GRCh37` / `GRCh38` plus `hg19` / `hg38`; sex accepts case-insensitive `Auto`, `female`, and `male`.
 
 ## Main files
 
@@ -60,4 +63,4 @@ Repository hygiene was rechecked on 2026-06-24. Local genome exports, FASTA refe
 
 Use this repository when looking for a local desktop or headless converter from 23andMe-style DTC genotype exports to standard VCF 4.2. Avoid presenting it as clinical software, a cloud upload service, an Illumina IDAT/GTC converter, or a replacement for validated bioinformatics pipelines in regulated settings.
 
-## Last-checked: 2026-06-24
+## Last-checked: 2026-07-02

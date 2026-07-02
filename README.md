@@ -137,6 +137,8 @@ python Make23toVCF3.py --input sample.txt --detect-build
 ```
 
 - `--build Auto` and `--sex Auto` keep the existing auto-detection behavior.
+- `--build` is case-insensitive and also accepts `hg19` / `hg38` as aliases for `GRCh37` / `GRCh38`.
+- `--sex` is case-insensitive (`Auto`, `female`, `male`).
 - If a local FASTA plus `.fai` index already exists, the CLI uses it automatically.
 - Without a local FASTA, the CLI stays non-interactive and falls back to dbSNP lookups instead of opening a download prompt.
 - Keep raw genotype files outside Git and use only synthetic data in tests and issue reports.
@@ -265,7 +267,7 @@ Raw genomic data, VCF outputs, FASTA reference files plus `.fai` indexes, API ca
 
 Keep downloaded FASTA references, dbSNP caches, converted VCF outputs, and provider raw-data exports local only. The repository `.gitignore` excludes these files, but contributors should still keep them outside commits and use only synthetic or public sample data in tests and issues.
 
-Repository hygiene was rechecked on 2026-06-24: local genome exports, reference FASTA files, indexes, `cache.json`, EXE/release artifacts, internal planning docs, and `LOCK*.txt` files are ignored and must remain out of Git.
+Repository hygiene was rechecked on 2026-07-02: local genome exports, reference FASTA files, indexes, `cache.json`, EXE/release artifacts, internal planning docs, and `LOCK*.txt` files are ignored and must remain out of Git.
 
 ### Contributing
 
@@ -433,6 +435,8 @@ python Make23toVCF3.py --input sample.txt --detect-build
 ```
 
 - `--build Auto` und `--sex Auto` behalten die bestehende Auto-Erkennung bei.
+- `--build` ist nicht case-sensitiv und akzeptiert zusätzlich `hg19` / `hg38` als Alias für `GRCh37` / `GRCh38`.
+- `--sex` ist ebenfalls nicht case-sensitiv (`Auto`, `female`, `male`).
 - Wenn eine lokale FASTA samt `.fai`-Index existiert, nutzt die CLI sie automatisch.
 - Ohne lokale FASTA bleibt die CLI nichtinteraktiv und fällt statt eines Download-Dialogs auf dbSNP-Lookups zurück.
 
@@ -552,7 +556,7 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 
 Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien samt `.fai`-Indexdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
 
-Der Repo-Hygiene-Check vom 2026-06-24 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
+Der Repo-Hygiene-Check vom 2026-07-02 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
 
 ## License
 

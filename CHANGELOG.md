@@ -29,6 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Made CLI build/sex parsing more forgiving: `--build` now accepts case-insensitive `GRCh37` / `GRCh38` plus `hg19` / `hg38` aliases, and `--sex` accepts case-insensitive `Auto` / `female` / `male`. Regression coverage was added in `tests/test_cli_headless.py`.
 - Reduced CLI success output so headless conversions no longer print local
   output paths, variant counts, genome build, or sex metadata by default.
 - Fixed `parse_genotype_file` encoding fallback (Bug B): files encoded in latin-1/cp1252 (some FTDNA exports) previously raised `UnicodeDecodeError`; now retries with `latin-1` after a failed `utf-8-sig` attempt. Regression test: `test_parse_genotype_file_latin1_fallback`.
@@ -48,6 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ### Repository Hygiene
 
+- Rechecked repository privacy and Git hygiene on 2026-07-02 after the CLI alias update; local genome exports, FASTA references, `cache.json`, EXE/release artifacts, internal docs, and `LOCK*.txt` remain ignored and untracked.
 - Checked repository privacy and Git hygiene on 2026-06-24: local genome exports, FASTA references, `cache.json`, EXE/release artifacts, internal docs, and `LOCK*.txt` remain ignored and untracked.
 - Added an explicit local-data hygiene note for ignored FASTA references, dbSNP caches, VCF outputs, and provider raw-data exports.
 - Added `.gitattributes` for stable text line endings and binary handling of screenshots, icons, executables, VCF files, and FASTA references.

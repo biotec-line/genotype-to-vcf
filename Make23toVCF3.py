@@ -61,6 +61,21 @@ _cache_lock = threading.Lock()
 BUILD_HINTS_37 = [r"\bgrch\s*37\b", r"\bgrch37\b", r"\bbuild\s*37\b", r"\bhg19\b", r"\bb37\b", r"\bncb[iy]\s*build\s*37\b"]
 BUILD_HINTS_38 = [r"\bgrch\s*38\b", r"\bgrch38\b", r"\bbuild\s*38\b", r"\bhg38\b", r"\bb38\b", r"\bncb[iy]\s*build\s*38\b"]
 
+CLI_BUILD_ALIASES = {
+    "auto": "Auto",
+    "grch37": "GRCh37",
+    "hg19": "GRCh37",
+    "37": "GRCh37",
+    "grch38": "GRCh38",
+    "hg38": "GRCh38",
+    "38": "GRCh38",
+}
+CLI_SEX_ALIASES = {
+    "auto": "Auto",
+    "female": "female",
+    "male": "male",
+}
+
 
 class CallbackSignal:
     """Wrap a plain callback in a signal-like object with an emit method."""
@@ -79,6 +94,26 @@ def make_signal(target=None):
     if callable(target):
         return CallbackSignal(target)
     return CallbackSignal()
+
+
+def normalize_cli_build(value):
+    """Normalize CLI build aliases to the internal canonical names."""
+    normalized = CLI_BUILD_ALIASES.get(str(value).strip().lower())
+    if normalized is None:
+        raise argparse.ArgumentTypeError(
+            "Ungültiger Build. Erlaubt sind Auto, GRCh37, GRCh38, hg19 oder hg38."
+        )
+    return normalized
+
+
+def normalize_cli_sex(value):
+    """Normalize CLI sex values while keeping the canonical internal form."""
+    normalized = CLI_SEX_ALIASES.get(str(value).strip().lower())
+    if normalized is None:
+        raise argparse.ArgumentTypeError(
+            "Ungültiges Geschlecht. Erlaubt sind Auto, female oder male."
+        )
+    return normalized
 
 
 def default_output_path(file_path, build, now=None):
@@ -1237,14 +1272,14 @@ def build_cli_parser():
     parser.add_argument(
         "--build",
         default="Auto",
-        choices=["Auto", "GRCh37", "GRCh38"],
-        help="Genome-Build explizit setzen oder automatisch erkennen.",
+        type=normalize_cli_build,
+        help="Genome-Build explizit setzen oder automatisch erkennen (case-insensitive; hg19/hg38 aliasiert).",
     )
     parser.add_argument(
         "--sex",
         default="Auto",
-        choices=["Auto", "female", "male"],
-        help="Biologisches Geschlecht explizit setzen oder automatisch erkennen.",
+        type=normalize_cli_sex,
+        help="Biologisches Geschlecht explizit setzen oder automatisch erkennen (case-insensitive).",
     )
     parser.add_argument(
         "--detect-build",
