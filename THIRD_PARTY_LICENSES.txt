@@ -1,0 +1,44 @@
+Genotype-to-VCF Pro - Third-party license inventory
+Checked: 2026-07-06
+
+Project license:
+- The application code in this repository is licensed under MIT; see LICENSE.
+
+Scope:
+- This inventory covers the direct Python runtime dependencies listed in requirements.txt.
+- It also lists the Qt for Python wheel set that PySide6 installs and the runtime packages commonly installed through requests and pyfaidx in the checked environment.
+- Package versions and license metadata were checked against PyPI JSON metadata on 2026-07-06.
+- OSV was checked on 2026-07-06 for the listed checked versions and for the key dependency floors in requirements.txt.
+- This file is a release-facing license inventory, not a complete frozen transitive SBOM.
+
+Direct runtime dependencies:
+
+| Package | Requirement | Checked version | License | Source |
+| --- | --- | --- | --- | --- |
+| PySide6 | PySide6>=6.5.0 | 6.11.1 | LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only | https://pypi.org/project/PySide6/ |
+| requests | requests>=2.33.1 | 2.34.2 | Apache-2.0 | https://pypi.org/project/requests/ |
+| pyfaidx | pyfaidx>=0.7.0 | 0.9.0.4 | BSD-3-Clause | https://pypi.org/project/pyfaidx/ |
+| psutil | psutil>=5.9.0 | 7.2.2 | BSD-3-Clause | https://pypi.org/project/psutil/ |
+
+Qt for Python wheel set installed by PySide6:
+
+| Package | Checked version | License | Source |
+| --- | --- | --- | --- |
+| PySide6_Addons | 6.11.1 | LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only | https://pypi.org/project/PySide6-Addons/ |
+| PySide6_Essentials | 6.11.1 | LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only | https://pypi.org/project/PySide6-Essentials/ |
+| shiboken6 | 6.11.1 | LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only | https://pypi.org/project/shiboken6/ |
+
+Runtime packages installed through direct dependencies in the checked environment:
+
+| Package | Checked version | License | Source |
+| --- | --- | --- | --- |
+| certifi | 2026.6.17 | MPL-2.0 | https://pypi.org/project/certifi/ |
+| charset-normalizer | 3.4.7 | MIT | https://pypi.org/project/charset-normalizer/ |
+| idna | 3.18 | BSD-3-Clause | https://pypi.org/project/idna/ |
+| packaging | 26.2 | Apache-2.0 OR BSD-2-Clause | https://pypi.org/project/packaging/ |
+| urllib3 | 2.7.0 | MIT | https://pypi.org/project/urllib3/ |
+
+Operational notes:
+- Preserve upstream wheel license files when packaging the application, especially for PySide6 and the Qt for Python wheel set.
+- Raw genotype exports, generated VCF files, reference genomes, FASTA index files, local caches, and build outputs are data or artifacts; they are intentionally excluded from this source license inventory.
+- Refresh this file when requirements.txt changes, when the packaged runtime is rebuilt with different dependency versions, or when a full SBOM is produced for a release.
