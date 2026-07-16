@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Genotype-to-VCF Pro - Browserlokale Demo</title>
+  <link rel="stylesheet" href="./demo.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Lokale Vorschau ohne Upload</p>
+      <h1>Browserlokale Format-Demo</h1>
+      <p class="lead">
+        Diese statische Demo prüft nur lokal im Browser, ob eine Datei grob zum
+        erwarteten Vier-Spalten-Format passt. Es werden keine Rohdaten
+        hochgeladen, gespeichert oder an APIs gesendet.
+      </p>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Eingabe</h2>
+        <p class="muted">
+          Unterstützt lokale 23andMe-artige TSV/CSV-Dateien mit
+          <code>rsid, chromosome, position, genotype</code>.
+        </p>
+        <div class="actions">
+          <label class="button">
+            Datei wählen
+            <input id="file-input" type="file" accept=".txt,.tsv,.csv,text/plain">
+          </label>
+          <button id="sample-button" type="button">Synthetisches Beispiel laden</button>
+          <button id="clear-button" type="button" class="secondary">Leeren</button>
+        </div>
+        <label class="field-label" for="raw-input">Oder Text lokal einfügen</label>
+        <textarea
+          id="raw-input"
+          spellcheck="false"
+          placeholder="# rsid	chromosome	position	genotype&#10;rs12564807	1	734462	AA&#10;rs3131972	1	752721	AG"></textarea>
+        <div class="actions">
+          <button id="analyze-button" type="button">Lokal prüfen</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Grenzen</h2>
+        <ul class="limits">
+          <li>Keine VCF-Erzeugung im Browser.</li>
+          <li>Keine Genotyp-Uploads und keine Server-Komponente.</li>
+          <li>Keine dbSNP-, FASTA- oder Build-Erkennung innerhalb der Demo.</li>
+          <li>Nur Vorschau, Formatcheck und Risiko-Hinweise.</li>
+        </ul>
+        <p class="muted small">
+          Für echte Konvertierung bitte weiter die Desktop-App oder die CLI
+          <code>Make23toVCF3.py --input ...</code> verwenden.
+        </p>
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>Ergebnis</h2>
+      <div id="status-banner" class="status info">
+        Noch nichts geprüft.
+      </div>
+      <div id="summary" class="summary"></div>
+      <div id="warnings" class="warnings"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>rsID</th>
+              <th>Chromosom</th>
+              <th>Position</th>
+              <th>Genotyp</th>
+            </tr>
+          </thead>
+          <tbody id="preview-body">
+            <tr>
+              <td colspan="4" class="empty">Noch keine Vorschau vorhanden.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./demo.mjs"></script>
+</body>
+</html>

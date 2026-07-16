@@ -4,7 +4,7 @@ Canonical repository: https://github.com/biotec-line/genotype-to-vcf
 Primary language: Python
 Interface: PySide6 desktop GUI plus headless CLI
 License: MIT
-Last repo hygiene check: 2026-07-02
+Last repo hygiene check: 2026-07-16
 
 ## Purpose
 
@@ -41,7 +41,7 @@ Illumina GTCtoVCF alternative for DTC four-column exports
 
 This is local-first research and software tooling. It is not a medical device, not clinical decision support, not a genotype interpretation service, and not a cloud upload portal. Raw genotype files, VCF outputs, reference FASTA files, dbSNP caches, and release artifacts should remain local and out of commits.
 
-Repository hygiene was rechecked on 2026-07-02. Local genome exports, FASTA references and indexes, `cache.json`, EXE/release artifacts, internal planning files, and `LOCK*.txt` coordination files are intentionally ignored and must not be committed.
+Repository hygiene was rechecked on 2026-07-16. Local genome exports, FASTA references and indexes, `cache.json`, EXE/release artifacts, internal planning files, and `LOCK*.txt` coordination files are intentionally ignored and must not be committed. The browser-local demo is a static, no-upload format preview and renders pasted genotype values as text rather than HTML.
 
 ## Discovery notes
 
@@ -54,6 +54,7 @@ Repository hygiene was rechecked on 2026-07-02. Local genome exports, FASTA refe
 
 - `README.md`: Bilingual user-facing landing page, usage, privacy, platform strategy, and legal notice.
 - `Make23toVCF3.py`: Current converter application and PySide6 GUI.
+- `docs/browser-local-demo/`: Static browser-local format preview; no upload, no VCF writer, no background API calls.
 - `23toVCF_Pro.spec`: PyInstaller configuration for Windows executable builds.
 - `README/screenshots/main.png`: Main GUI screenshot without personal data.
 - `requirements.txt`: Runtime dependencies.
@@ -63,4 +64,4 @@ Repository hygiene was rechecked on 2026-07-02. Local genome exports, FASTA refe
 
 Use this repository when looking for a local desktop or headless converter from 23andMe-style DTC genotype exports to standard VCF 4.2. Avoid presenting it as clinical software, a cloud upload service, an Illumina IDAT/GTC converter, or a replacement for validated bioinformatics pipelines in regulated settings.
 
-## Last-checked: 2026-07-02
+## Last-checked: 2026-07-16

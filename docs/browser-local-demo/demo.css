@@ -1,0 +1,221 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f1e8;
+  --card: #fffdf8;
+  --ink: #17212c;
+  --muted: #5d6b79;
+  --line: #d8cfc0;
+  --accent: #165c74;
+  --accent-2: #c56b2d;
+  --ok: #1d6c48;
+  --warn: #9a5b11;
+  --info: #2d5a93;
+  --soft: #edf4f7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(197, 107, 45, 0.08), transparent 32%),
+    linear-gradient(180deg, #f7f3eb 0%, var(--bg) 100%);
+  color: var(--ink);
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 18px 40px;
+}
+
+.hero {
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent-2);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+h1,
+h2 {
+  margin: 0 0 12px;
+}
+
+.lead,
+.muted,
+.small {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.92rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 14px 32px rgba(23, 33, 44, 0.05);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+
+.button,
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font: inherit;
+}
+
+button.secondary {
+  background: #d8e2e6;
+  color: var(--ink);
+}
+
+.button input {
+  display: none;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  font: 0.95rem/1.45 "Cascadia Code", "Consolas", monospace;
+  background: #fff;
+  color: var(--ink);
+}
+
+.limits {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.55;
+}
+
+.status {
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.status.info {
+  background: #edf4fb;
+  color: var(--info);
+}
+
+.status.ok {
+  background: #ecf7ef;
+  color: var(--ok);
+}
+
+.status.warn {
+  background: #fff4e8;
+  color: var(--warn);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.summary-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--soft);
+}
+
+.summary-card strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.warnings {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.warning {
+  border-left: 4px solid var(--accent-2);
+  background: #fff8ef;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+th {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+}
+
+code {
+  font-family: "Cascadia Code", "Consolas", monospace;
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    padding: 18px 12px 28px;
+  }
+}

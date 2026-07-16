@@ -18,6 +18,7 @@ Current version: **1.0.2**
 |---|---|
 | Convert a 23andMe-style raw genotype export | [Installation](#installation) -> [Usage](#usage) |
 | Check whether your provider format is supported | [Tested Providers](#tested-providers) and [Supported Input Formats](#supported-input-formats) |
+| Run a local browser-only format preflight without uploads | [Browser-Local Demo](#browser-local-demo) |
 | Run a headless conversion in CI or a local batch pipeline | [CLI / Headless Usage](#cli--headless-usage) |
 | Understand privacy boundaries before using genetic data | [Privacy](#privacy) and the legal notice |
 | Package or test the Windows desktop app | [Build Your Own Executable](#option-3-build-your-own-executable) |
@@ -125,6 +126,18 @@ The build wrapper uses `C:\_Local_DEV\codex_build\23tovcf_pro` as its default te
 3. Choose **Sex** (`Auto` / `female` / `male`) and **Build** (`Auto` / `GRCh37` / `GRCh38`)
 4. Click **"Start Conversion"**
 5. The VCF file is saved alongside the input file
+
+#### Browser-Local Demo
+
+For a quick privacy-preserving preflight, open `docs/browser-local-demo/index.html`
+locally in your browser. The demo:
+
+- reads a selected or pasted genotype export entirely locally
+- checks for the expected four-column TSV/CSV shape
+- shows a small read-only preview plus warnings for unsupported layouts
+
+It does **not** upload files, call APIs, store genetic data, or generate a VCF in
+the browser. The desktop app and CLI remain the only supported conversion paths.
 
 #### CLI / Headless Usage
 
@@ -239,6 +252,10 @@ The persistent `cache.json` stores dbSNP API responses with timestamps. Subseque
 
 GitHub releases and the Windows executable remain the primary channel. macOS and Linux are covered by source-smoke CI (ubuntu-latest, macos-latest — see `.github/workflows/ci.yml`). Windows Store, native mobile apps, and public upload webapps are intentionally out of scope because this tool handles genetic raw data and large reference genomes.
 
+A small browser-local demo is acceptable only as a static, non-upload preview for
+format compatibility. It is not a hosted web service, not a cloud workflow, and
+not a replacement for the desktop or CLI converter.
+
 ### Privacy
 
 This tool processes genetic data locally on your machine. No data is sent to external servers except:
@@ -316,6 +333,7 @@ Aktuelle Version: **1.0.2**
 |---|---|
 | 23andMe-artige Rohdaten in VCF konvertieren | [Installation](#installation) -> [Verwendung](#verwendung) |
 | Anbieterformat prüfen | [Getestete Anbieter](#getestete-anbieter) und [Unterstützte Eingabeformate](#unterstützte-eingabeformate) |
+| Lokalen Browser-Formatcheck ohne Upload ausführen | [Browserlokale Demo](#browserlokale-demo) |
 | Konvertierung ohne GUI in CI oder lokaler Batch-Pipeline ausführen | [CLI / Headless-Nutzung](#cli--headless-nutzung) |
 | Datenschutzgrenzen vor Nutzung genetischer Daten verstehen | [Datenschutz](#datenschutz) und rechtlicher Hinweis |
 | Windows-Desktop-App paketieren oder testen | [Eigene EXE erstellen](#option-3-eigene-exe-erstellen) |
@@ -423,6 +441,18 @@ Das Build-Skript nutzt auf Windows standardmäßig `C:\_Local_DEV\codex_build\23
 3. **Geschlecht** (`Auto` / `female` / `male`) und **Build** (`Auto` / `GRCh37` / `GRCh38`) wählen
 4. **"Start Conversion"** klicken
 5. Die VCF-Datei wird neben der Eingabedatei gespeichert
+
+### Browserlokale Demo
+
+Für einen schnellen datenschutzfreundlichen Vorabcheck kann
+`docs/browser-local-demo/index.html` lokal im Browser geöffnet werden. Die Demo:
+
+- liest eine ausgewählte oder eingefügte Genotyp-Datei vollständig lokal
+- prüft nur das erwartete Vier-Spalten-TSV/CSV-Format
+- zeigt eine kleine read-only Vorschau und Hinweise auf nicht unterstützte Layouts
+
+Sie lädt **nichts** hoch, ruft keine APIs auf, speichert keine genetischen Daten
+und erzeugt kein VCF im Browser. Produktive Konvertierung bleibt Desktop-App bzw. CLI.
 
 ### CLI / Headless-Nutzung
 
@@ -539,6 +569,11 @@ Dieses Tool verarbeitet genetische Daten lokal auf Ihrem Rechner. Keine Daten we
 - **Ensembl FTP** für optionale FASTA-Referenzgenom-Downloads
 
 Genotyp-Daten, persönliche Identifikatoren oder Rohdateien werden niemals übertragen.
+
+Die browserlokale Demo unter `docs/browser-local-demo/` arbeitet ebenfalls strikt
+ohne Uploads oder Hintergrundnetzwerk. Sie dient nur als lokaler Format- und
+Vorschau-Check; Werte aus eingefügten Dateien werden als Text gerendert, nicht
+als HTML.
 
 Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Indexdateien (`*.fa`, `*.fasta`, `*.fai`), Caches, EXE-/Release-Artefakte und interne Arbeitsdateien (`AUFGABEN.txt`, `TEST.txt`, Diagnoseberichte) sind per `.gitignore` ausgeschlossen. Die neue `.gitattributes` hält Textdateien und große Binärartefakte zusätzlich sauber getrennt.
 

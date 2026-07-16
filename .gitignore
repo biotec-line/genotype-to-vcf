@@ -60,7 +60,11 @@ _ul
 *_BUGSWEEP_FINAL_*.py
 
 # Development notes and internal coordination
-docs/
+docs/*
+!docs/browser-local-demo/
+!docs/browser-local-demo/index.html
+!docs/browser-local-demo/demo.css
+!docs/browser-local-demo/demo.mjs
 LOCK*.txt
 AUFGABEN.txt
 TEST.txt

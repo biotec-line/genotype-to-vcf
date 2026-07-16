@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Added a static local browser demo in `docs/browser-local-demo/` for privacy-safe format preflight without uploads, server calls, or in-browser VCF generation.
+- Added `tests/test_browser_local_demo.mjs` to cover CSV parsing, chromosome normalization, unsupported-layout warnings, and the summary snapshot used by the browser demo.
 - Added README positioning tables and search phrases for 23andMe raw-data-to-VCF, DTC-DNA genotype conversion, MyHeritage/FamilyTreeDNA-compatible exports, and disambiguation against Illumina IDAT/GTC tools, cloud upload portals, and clinical interpretation services.
 - Updated `llms.txt` with 2026-06-12 discovery notes, headless CLI framing, broader search phrases, and explicit boundaries for non-clinical local VCF conversion.
 - Added `scripts/make_sha256sums.py` to generate SHA256SUMS for `dist/` artifacts before GitHub releases; `tests/test_make_sha256sums.py` covers the four core functions.
@@ -22,6 +24,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Narrowed `.gitignore` so `docs/browser-local-demo/` stays versioned while the rest of `docs/` remains internal-only.
+- Documented the new browser-local format demo in the README and task list as a non-upload, read-only preview path rather than a public webapp product line.
 - Reordered the public README so the English project overview is the default GitHub landing section and the German documentation remains available below it.
 - Moved GUI and CLI runs onto the shared `run_conversion_pipeline()` path so the conversion logic is no longer split across separate execution flows.
 - Documented the new CLI/headless workflow in the English and German README sections plus the platform plan and task list.
@@ -29,6 +33,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Hardened the browser-local preview against HTML injection from pasted or selected genotype text by rendering dynamic values with DOM text nodes instead of `innerHTML` templates.
 - Made CLI build/sex parsing more forgiving: `--build` now accepts case-insensitive `GRCh37` / `GRCh38` plus `hg19` / `hg38` aliases, and `--sex` accepts case-insensitive `Auto` / `female` / `male`. Regression coverage was added in `tests/test_cli_headless.py`.
 - Reduced CLI success output so headless conversions no longer print local
   output paths, variant counts, genome build, or sex metadata by default.
@@ -49,6 +54,7 @@ All notable changes to this project will be documented in this file.
 
 ### Repository Hygiene
 
+- Rechecked repository privacy and Git hygiene on 2026-07-16 for the browser-local demo: no real genotype data, VCF outputs, FASTA references, caches, credentials, or build artifacts are tracked; `LOCK*.txt` remains ignored.
 - Rechecked repository privacy and Git hygiene on 2026-07-02 after the CLI alias update; local genome exports, FASTA references, `cache.json`, EXE/release artifacts, internal docs, and `LOCK*.txt` remain ignored and untracked.
 - Checked repository privacy and Git hygiene on 2026-06-24: local genome exports, FASTA references, `cache.json`, EXE/release artifacts, internal docs, and `LOCK*.txt` remain ignored and untracked.
 - Added an explicit local-data hygiene note for ignored FASTA references, dbSNP caches, VCF outputs, and provider raw-data exports.
