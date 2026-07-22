@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 
 
 ### Build / Release
+- Release-Status am 2026-07-22 geprüft: Der nach `1.0.2` gesammelte Stand bleibt bewusst unter `[Unreleased]`; es wird kein `1.0.3`-Release-Kandidat, Versions-Bump, Artefakt-Build oder Upload impliziert. Vor einer separaten Release-Freigabe sind ein frischer Windows-EXE-/SHA256SUMS-Check und die erneut dokumentierten Source-Smokes erforderlich.
 - EXE neu gebaut 2026-06-01 (PyInstaller, 23toVCF_Pro.spec); 9/9 Tests grün, Smoke OK. EXE war 2026-05-01; Anlass: Make23toVCF3.py 2026-05-30.
 - `build_exe.bat` nutzt nun standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als lokalen Build-Root außerhalb des OneDrive-Projektbaums und führt PyInstaller mit `--clean` aus.
 
@@ -56,7 +57,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
-- Removed `PORTIERUNGSPLAN.md`; its content is now covered by `AUFGABEN.txt` and the platform section in `README.md`.
+- `PORTIERUNGSPLAN.md` wurde am 2026-07-22 als kanonische interne Plattformsteuerung wiederhergestellt; README und `AUFGABEN.txt` ergänzen ihn, ersetzen ihn aber nicht.
 
 ### Repository Hygiene
 
