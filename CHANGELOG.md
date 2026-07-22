@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation / Maintenance (2026-07-22)
+- Added dedicated German documentation landing page (README_de.md) and updated top-level language navigation bar ([English](README.md) | [Deutsch](README_de.md)).
+- Synchronized llms.txt repository hygiene timestamp to 2026-07-22.
+- Verified test suite (27/27 passed), syntax compilation, and git diff compliance.
+
+
 ### Build / Release
 - EXE neu gebaut 2026-06-01 (PyInstaller, 23toVCF_Pro.spec); 9/9 Tests grün, Smoke OK. EXE war 2026-05-01; Anlass: Make23toVCF3.py 2026-05-30.
 - `build_exe.bat` nutzt nun standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als lokalen Build-Root außerhalb des OneDrive-Projektbaums und führt PyInstaller mit `--clean` aus.
