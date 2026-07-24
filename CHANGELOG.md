@@ -1,8 +1,12 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+### Documentation / Maintenance (2026-07-24)
+- Technical hygiene & maintenance check: verified git status, test suite (27 passed, 1 subtest passed), and llms.txt synchronization.
+- Updated repository hygiene metadata and llms.txt Last-checked timestamp to 2026-07-24.
 
 ### Documentation / Maintenance (2026-07-22)
 - Added dedicated German documentation landing page (README_de.md) and updated top-level language navigation bar ([English](README.md) | [Deutsch](README_de.md)).
