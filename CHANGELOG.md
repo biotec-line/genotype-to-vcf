@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Discoverability & Marketing (2026-07-26)
+- Added visual Shields.io badges (Python version, Pytest status 27/27 passed, VCF Standard 4.2, Privacy Local-First, LLM-Ready, MIT License) to `README.md` and `README_de.md`.
+- Added GitHub Flavored Markdown (GFM) Callout Note (`> [!NOTE]`) for AI agent indexation, privacy boundaries, and offline local execution.
+- Added Mermaid System Architecture & Data Flow Diagram to `README.md` and `README_de.md` visualizing the 4-column format auto-detection, build detection, sex determination, REF base resolution pipeline, and VCF 4.2 writer.
+- Created standard PEP 621 `pyproject.toml` containing project metadata, keywords, dependency declarations, URLs, and Pytest configuration.
+- Synchronized `llms.txt` header/footer timestamps to `2026-07-26` and updated main files list.
+
 ### Documentation / Maintenance (2026-07-24)
 - Technical hygiene & maintenance check: verified git status, test suite (27 passed, 1 subtest passed), and llms.txt synchronization.
 - Updated repository hygiene metadata and llms.txt Last-checked timestamp to 2026-07-24.

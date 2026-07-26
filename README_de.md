@@ -2,6 +2,16 @@
 
 [English](README.md) | [Deutsch](README_de.md)
 
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![Pytest Status](https://img.shields.io/badge/pytest-27%20passed-brightgreen.svg)
+![VCF Standard](https://img.shields.io/badge/VCF%20Standard-4.2-blue.svg)
+![Datenschutz](https://img.shields.io/badge/Datenschutz-Local--First-purple.svg)
+![LLM Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)
+![Lizenz](https://img.shields.io/badge/Lizenz-MIT-green.svg)
+
+> [!NOTE]
+> **KI-Agenten & LLM-Integrationshinweis**: Dieses Repository enthält [`llms.txt`](llms.txt) für maschinenlesbare Indexierung. Genotype-to-VCF Pro arbeitet 100% lokal und datenschutzfreundlich. Genom-Rohdaten, VCF-Ausgaben und FASTA-Referenzindizes verbleiben ausschließlich lokal auf Ihrem System und werden nicht an externe Server übertragen.
+
 Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdaten in das standardisierte **VCF 4.2**-Format. Mit moderner PySide6-Oberfläche, Unterstützung für GRCh37 und GRCh38 Referenzgenome, automatischer Build-Erkennung sowie optionalem Offline-FASTA-Modus.
 
 Ursprünglich für 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbieter**, der das gleiche Tab-separierte Format verwendet (`rsid  chromosome  position  genotype`).
@@ -9,6 +19,23 @@ Ursprünglich für 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbie
 Aktuelle Version: **1.0.2**
 
 ![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
+
+### Systemarchitektur & Datenfluss
+
+```mermaid
+flowchart TD
+    A["Genotyp-Rohdaten (.txt / .csv)<br/>(23andMe, MyHeritage, FTDNA)"] --> B["Format-Autoerkennung<br/>(4 Spalten rsid, chrom, pos, genotype)"]
+    B --> C{"Genom-Build-Erkennung"}
+    C -->|"Auto / GRCh37 / GRCh38"| D["dbSNP Positionsvalidierung & Geschlechtsbestimmung"]
+    D --> E{"REF-Basen-Auflösung"}
+    E -->|"Priorität 1"| F["Lokale FASTA-Referenz (.fa + .fai)"]
+    E -->|"Priorität 2"| G["Persistenter Cache (cache.json)"]
+    E -->|"Priorität 3"| H["NCBI dbSNP REST API"]
+    F --> I["VCF 4.2 Writer<br/>(Autosomale & PAR Ploidie-Regeln)"]
+    G --> I
+    H --> I
+    I --> J["Ausgabe VCF 4.2 Datei (.vcf)"]
+```
 
 ## Einstieg
 

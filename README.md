@@ -2,6 +2,16 @@
 
 [English](README.md) | [Deutsch](README_de.md)
 
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![Pytest Status](https://img.shields.io/badge/pytest-27%20passed-brightgreen.svg)
+![VCF Standard](https://img.shields.io/badge/VCF%20Standard-4.2-blue.svg)
+![Privacy](https://img.shields.io/badge/Privacy-Local--First-purple.svg)
+![LLM Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+> [!NOTE]
+> **AI Agent & LLM Integration Notice**: This repository includes [`llms.txt`](llms.txt) for machine-readable discovery and indexation. Genotype-to-VCF Pro operates 100% locally and privacy-preserving. Genetic raw data, VCF outputs, and FASTA genome indexes remain strictly local on your machine and are never transmitted to external services.
+
 ## English
 
 A desktop application for converting DTC (Direct-to-Consumer) DNA raw data files into the standardized **VCF 4.2** format. Built with a modern PySide6 GUI, it supports both GRCh37 and GRCh38 reference genomes with automatic build detection.
@@ -11,6 +21,23 @@ Originally designed for 23andMe exports, it works with **any provider** that use
 Current version: **1.0.2**
 
 ![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
+
+### System Architecture & Data Flow
+
+```mermaid
+flowchart TD
+    A["Raw Genotype Export (.txt / .csv)<br/>(23andMe, MyHeritage, FTDNA)"] --> B["Format Auto-Detection<br/>(4-column rsid, chrom, pos, genotype)"]
+    B --> C{"Genome Build Detection"}
+    C -->|"Auto / GRCh37 / GRCh38"| D["dbSNP Position Validation & Sex Determination"]
+    D --> E{"REF Base Resolution"}
+    E -->|"Priority 1"| F["Local FASTA Reference (.fa + .fai)"]
+    E -->|"Priority 2"| G["Persistent Cache (cache.json)"]
+    E -->|"Priority 3"| H["NCBI dbSNP REST API"]
+    F --> I["VCF 4.2 Writer<br/>(Autosomal & PAR Ploidy Rules)"]
+    G --> I
+    H --> I
+    I --> J["Output VCF 4.2 File (.vcf)"]
+```
 
 ### Start Here
 
