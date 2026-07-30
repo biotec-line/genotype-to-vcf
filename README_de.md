@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" width="100%" alt="Genotype-to-VCF Pro Banner">
+</p>
+
 # Genotype-to-VCF Pro Converter
 
 [English](README.md) | [Deutsch](README_de.md)
