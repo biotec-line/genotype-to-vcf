@@ -19,9 +19,16 @@ Bitte hängen Sie keine echten Genomdaten, VCF-Dateien, API-Caches oder persönl
 - Optionaler dbSNP/FASTA-Downloadpfad
 - Build- und Packaging-Konfiguration
 
-### Reaktion
+### Reaktion & SLA
 
-Das Projekt wird als Solo-/Small-maintainer-Projekt gepflegt. Kritische Meldungen werden priorisiert; bitte geben Sie vor einer öffentlichen Offenlegung angemessene Zeit zur Prüfung.
+Das Projekt wird als Solo-/Small-Maintainer-Projekt gepflegt:
+- **Erstbestätigung (Acknowledgment SLA):** Innerhalb von 48 Stunden nach Eingang einer Meldung.
+- **Ersteinschätzung & Triage (Triage SLA):** Innerhalb von 5 Werktagen.
+- Bitte geben Sie vor einer öffentlichen Offenlegung (Responsible Disclosure) mindestens 90 Tage Zeit zur Behebung.
+
+### Gesetzlicher Haftungsausschluss (§ 521 BGB)
+
+Die Bereitstellung der Software und dieser Sicherheitsrichtlinie erfolgt unentgeltlich (§§ 516 ff. BGB). Die Haftung des Autors und der Maintainer ist gemäß § 521 BGB auf Vorsatz und grobe Fahrlässigkeit beschränkt. Die Nutzung erfolgt auf eigenes Risiko.
 
 ## English
 
@@ -42,6 +49,13 @@ Do not attach real genomic data, VCF files, API caches, or personal raw data.
 - Optional dbSNP/FASTA download path
 - Build and packaging configuration
 
-### Response
+### Response & Security SLA
 
-This project is maintained as a solo/small-maintainer project. Critical reports are prioritized; please allow reasonable time before public disclosure.
+This project is maintained as an open-source initiative:
+- **Acknowledgment SLA:** Initial response within 48 hours.
+- **Triage SLA:** Assessment and triage within 5 business days.
+- Please allow a coordinated disclosure window of 90 days before public disclosure.
+
+### Statutory Limitation of Liability (§ 521 BGB)
+
+This software and documentation are provided free of charge as an open-source gift (§§ 516 et seq. BGB). In accordance with § 521 of the German Civil Code (BGB), liability is strictly limited to intent and gross negligence. Use is at your own risk.

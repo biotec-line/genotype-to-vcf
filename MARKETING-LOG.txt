@@ -1,0 +1,85 @@
+# MARKETING-LOG — Genotype-to-VCF Pro
+
+Stand: 2026-09-22
+Kanonisches Repo: https://github.com/biotec-line/genotype-to-vcf
+Organisations-Kontext: biotec-line / open-bricks
+Distributionsmodus: GitHub Source + PyInstaller Windows Executable
+
+===============================================================================
+1. POSITIONIERUNG & MARKTKONTEXT
+===============================================================================
+
+Genotype-to-VCF Pro adressiert die Lücke zwischen proprietären Cloud-Diensten
+(die genomische Rohdaten auf Drittanbieter-Server übertragen) und komplexen
+Kommandozeilen-Bioinformatik-Pipelines (PLINK, BCFtools, Illumina GTCtoVCF).
+
+Ziel: Ein lokales, datenschutzfreundliches Desktop-Werkzeug (PySide6 GUI) und
+eine schlanke Headless-CLI für Personal Genomics und bioinformatische Forschung,
+das 4-Spalten-DTC-Rohdaten (23andMe, Ancestry, MyHeritage, FamilyTreeDNA)
+automatisch auf GRCh37/GRCh38 abbildet, Referenzbasen deterministisch auflöst
+und normkonforme VCF-4.2-Dateien erzeugt.
+
+Kern-Mehrwerte:
+1. Local-First Privacy Boundary (INV-LOCAL-01): Sämtliche Genomdaten und
+   VCF-Outputs verbleiben auf der Maschine des Nutzers.
+2. Unprivilegierte Ausführung (INV-LOCAL-02): GUI und CLI laufen im regulären
+   Benutzerkontext (`RunAsInvoker`), keine administrativen Rechte nötig.
+3. Zero Unsolicited Egress (INV-LOCAL-03): Netzwerkzugriffe ausschließlich
+   zur optionalen rsID-Positionsvalidierung via dbSNP REST API oder Ensembl FASTA.
+4. Non-Clinical Research Purpose (INV-LOCAL-04): Kein Medizinprodukt gem.
+   MDR (EU) 2017/745 / IVDR (EU) 2017/746; rein für Forschungs- und Entwicklungszwecke.
+5. VCF 4.2 Standard Compliance (INV-LOCAL-05): Korrekte Ploidie-Behandlung
+   für Autosomen, PAR1/PAR2 und Geschlechtschromosomen.
+6. Tiered Reference Resolution (INV-LOCAL-06): 3-stufige Auflösung (FASTA, Cache, API).
+7. Headless Automation Isolation (INV-LOCAL-07): Nahtlose Scriptbarkeit für CI/CD.
+8. LGPL-3.0 Dynamic Linking Isolation (INV-LOCAL-08): PySide6 dynamisch gekapselt, MIT-Reinheit.
+9. Version Freeze Discipline (INV-LOCAL-09): Keine Versionserhöhungen bei Pfad A/B (T-20260920-167562623).
+10. Statutory Disclaimer & SLA (INV-LOCAL-10): § 521 BGB Haftungsprivileg und 48h/5d SLA.
+
+===============================================================================
+2. ZIELGRUPPEN & PERSONAS (PERSONA-01 BIS PERSONA-03)
+===============================================================================
+
+[PERSONA-01] Datenschutzbewusste Personal-Genomics-Anwender
+- Problem: Besitzen 23andMe- oder Ancestry-Rohdaten, möchten diese für Tools wie
+  Promethease, Genetic Genie oder SnpEff in VCF umwandeln, lehnen jedoch Cloud-Uploads ab.
+- Lösung: Vollständig lokale Konvertierung per Klick im PySide6 GUI.
+
+[PERSONA-02] Bioinformatiker & Genomics-Forscher
+- Problem: Benötigen standardisierte VCF-4.2-Dateien aus heterogenen DTC-Formaten
+  für populationsgenetische Studien oder Methodenvalidierung.
+- Lösung: Headless-CLI-Integration (`--input raw.txt --output sample.vcf --detect-build`)
+  in lokale Bash- oder Python-Pipelines.
+
+[PERSONA-03] Open-Science- & FOSS-Entwickler
+- Problem: Benötigen verlässliche, transparente Open-Source-Referenzimplementierungen
+  für Genotyp-Parsing und PAR-Ploidie-Regeln unter permissiver MIT-Lizenz.
+- Lösung: Saubere Modularisierung, 100% Testabdeckung der Parsing- und VCF-Logik.
+
+===============================================================================
+3. DISCOVERABILITY & KEYWORDS
+===============================================================================
+
+- 23andMe to VCF converter
+- DTC DNA raw data to VCF 4.2
+- local-first personal genomics converter
+- PySide6 VCF converter for genotype exports
+- privacy-preserving 23andMe raw data conversion
+- GRCh37 GRCh38 genotype build detection
+- offline personal genomics VCF writer
+- MyHeritage FamilyTreeDNA genotype VCF export
+- dbSNP reference base lookup VCF writer
+
+===============================================================================
+4. AUDIT & PFAD-A-HYGIENE HISTORIE
+===============================================================================
+
+- 2026-09-22 (Pfad A — Hygiene, PEP 621 & Contract Test Audit):
+  * Kanonische Attribution NOTICE im Repo-Root erstellt.
+  * Level 1 SBOM THIRD_PARTY_LICENSES.md mit Invarianten-Matrix erstellt.
+  * PEP 621 pyproject.toml mit license-files, project.urls, ruff und basetemp gehärtet.
+  * Pytest-Konfiguration mit isoliertem tempdir (.pytest_tmp) harmonisiert.
+  * Multi-Host Sync-, Lock- und Cache-Guards in .gitignore integriert.
+  * CI-Workflows (ci.yml, stale.yml, welcome.yml) mit Concurrency und Timeouts versehen.
+  * Gesetzlichen Haftungsausschluss (§ 521 BGB) und 48h Security SLA in SECURITY.md verankert.
+  * Vertragstest-Suite tests/test_metadata.py implementiert (100% grün).

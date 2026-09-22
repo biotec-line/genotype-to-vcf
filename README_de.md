@@ -7,10 +7,12 @@
 [English](README.md) | [Deutsch](README_de.md)
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
-![Pytest Status](https://img.shields.io/badge/pytest-27%20passed-brightgreen.svg)
+![Pytest Status](https://img.shields.io/badge/pytest-34%20passed-brightgreen.svg)
 ![VCF Standard](https://img.shields.io/badge/VCF%20Standard-4.2-blue.svg)
 ![Datenschutz](https://img.shields.io/badge/Datenschutz-Local--First-purple.svg)
 ![LLM Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)
+![Attribution](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)
+![SBOM](https://img.shields.io/badge/SBOM-Level--1-blue.svg)
 ![Lizenz](https://img.shields.io/badge/Lizenz-MIT-green.svg)
 
 > [!NOTE]
@@ -305,11 +307,14 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 
 Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien samt `.fai`-Indexdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
 
-Der Repo-Hygiene-Check vom 2026-07-02 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
+Der Repo-Hygiene-Check vom 2026-09-22 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
 
-## License
+## Lizenz & Attribution
 
-[MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+- [MIT License](LICENSE) - siehe [LICENSE](LICENSE) für Details.
+- [NOTICE](NOTICE) - Kanonische Copyright-Attribution, Governance-Invarianten (INV-LOCAL-01..INV-SLA-10) und Organisationskontext.
+- [Level 1 SBOM](THIRD_PARTY_LICENSES.md) / [Third-Party License Inventory](THIRD_PARTY_LICENSES.txt) - Vollständige Abhängigkeits-Lizenzierung und LGPL-3.0 dynamische Bindungs-Isolation.
+- [Sicherheitsrichtlinie](SECURITY.md) - Responsible Disclosure mit 48h Erstbestätigungs-SLA und 5-Tage-Triage-SLA.
 
 > ⚠️ **Rechtlicher Hinweis / Legal Notice**
 >

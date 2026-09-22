@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Repository Hygiene & Governance Hardening (2026-09-22)
+- Added canonical root `NOTICE` file with copyright attribution to Lukas Geiger (c/o biotec-line / open-bricks) and detailed governance invariants (INV-LOCAL-01 through INV-SLA-10).
+- Created Level 1 SBOM in `THIRD_PARTY_LICENSES.md` documenting PySide6 LGPL-3.0 dynamic linking isolation (zero copyleft contamination), unprivileged RunAsInvoker non-elevation, and full dependency inventory.
+- Hardened PEP 621 `pyproject.toml` with `license-files`, expanded `[project.urls]`, pytest `--basetemp=.pytest_tmp`, and ruff lint configuration while strictly maintaining version freeze at `1.0.2` (T-20260920-167562623).
+- Added multi-host cloud-sync conflict, system-wide lock (`LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`), and local cache guards to `.gitignore`.
+- Hardened GitHub Actions workflows (`ci.yml`, `stale.yml`, `welcome.yml`) with job-level `timeout-minutes`, concurrency cancellation (`cancel-in-progress: true`), and least-privilege permissions.
+- Added statutory limitation of liability (§ 521 BGB Gefälligkeitsrecht) and 48-hour acknowledgment / 5-day triage Security SLA to `SECURITY.md`, `README.md`, and `README_de.md`.
+- Implemented comprehensive contract test suite `tests/test_metadata.py` bringing total passing tests to 34/34 (100% green).
+- Created local `MARKETING-LOG.txt` tracking positioning, target personas, and discoverability keywords.
+
 ### Discoverability & Marketing (2026-07-26)
 - Added visual Shields.io badges (Python version, Pytest status 27/27 passed, VCF Standard 4.2, Privacy Local-First, LLM-Ready, MIT License) to `README.md` and `README_de.md`.
 - Added GitHub Flavored Markdown (GFM) Callout Note (`> [!NOTE]`) for AI agent indexation, privacy boundaries, and offline local execution.

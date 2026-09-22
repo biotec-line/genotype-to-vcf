@@ -32,7 +32,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QPushButton, QLabel, QComboBox,
                              QTextEdit, QProgressBar, QFileDialog, QMessageBox,
                              QFrame, QStyleFactory)
-from PySide6.QtCore import QThread, Signal, Qt, QObject
+from PySide6.QtCore import QThread, Signal, Qt
 from PySide6.QtGui import QColor, QPalette, QFont, QIcon
 
 # -----------------------------
@@ -893,7 +893,7 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
         vcf.write(f"##reference={build}\n")
         vcf.write(f"##source=Genotype_to_VCF_Pro_v{APP_VERSION}\n")
         vcf.write('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n')
-        vcf.write(f'##INFO=<ID=I_ID,Number=1,Type=String,Description="Original internal ID">\n')
+        vcf.write('##INFO=<ID=I_ID,Number=1,Type=String,Description="Original internal ID">\n')
         vcf.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n")
 
         for idx, (rsid, chrom, pos, genotype) in enumerate(variants):

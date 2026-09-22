@@ -1,0 +1,74 @@
+Genotype-to-VCF Pro (genotype-to-vcf)
+=====================================
+
+Copyright (c) 2026 Lukas Geiger (c/o biotec-line / open-bricks)
+Licensed under the MIT License. See LICENSE for the full license text.
+
+This NOTICE file is provided for informational and attribution purposes
+alongside the license and must be preserved in redistributions of the
+source code and in substantial portions of the software.
+
+--------------------------------------------------------------------
+1. Purpose & Architecture
+--------------------------------------------------------------------
+
+Genotype-to-VCF Pro is an unprivileged, local-first personal genomics
+desktop application (PySide6 GUI) and headless CLI converter designed to
+transform Direct-to-Consumer (DTC) DNA raw genotype export files (23andMe,
+AncestryDNA, MyHeritage, FamilyTreeDNA, tellmeGen) into standardized
+VCF 4.2 format with automated GRCh37/GRCh38 build detection and reference
+base resolution.
+
+The package is explicitly engineered with the following invariants:
+  * Local-First Privacy Boundary (INV-LOCAL-01): Genetic raw data,
+    generated VCF files, and local reference indexes remain strictly on the
+    local machine and are never transmitted to external cloud systems.
+  * Unprivileged User-Space Execution (INV-LOCAL-02): RunAsInvoker non-elevation;
+    both GUI and CLI run with regular user privileges without requiring
+    administrator or elevated rights.
+  * Zero Unsolicited Egress (INV-LOCAL-03): Network communication is strictly
+    opt-in and limited to NCBI dbSNP REST queries containing only rsIDs
+    (e.g., rs12345) and optional user-selected Ensembl reference downloads.
+  * Non-Clinical Research Purpose (INV-LOCAL-04): Software is provided
+    exclusively for software engineering and scientific research workflows;
+    it is not a medical device under MDR (EU) 2017/745 or IVDR (EU) 2017/746.
+  * VCF 4.2 Standard Compliance (INV-LOCAL-05): Strict adherence to VCF 4.2
+    specifications with proper handling of autosomal ploidy, pseudoautosomal
+    regions (PAR1/PAR2), and sex chromosomes.
+  * Tiered Reference Resolution (INV-LOCAL-06): Deterministic reference base
+    lookup prioritized across (1) local indexed FASTA, (2) atomic local
+    cache (`cache.json`), and (3) NCBI dbSNP REST API.
+  * Headless Automation Isolation (INV-LOCAL-07): Robust CLI pipeline
+    allowing headless integration in automated bioinformatic workflows.
+  * LGPL-3.0 Dynamic Linking Isolation (INV-LOCAL-08): Runtime GUI binding
+    via PySide6 utilizes standard dynamic linking to Qt, guaranteeing full
+    license isolation and MIT purity for all core application modules.
+  * Version Freeze Discipline (INV-LOCAL-09): Strict compliance with policy
+    T-20260920-167562623; hygiene and marketing passes never modify the
+    application version outside authorized release ceremonies.
+  * Statutory Disclaimer & SLA (INV-LOCAL-10): Unpaid open-source donation
+    under §§ 516 ff. BGB with liability governed by § 521 BGB; vulnerability
+    reports are subject to a 48-hour acknowledgment and 5-day triage SLA.
+
+--------------------------------------------------------------------
+2. Organizational & Umbrella Context
+--------------------------------------------------------------------
+
+This software is maintained under the biotec-line organization as part of
+the open-bricks software federation:
+  * Primary Organization: biotec-line (https://github.com/biotec-line)
+  * Umbrella Federation: open-bricks (https://github.com/open-bricks)
+  * Canonical Repository: https://github.com/biotec-line/genotype-to-vcf
+
+--------------------------------------------------------------------
+3. Third-Party Licenses & Acknowledgements
+--------------------------------------------------------------------
+
+Genotype-to-VCF Pro utilizes open-source components:
+  * PySide6 (The Qt Company) - LGPL-3.0-only / GPL-2.0-only / GPL-3.0-only
+  * pyfaidx (Matthew Shirley) - BSD-3-Clause
+  * requests (Kenneth Reitz / PSF) - Apache-2.0
+  * psutil (Giampaolo Rodola) - BSD-3-Clause
+
+Detailed licenses, runtime package matrices, and SBOM disclosures are
+maintained in THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt.

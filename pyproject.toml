@@ -9,7 +9,9 @@ description = "Local-first DTC DNA genotype export to VCF 4.2 converter with PyS
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]
 authors = [
+    {name = "Lukas Geiger", email = "lukas@example.com"},
     {name = "biotec-line"}
 ]
 keywords = [
@@ -22,7 +24,12 @@ keywords = [
     "grch37",
     "grch38",
     "pyside6",
-    "local-first"
+    "local-first",
+    "zero-egress",
+    "biotec-line",
+    "open-bricks",
+    "offline-first",
+    "developer-tools"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -47,9 +54,45 @@ Homepage = "https://github.com/biotec-line/genotype-to-vcf"
 Documentation = "https://github.com/biotec-line/genotype-to-vcf#readme"
 Repository = "https://github.com/biotec-line/genotype-to-vcf.git"
 Issues = "https://github.com/biotec-line/genotype-to-vcf/issues"
+Notice = "https://github.com/biotec-line/genotype-to-vcf/blob/master/NOTICE"
+"Third-Party Licenses" = "https://github.com/biotec-line/genotype-to-vcf/blob/master/THIRD_PARTY_LICENSES.md"
+"Parent Organization" = "https://github.com/biotec-line"
+"Marketing Log" = "https://github.com/biotec-line/genotype-to-vcf/blob/master/MARKETING-LOG.txt"
+"LLM Ready" = "https://github.com/biotec-line/genotype-to-vcf/blob/master/llms.txt"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q"
+addopts = "-ra -q --basetemp=.pytest_tmp"
 testpaths = ["tests"]
 pythonpath = ["."]
+norecursedirs = [
+    ".git",
+    ".pytest_cache",
+    ".pytest_tmp",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    ".ruff_cache",
+    "releases",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = [
+    ".git",
+    "__pycache__",
+    "releases",
+    ".pytest_tmp",
+    ".ruff_cache",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E701",
+    "E402",
+]

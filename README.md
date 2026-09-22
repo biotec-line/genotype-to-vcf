@@ -7,10 +7,12 @@
 [English](README.md) | [Deutsch](README_de.md)
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
-![Pytest Status](https://img.shields.io/badge/pytest-27%20passed-brightgreen.svg)
+![Pytest Status](https://img.shields.io/badge/pytest-34%20passed-brightgreen.svg)
 ![VCF Standard](https://img.shields.io/badge/VCF%20Standard-4.2-blue.svg)
 ![Privacy](https://img.shields.io/badge/Privacy-Local--First-purple.svg)
 ![LLM Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)
+![Attribution](https://img.shields.io/badge/Attribution-NOTICE-blue.svg)
+![SBOM](https://img.shields.io/badge/SBOM-Level--1-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 > [!NOTE]
@@ -622,11 +624,14 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 
 Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien samt `.fai`-Indexdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
 
-Der Repo-Hygiene-Check vom 2026-07-02 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
+Der Repo-Hygiene-Check vom 2026-09-22 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
 
-## License
+## License & Attribution
 
-[MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+- [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+- [NOTICE](NOTICE) - canonical copyright attribution, governance invariants (INV-LOCAL-01..INV-SLA-10) and organizational context.
+- [Level 1 SBOM](THIRD_PARTY_LICENSES.md) / [Third-Party License Inventory](THIRD_PARTY_LICENSES.txt) - full dependency licensing and LGPL-3.0 dynamic linking isolation.
+- [Security Policy](SECURITY.md) - responsible disclosure with 48h acknowledgment SLA and 5-day triage SLA.
 
 > ⚠️ **Rechtlicher Hinweis / Legal Notice**
 >

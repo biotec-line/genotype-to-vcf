@@ -116,3 +116,35 @@ DECISIONS.md
 PORTIERUNGSPLAN.md
 TODO.md
 DONE.md
+
+# Multi-Host Cloud-Sync, Lock & Cache Guards
+*conflicted copy*
+* (Kopie)*
+* (Copy)*
+*-WORKSTATION*
+*-WORKSTATION-LG*
+*-ASUS*
+*-ASUS-GEI*
+*-LAPTOP*
+*-Mac Studio*
+*-MacBook*
+*.orig
+*.rej
+LOCK
+LOCK.*
+LOCK*.txt
+LOCK.user.*
+LOCK.until.*
+LOCK.condition.*
+LOCK.permissions.json
+LOCK.antigravity.*
+LOCK.team.*
+.automation-lock
+uv.lock
+!package-lock.json
+.hypothesis/
+.turbo/
+.nyc_output/
+.tox/
+.pytest_tmp/
+.ruff_cache/
