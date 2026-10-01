@@ -231,10 +231,12 @@ def test_identity_permission_error_is_not_assumed_distinct(fixture, monkeypatch)
             raise error
         return original_stat(path, *args, **kwargs)
     monkeypatch.setattr(os, "stat", denied)
-    with pytest.raises(PermissionError) as caught:
-        pipeline(fixture)
+    try:
+        with pytest.raises(PermissionError) as caught:
+            pipeline(fixture)
+    finally:
+        monkeypatch.setattr(os, "stat", original_stat)
     assert caught.value is error
-    monkeypatch.setattr(os, "stat", original_stat)
     originals_unchanged(fixture)
 
 
