@@ -388,3 +388,37 @@ def test_parallel_vcf_writers_use_different_private_stages(fixture, monkeypatch)
     assert (records[0].endswith("0/1") and "AG" in completed) or (records[0].endswith("0/0") and "AA" in completed)
     assert src.read_bytes() == initial[src.name]
     assert {path.name for path in src.parent.iterdir()} == set(initial)
+
+
+@pytest.mark.parametrize("resource", ["cache", "reference-index"])
+@pytest.mark.parametrize("entry", ["pipeline", "public-writer"])
+def test_resource_reconfiguration_does_not_unprotect_initial_path(fixture, monkeypatch, resource, entry):
+    src, dst, cache, initial = fixture
+    if resource == "cache":
+        original = Path(converter.CACHE_FILE)
+    else:
+        original = Path(converter.FASTA_PATHS["GRCh37"] + ".fai")
+
+    def reconfigure(progress):
+        if progress != 100:
+            return
+        dst.unlink()
+        os.link(original, dst)
+        if resource == "cache":
+            monkeypatch.setattr(converter, "CACHE_FILE", str(src.parent / "new-cache.json"))
+        else:
+            monkeypatch.setattr(converter, "FASTA_PATHS", {"GRCh37": str(src.parent / "new-reference.fa")})
+
+    progress = converter.CallbackSignal(reconfigure)
+    with pytest.raises((ValueError, shutil.SameFileError)):
+        if entry == "pipeline":
+            pipeline(fixture, progress_signal=progress)
+        else:
+            converter.create_vcf([("rs1", "1", 100, "AG")], "GRCh37", str(dst), cache,
+                                 progress_signal=progress)
+    assert os.path.samefile(original, dst)
+    assert dst.read_bytes() == initial[original.name]
+    for name, content in initial.items():
+        if name != dst.name:
+            assert (src.parent / name).read_bytes() == content
+    assert {path.name for path in src.parent.iterdir()} == set(initial)

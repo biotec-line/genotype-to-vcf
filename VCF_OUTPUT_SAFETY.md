@@ -15,6 +15,10 @@ Datenströme als Ausgabe abgelehnt und abschließende Punkte und Leerzeichen bei
 Pfadprüfung berücksichtigt. Ein Fehler beim Prüfen einer Identität gilt nicht als
 Nachweis, dass die Dateien verschieden sind.
 
+Die anfänglich bekannten Ressourcenpfade bleiben während des gesamten Vorgangs
+geschützt. Ändert ein Callback die Konfiguration, berücksichtigt die letzte Prüfung
+sowohl diese ursprünglichen Pfade als auch die aktuell konfigurierten Ressourcen.
+
 Bei Abbruch liefert die Pipeline `None`; die GUI meldet keinen Erfolg. Die
 bestehende öffentliche Funktion `create_vcf` liefert aus Kompatibilitätsgründen
 weiterhin `0` bei Abbruch. Sie erhält eine bereits eingelesene Variantenliste und

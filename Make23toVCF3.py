@@ -185,8 +185,9 @@ def run_conversion_pipeline(
 
     if stop_event.is_set():
         return None
+    protected_paths = (file_path, *_vcf_resource_paths())
     if output_path:
-        _validate_vcf_output(output_path, (file_path,))
+        _validate_vcf_output(output_path, protected_paths)
 
     log_signal.emit("Loading variants...")
     variants = parse_genotype_file(file_path)
@@ -221,6 +222,7 @@ def run_conversion_pipeline(
     if stop_event.is_set():
         return None
 
+    protected_paths += _vcf_resource_paths(fasta_path)
     if fasta_path:
         log_signal.emit("Lokale FASTA wird genutzt (Schnellmodus).")
         log_signal.emit("Überspringe dbSNP-Download für SNPs.")
@@ -235,7 +237,7 @@ def run_conversion_pipeline(
         return None
 
     out_name = output_path or default_output_path(file_path, resolved_build)
-    _validate_vcf_output(out_name, (file_path,), fasta_path)
+    _validate_vcf_output(out_name, protected_paths, fasta_path)
     out_dir = os.path.dirname(os.path.abspath(out_name))
     if out_dir and not os.path.exists(out_dir):
         os.makedirs(out_dir, exist_ok=True)
@@ -251,7 +253,7 @@ def run_conversion_pipeline(
         log_signal,
         stop_event,
         progress_signal,
-        protected_paths=(file_path,),
+        protected_paths=protected_paths,
     )
 
     if count is None:
@@ -880,6 +882,17 @@ def detect_build_robust(variants, cache, signal_callback, stop_event):
 
     return "GRCh38" if m38 > m37 else "GRCh37"
 
+def _vcf_resource_paths(fasta_path=None):
+    """Erfasst Ressourcenpfade, damit spätere Callbacks ihren Schutz nicht aufheben."""
+    references = list(FASTA_PATHS.values())
+    if fasta_path:
+        references.append(fasta_path)
+    protected = [CACHE_FILE, __file__]
+    for reference in references:
+        protected.extend((reference, str(reference) + ".fai", str(reference) + ".gz"))
+    return tuple(protected)
+
+
 def _validate_vcf_output(out_path, protected_paths=(), fasta_path=None):
     """Verhindert die Veröffentlichung über Eingabe, Referenzen und App-Ressourcen."""
     def key(path):
@@ -890,12 +903,7 @@ def _validate_vcf_output(out_path, protected_paths=(), fasta_path=None):
             absolute = "\\".join(part.rstrip(" .") for part in absolute.split("\\"))
         return os.path.normcase(absolute)
 
-    references = list(FASTA_PATHS.values())
-    if fasta_path:
-        references.append(fasta_path)
-    protected = [CACHE_FILE, __file__, *protected_paths]
-    for reference in references:
-        protected.extend((reference, str(reference) + ".fai", str(reference) + ".gz"))
+    protected = (*protected_paths, *_vcf_resource_paths(fasta_path))
     output_key = key(out_path)
     resolved_key = key(os.path.realpath(out_path))
     try:
@@ -983,6 +991,7 @@ def _write_vcf_atomic(variants, build, out_path, cache, fasta_path=None, sex="un
     """
     if stop_event and stop_event.is_set():
         return None
+    protected_paths = (*protected_paths, *_vcf_resource_paths(fasta_path))
     _validate_vcf_output(out_path, protected_paths, fasta_path)
     fai_index = load_fai_index(fasta_path + ".fai") if fasta_path else {}
 
