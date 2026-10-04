@@ -92,7 +92,9 @@ exclude = [
 ]
 
 [tool.ruff.lint]
+select = ["E", "F", "W"]
 ignore = [
     "E701",
     "E402",
+    "E501",
 ]
