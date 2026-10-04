@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (2026-10-04)
+- VCF output is now written to a private temporary file and published atomically via `os.replace`; cancellation or errors no longer overwrite an existing VCF, and the input, cache and FASTA files are protected against being chosen as output (see `VCF_OUTPUT_SAFETY.md`, PR #2).
+
 ### Repository Hygiene & Governance Hardening (2026-09-22)
 - Added canonical root `NOTICE` file with copyright attribution to Lukas Geiger (c/o biotec-line / open-bricks) and detailed governance invariants (INV-LOCAL-01 through INV-SLA-10).
 - Created Level 1 SBOM in `THIRD_PARTY_LICENSES.md` documenting PySide6 LGPL-3.0 dynamic linking isolation (zero copyleft contamination), unprivileged RunAsInvoker non-elevation, and full dependency inventory.
