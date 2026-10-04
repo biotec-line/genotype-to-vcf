@@ -6,7 +6,7 @@
 
 [English](README.md) | [Deutsch](README_de.md)
 
-![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 [![CI](https://github.com/biotec-line/genotype-to-vcf/actions/workflows/ci.yml/badge.svg)](https://github.com/biotec-line/genotype-to-vcf/actions/workflows/ci.yml)
 ![VCF Standard](https://img.shields.io/badge/VCF%20Standard-4.2-blue.svg)
 ![Datenschutz](https://img.shields.io/badge/Datenschutz-Local--First-purple.svg)
@@ -119,7 +119,7 @@ Veröffentlichte EXE-Builds gehören auf die [GitHub-Release-Seite](https://gith
 
 ### Option 2: Aus dem Quellcode
 
-**Voraussetzungen:** Python 3.8+
+**Voraussetzungen:** Python 3.10+
 
 ```bash
 git clone https://github.com/biotec-line/genotype-to-vcf.git
@@ -271,7 +271,7 @@ Der persistente `cache.json` speichert dbSNP API-Antworten mit Zeitstempeln. Fol
 
 ## Technische Details
 
-- **Sprache:** Python 3.8+
+- **Sprache:** Python 3.10+
 - **GUI:** PySide6 mit Fusion Dark Theme
 - **Bioinformatik:** pyfaidx für FASTA-Indexierung
 - **API:** NCBI dbSNP REST API (`https://api.ncbi.nlm.nih.gov/variation/v0/`)

@@ -1,7 +1,7 @@
 # Genotype-to-VCF Pro
 
 Canonical repository: https://github.com/biotec-line/genotype-to-vcf
-Primary language: Python
+Primary language: Python (3.10+)
 Interface: PySide6 desktop GUI plus headless CLI
 License: MIT
 Last repo hygiene check: 2026-09-22
