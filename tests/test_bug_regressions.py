@@ -52,5 +52,58 @@ class TestU2ManageTranslations(unittest.TestCase):
                 self.assertIn('"en": ""', rebuilt)
 
 
+def test_cache_thread_safety(tmp_path):
+    import threading
+    import Make23toVCF3 as converter
+
+    cache = {}
+    cache_file = tmp_path / "test_cache.json"
+
+    def writer():
+        for i in range(100):
+            converter.cache_upsert(cache, f"rs{i}", "GRCh38", "1", i, "A")
+
+    def saver():
+        for _ in range(20):
+            converter.save_cache(cache, str(cache_file))
+
+    def reader():
+        for i in range(100):
+            converter.lookup_rsid_from_cache("1", i, "GRCh38", cache)
+
+    threads = [
+        threading.Thread(target=writer),
+        threading.Thread(target=saver),
+        threading.Thread(target=reader),
+    ]
+
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert "rs99" in cache
+
+
+def test_normalize_chrom_and_numerical_dtc_codes():
+    import Make23toVCF3 as converter
+
+    assert converter.normalize_chrom("23") == "X"
+    assert converter.normalize_chrom("24") == "Y"
+    assert converter.normalize_chrom("25") == "X"
+    assert converter.normalize_chrom("26") == "MT"
+    assert converter.normalize_chrom("chrM") == "MT"
+
+    # Test sex detection with numerical chromosome 24
+    variants = [(f"rs{i}", "24", 1000 + i, "AA") for i in range(10)]
+    assert converter.detect_sex_from_variants(variants) == "male"
+
+    # Test ploidy logic with numerical chromosome 24 for female/male
+    assert converter.ploidy_for_site("24", 2_700_000, "GRCh37", "female") == 0
+    assert converter.ploidy_for_site("24", 2_700_000, "GRCh37", "male") == 1
+
+
 if __name__ == "__main__":
     unittest.main()
+
+

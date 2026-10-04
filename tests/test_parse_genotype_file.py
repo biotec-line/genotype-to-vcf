@@ -39,3 +39,27 @@ def test_parse_genotype_file_latin1_fallback(tmp_path):
 
     result = converter.parse_genotype_file(str(raw))
     assert result == [("rs123", "1", 12345, "AG")]
+
+
+def test_parse_genotype_file_semicolon_delimited_csv(tmp_path):
+    raw = tmp_path / "semicolon-provider-export.csv"
+    raw.write_text(
+        '"rsid";"chromosome";"position";"genotype"\n'
+        '"rs999";"chr4";"54321";"CT"\n',
+        encoding="utf-8",
+    )
+
+    assert converter.parse_genotype_file(str(raw)) == [("rs999", "4", 54321, "CT")]
+
+
+def test_parse_genotype_file_handles_malformed_csv_unclosed_quote(tmp_path):
+    raw = tmp_path / "malformed-quote.csv"
+    raw.write_text(
+        'rs101,"chr5",11111,"AA\n'
+        'rs102,chr5,22222,GG\n',
+        encoding="utf-8",
+    )
+
+    result = converter.parse_genotype_file(str(raw))
+    assert ("rs102", "5", 22222, "GG") in result
+

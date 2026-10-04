@@ -1,38 +1,74 @@
 {
   "23andMe-Datei auswählen": {
     "de": "23andMe-Datei auswählen",
-    "en": "Select 23andMe File"
+    "en": "Select 23andMe File",
+    "es": "Seleccionar archivo 23andMe",
+    "zh": "选择 23andMe 文件",
+    "ja": "23andMe ファイルを選択",
+    "ru": "Выбрать файл 23andMe"
   },
   "Datei wählen": {
     "de": "Datei wählen",
-    "en": "Select File"
+    "en": "Select File",
+    "es": "Seleccionar archivo",
+    "zh": "选择文件",
+    "ja": "ファイルを選択",
+    "ru": "Выбрать файл"
   },
   "Keine Datei": {
     "de": "Keine Datei",
-    "en": "No file"
+    "en": "No file",
+    "es": "Sin archivo",
+    "zh": "无文件",
+    "ja": "ファイルなし",
+    "ru": "Нет файла"
   },
   "Keine Datei ausgewählt": {
     "de": "Keine Datei ausgewählt",
-    "en": "No file selected"
+    "en": "No file selected",
+    "es": "Ningún archivo seleccionado",
+    "zh": "未选择文件",
+    "ja": "ファイルが選択されていません",
+    "ru": "Файл не выбран"
   },
   "Starten": {
     "de": "Starten",
-    "en": "Start"
+    "en": "Start",
+    "es": "Iniciar",
+    "zh": "开始",
+    "ja": "開始",
+    "ru": "Запуск"
   },
   "Umwandlung starten": {
     "de": "Umwandlung starten",
-    "en": "Start Conversion"
+    "en": "Start Conversion",
+    "es": "Iniciar conversión",
+    "zh": "开始转换",
+    "ja": "変換を開始",
+    "ru": "Начать конвертацию"
   },
   "📁 Genotype-Datei öffnen": {
     "de": "📁 Genotype-Datei öffnen",
-    "en": "📁 Open Genotype File"
+    "en": "📁 Open Genotype File",
+    "es": "📁 Abrir archivo de genotipo",
+    "zh": "📁 打开基因型文件",
+    "ja": "📁 遺伝型ファイルを開く",
+    "ru": "📁 Открыть генотип-файл"
   },
   "🚀 Konvertierung Starten": {
     "de": "🚀 Konvertierung Starten",
-    "en": "🚀 Start Conversion"
+    "en": "🚀 Start Conversion",
+    "es": "🚀 Iniciar conversión",
+    "zh": "🚀 开始转换",
+    "ja": "🚀 変換を開始",
+    "ru": "🚀 Начать конвертацию"
   },
   "🛑 Abbrechen": {
     "de": "🛑 Abbrechen",
-    "en": "🛑 Cancel"
+    "en": "🛑 Cancel",
+    "es": "🛑 Cancelar",
+    "zh": "🛑 取消",
+    "ja": "🛑 キャンセル",
+    "ru": "🛑 Отмена"
   }
-}
+}
