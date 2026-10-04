@@ -9,31 +9,46 @@ tellmeGen) into standard VCF 4.2 format. Supports auto-detection of genome build
 """
 
 import argparse
-import sys
-import os
-import re
-import gzip
 import csv
+import gzip
 import json
-import time
+import os
 import random
-import string
+import re
 import shutil
+import stat
+import string
+import sys
+import tempfile
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from datetime import datetime
 
+import psutil
 import requests
 from pyfaidx import Faidx
-import psutil
+from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtGui import QColor, QFont, QIcon, QPalette
 
 # PySide6 imports
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QHBoxLayout, QPushButton, QLabel, QComboBox,
-                             QTextEdit, QProgressBar, QFileDialog, QMessageBox,
-                             QFrame, QStyleFactory)
-from PySide6.QtCore import QThread, Signal, Qt
-from PySide6.QtGui import QColor, QPalette, QFont, QIcon
+from PySide6.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QStyleFactory,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 # -----------------------------
 # Konfiguration
@@ -168,6 +183,12 @@ def run_conversion_pipeline(
     progress_signal = make_signal(progress_signal)
     stop_event = stop_event or threading.Event()
 
+    if stop_event.is_set():
+        return None
+    protected_paths = (file_path, *_vcf_resource_paths())
+    if output_path:
+        _validate_vcf_output(output_path, protected_paths)
+
     log_signal.emit("Loading variants...")
     variants = parse_genotype_file(file_path)
     if not variants:
@@ -201,6 +222,7 @@ def run_conversion_pipeline(
     if stop_event.is_set():
         return None
 
+    protected_paths += _vcf_resource_paths(fasta_path)
     if fasta_path:
         log_signal.emit("Lokale FASTA wird genutzt (Schnellmodus).")
         log_signal.emit("Überspringe dbSNP-Download für SNPs.")
@@ -215,12 +237,13 @@ def run_conversion_pipeline(
         return None
 
     out_name = output_path or default_output_path(file_path, resolved_build)
+    _validate_vcf_output(out_name, protected_paths, fasta_path)
     out_dir = os.path.dirname(os.path.abspath(out_name))
     if out_dir and not os.path.exists(out_dir):
         os.makedirs(out_dir, exist_ok=True)
         log_signal.emit(f"Erstelle Zielordner: {out_dir}")
     log_signal.emit(f"Schreibe VCF: {os.path.basename(out_name)}...")
-    count = create_vcf(
+    count = _write_vcf_atomic(
         variants,
         resolved_build,
         out_name,
@@ -230,10 +253,11 @@ def run_conversion_pipeline(
         log_signal,
         stop_event,
         progress_signal,
+        protected_paths=protected_paths,
     )
 
-    if not stop_event.is_set():
-        progress_signal.emit(100)
+    if count is None:
+        return None
 
     return {
         "output_path": out_name,
@@ -858,7 +882,97 @@ def detect_build_robust(variants, cache, signal_callback, stop_event):
 
     return "GRCh38" if m38 > m37 else "GRCh37"
 
+def _vcf_resource_paths(fasta_path=None):
+    """Erfasst Ressourcenpfade, damit spätere Callbacks ihren Schutz nicht aufheben."""
+    references = list(FASTA_PATHS.values())
+    if fasta_path:
+        references.append(fasta_path)
+    protected = [CACHE_FILE, __file__]
+    for reference in references:
+        protected.extend((reference, str(reference) + ".fai", str(reference) + ".gz"))
+    return tuple(protected)
+
+
+def _validate_vcf_output(out_path, protected_paths=(), fasta_path=None):
+    """Verhindert die Veröffentlichung über Eingabe, Referenzen und App-Ressourcen."""
+    def key(path):
+        absolute = os.path.abspath(os.fspath(path))
+        if os.name == "nt":
+            if ":" in os.path.splitdrive(absolute)[1]:
+                raise ValueError("VCF-Ausgabe darf kein alternativer Datenstrom sein.")
+            absolute = "\\".join(part.rstrip(" .") for part in absolute.split("\\"))
+        return os.path.normcase(absolute)
+
+    protected = (*protected_paths, *_vcf_resource_paths(fasta_path))
+    output_key = key(out_path)
+    resolved_key = key(os.path.realpath(out_path))
+    try:
+        target_stat = os.stat(out_path)
+    except FileNotFoundError:
+        target_stat = None
+    if target_stat is not None and not stat.S_ISREG(target_stat.st_mode):
+        raise ValueError("VCF-Ausgabe muss eine reguläre Datei sein.")
+    for path in protected:
+        if path is None:
+            continue
+        if output_key == key(path) or resolved_key == key(os.path.realpath(path)):
+            raise ValueError("VCF-Ausgabe darf keine Eingabe oder geschützte Ressource ersetzen.")
+        if target_stat is not None:
+            try:
+                original_stat = os.stat(path)
+            except FileNotFoundError:
+                continue
+            if os.path.samestat(target_stat, original_stat):
+                raise ValueError("VCF-Ausgabe besitzt einen Alias zu einer geschützten Datei.")
+
+
+@contextmanager
+def _private_vcf_stage(out_path):
+    """Reserviert und bereinigt ausschließlich die eigene temporäre Ausgabedatei."""
+    fd, stage = tempfile.mkstemp(prefix=".vcf-", suffix=".tmp",
+                                 dir=os.path.dirname(os.path.abspath(out_path)))
+    stream = None
+    failed = False
+    try:
+        stream = os.fdopen(fd, "w", encoding="utf-8")
+        yield stream, stage
+    except BaseException:
+        failed = True
+        raise
+    finally:
+        try:
+            if stream is not None:
+                stream.close()
+            else:
+                os.close(fd)
+        except BaseException:
+            if not failed:
+                raise
+        finally:
+            try:
+                try:
+                    os.remove(stage)
+                except PermissionError:
+                    os.chmod(stage, stat.S_IREAD | stat.S_IWRITE)
+                    os.remove(stage)
+            except FileNotFoundError:
+                pass
+            except OSError:
+                # Keine Pfade/Rohdaten ausgeben und keinen ursprünglichen Fehler verdecken.
+                try:
+                    print("Temporäre VCF-Datei konnte nicht bereinigt werden.", file=sys.stderr)
+                except Exception:  # noqa: BLE001, S110 -- Ursprünglichen Schreibfehler erhalten.
+                    pass
+
+
 def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown", signal_callback=None, stop_event=None, progress_signal=None):
+    """Schreibt atomar VCF; gibt bei Abbruch weiterhin 0 statt eines Ergebnisses zurück."""
+    result = _write_vcf_atomic(variants, build, out_path, cache, fasta_path, sex,
+                               signal_callback, stop_event, progress_signal)
+    return 0 if result is None else result
+
+
+def _write_vcf_atomic(variants, build, out_path, cache, fasta_path=None, sex="unknown", signal_callback=None, stop_event=None, progress_signal=None, *, protected_paths=()):
     """Convert parsed variant list to a VCF 4.2 file.
 
     Args:
@@ -873,8 +987,12 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
         progress_signal: Optional PyQt signal with emit(int) for 0-100 progress.
 
     Returns:
-        Number of VCF records written.
+        Number of committed VCF records, or None if cancellation prevented publication.
     """
+    if stop_event and stop_event.is_set():
+        return None
+    protected_paths = (*protected_paths, *_vcf_resource_paths(fasta_path))
+    _validate_vcf_output(out_path, protected_paths, fasta_path)
     fai_index = load_fai_index(fasta_path + ".fai") if fasta_path else {}
 
     def get_ref(chrom, pos):
@@ -888,7 +1006,7 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
     written = 0
     total_variants = len(variants)
 
-    with open(out_path, "w", encoding="utf-8") as vcf:
+    with _private_vcf_stage(out_path) as (vcf, stage):
         vcf.write("##fileformat=VCFv4.2\n")
         vcf.write(f"##reference={build}\n")
         vcf.write(f"##source=Genotype_to_VCF_Pro_v{APP_VERSION}\n")
@@ -897,12 +1015,15 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
         vcf.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE\n")
 
         for idx, (rsid, chrom, pos, genotype) in enumerate(variants):
+            if stop_event and stop_event.is_set():
+                signal_callback.emit("Schreiben abgebrochen.")
+                return None
             if idx % 1000 == 0:
-                if stop_event and stop_event.is_set():
-                    signal_callback.emit("Schreiben abgebrochen.")
-                    return 0
                 if progress_signal:
                     progress_signal.emit(int((idx / total_variants) * 100))
+                if stop_event and stop_event.is_set():
+                    signal_callback.emit("Schreiben abgebrochen.")
+                    return None
 
             genotype = genotype.strip().upper().replace("_", "-")
             if genotype in ("--", "-", "00"): continue
@@ -944,6 +1065,19 @@ def create_vcf(variants, build, out_path, cache, fasta_path=None, sex="unknown",
                 if GT:
                     vcf.write(f"{chrom}\t{pos}\t{rsid}\t{ref_base}\t{ALT}\t.\t{FILTER}\t{INFO}\tGT\t{GT}\n")
                     written += 1
+
+        vcf.flush()
+        vcf.close()
+        if progress_signal:
+            progress_signal.emit(100)
+        if stop_event and stop_event.is_set():
+            signal_callback.emit("Schreiben abgebrochen.")
+            return None
+        _validate_vcf_output(out_path, protected_paths, fasta_path)
+        if stop_event and stop_event.is_set():
+            signal_callback.emit("Schreiben abgebrochen.")
+            return None
+        os.replace(stage, out_path)
 
     return written
 
@@ -1016,7 +1150,7 @@ class ConversionWorker(QThread):
                 ask_callback=self.ask_wrapper,
             )
 
-            if not self.is_interrupted.is_set():
+            if result is not None:
                 self.finished_signal.emit(
                     f"Erfolg! {result['written']} Varianten geschrieben.\nDatei: {result['output_path']}"
                 )
@@ -1297,9 +1431,11 @@ def build_cli_parser():
 def run_cli(args):
     """Execute the non-interactive CLI mode."""
     log_signal = CallbackSignal(lambda message: print(message, file=sys.stderr))
-    cache = load_cache()
 
     try:
+        if not args.detect_build and args.output:
+            _validate_vcf_output(args.output, (args.input,))
+        cache = load_cache()
         if args.detect_build:
             variants = parse_genotype_file(args.input)
             if not variants:
