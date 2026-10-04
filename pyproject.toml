@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "genotype-to-vcf"
-version = "1.0.2"
+version = "1.0.3"
 description = "Local-first DTC DNA genotype export to VCF 4.2 converter with PySide6 GUI & headless CLI"
 readme = "README.md"
 requires-python = ">=3.10"

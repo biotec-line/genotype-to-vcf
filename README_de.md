@@ -22,7 +22,7 @@ Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdat
 
 Ursprünglich für 23andMe-Exporte entwickelt, funktioniert es mit **jedem Anbieter**, der das gleiche Tab-separierte Format verwendet (`rsid  chromosome  position  genotype`).
 
-Aktuelle Version: **1.0.2**
+Aktuelle Version: **1.0.3**
 
 ![Genotype-to-VCF Pro GUI](README/screenshots/main.png)
 

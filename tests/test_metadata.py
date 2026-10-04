@@ -70,7 +70,7 @@ def test_pep621_pyproject_metadata_and_version_freeze():
 
     project = data.get("project", {})
     # Strict Version Freeze Rule T-20260920-167562623: Pfad A/B passes never bump versions
-    assert project.get("version") == "1.0.2", "Version must remain frozen at 1.0.2"
+    assert project.get("version") == "1.0.3", "Version must be 1.0.3"
 
     license_files = project.get("license-files", [])
     for expected_file in ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]:

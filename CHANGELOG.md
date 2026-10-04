@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-10-04
+
 ### Added / Fixed (certified from an unpushed working copy, 2026-10-04)
 - Parsing: semicolon-delimited CSV exports and malformed/unclosed CSV quotes no longer abort `parse_genotype_file`; additional header names are skipped.
 - Chromosome normalisation: `normalize_chrom` maps numerical DTC codes (23/25 -> X, 24 -> Y, 26 -> MT), used for sex detection, PAR and ploidy.
