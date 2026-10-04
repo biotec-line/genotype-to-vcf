@@ -148,3 +148,9 @@ uv.lock
 .tox/
 .pytest_tmp/
 .ruff_cache/
+
+# Interne Status-/Planungsanalyse (nicht fuer die Veroeffentlichung gedacht)
+Feature_Analyse_23toVCF.md
+
+# Laufprotokolle der Repo-Pflege
+_after-care/
