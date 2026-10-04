@@ -7,7 +7,7 @@
 [English](README.md) | [Deutsch](README_de.md)
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
-![Pytest Status](https://img.shields.io/badge/pytest-34%20passed-brightgreen.svg)
+[![CI](https://github.com/biotec-line/genotype-to-vcf/actions/workflows/ci.yml/badge.svg)](https://github.com/biotec-line/genotype-to-vcf/actions/workflows/ci.yml)
 ![VCF Standard](https://img.shields.io/badge/VCF%20Standard-4.2-blue.svg)
 ![Datenschutz](https://img.shields.io/badge/Datenschutz-Local--First-purple.svg)
 ![LLM Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-orange.svg)
@@ -148,7 +148,7 @@ python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 
 Die fertige EXE liegt anschließend in `dist/23toVCF_Pro.exe` und wird durch `build_exe.bat` zusätzlich nach `23toVCF_Pro.exe` im Projektwurzelverzeichnis kopiert. `build/`, `dist/`, `releases/` und `*.exe` bleiben lokale Build-Artefakte.
 
-Das Build-Skript nutzt auf Windows standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als temporären Build-Root, damit PyInstaller-Arbeitsdateien nicht im OneDrive-synchronisierten Projektbaum entstehen.
+Das Build-Skript nutzt auf Windows standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als temporären Build-Root, damit PyInstaller-Arbeitsdateien nicht im Projektbaum entstehen (sinnvoll, wenn dieser in einem Cloud-Sync-Ordner liegt).
 
 ## Verwendung
 
