@@ -52,5 +52,79 @@ class TestU2ManageTranslations(unittest.TestCase):
                 self.assertIn('"en": ""', rebuilt)
 
 
+def test_cache_thread_safety(tmp_path):
+    import threading
+    import Make23toVCF3 as converter
+
+    cache = {}
+    cache_file = tmp_path / "test_cache.json"
+
+    def writer():
+        for i in range(100):
+            converter.cache_upsert(cache, f"rs{i}", "GRCh38", "1", i, "A")
+        # Nested mutation: same rsid, changing builds (grows entry["assemblies"])
+        for i in range(2000):
+            converter.cache_upsert(cache, "rs_shared", f"build{i}", "1", i, "A")
+
+    def saver():
+        for _ in range(200):
+            converter.save_cache(cache, str(cache_file))
+
+    def reader():
+        for i in range(100):
+            converter.lookup_rsid_from_cache("1", i, "GRCh38", cache)
+
+    threads = [
+        threading.Thread(target=writer),
+        threading.Thread(target=saver),
+        threading.Thread(target=reader),
+    ]
+
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert "rs99" in cache
+    assert len(cache["rs_shared"]["assemblies"]) == 2000
+
+
+def test_save_cache_snapshot_is_isolated_from_nested_updates(tmp_path, monkeypatch):
+    import Make23toVCF3 as converter
+
+    cache = {}
+    converter.cache_upsert(cache, "rs1", "GRCh37", "1", 1, "A")
+    seen = {}
+
+    def fake_write(path, obj):
+        # A concurrent upsert lands while the snapshot is being serialized.
+        converter.cache_upsert(cache, "rs1", "GRCh38", "1", 2, "C")
+        seen["builds"] = sorted(obj["rs1"]["assemblies"])
+
+    monkeypatch.setattr(converter, "atomic_write_json", fake_write)
+    converter.save_cache(cache, str(tmp_path / "c.json"))
+    assert seen["builds"] == ["GRCh37"]  # deep snapshot, not a live view
+
+
+def test_normalize_chrom_and_numerical_dtc_codes():
+    import Make23toVCF3 as converter
+
+    assert converter.normalize_chrom("23") == "X"
+    assert converter.normalize_chrom("24") == "Y"
+    assert converter.normalize_chrom("25") == "X"
+    assert converter.normalize_chrom("26") == "MT"
+    assert converter.normalize_chrom("chrM") == "MT"
+
+    # Test sex detection with numerical chromosome 24
+    variants = [(f"rs{i}", "24", 1000 + i, "AA") for i in range(10)]
+    assert converter.detect_sex_from_variants(variants) == "male"
+
+    # Test ploidy logic with numerical chromosome 24 for female/male
+    assert converter.ploidy_for_site("24", 2_700_000, "GRCh37", "female") == 0
+    assert converter.ploidy_for_site("24", 2_700_000, "GRCh37", "male") == 1
+
+
 if __name__ == "__main__":
     unittest.main()
+
+

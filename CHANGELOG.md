@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added / Fixed (certified from an unpushed working copy, 2026-10-04)
+- Parsing: semicolon-delimited CSV exports and malformed/unclosed CSV quotes no longer abort `parse_genotype_file`; additional header names are skipped.
+- Chromosome normalisation: `normalize_chrom` maps numerical DTC codes (23/25 -> X, 24 -> Y, 26 -> MT), used for sex detection, PAR and ploidy.
+- Thread safety: `save_cache` and `lookup_rsid_from_cache` take the cache lock (no more `dictionary changed size during iteration`).
+- i18n: `translator.py` 1.1.0 supports de/en/es/zh/ja/ru with fallback chain target -> EN -> DE -> key; `locales/translations.json` filled for all six languages.
+- Tests: regression tests for the above plus a repository privacy/security contract test.
+
 ### Changed (2026-10-04)
 - Minimum Python version raised from 3.8 to 3.10 (`requires-python`, classifiers, README badge/requirements) to match the versions actually tested in CI (3.10 to 3.12) and the ruff target.
 

@@ -11,6 +11,7 @@ tellmeGen) into standard VCF 4.2 format. Supports auto-detection of genome build
 import argparse
 import csv
 import gzip
+import copy
 import json
 import os
 import random
@@ -359,7 +360,9 @@ def save_cache(cache, path=CACHE_FILE):
         cache: Dict of rsID metadata to save.
         path: Destination JSON file path.
     """
-    atomic_write_json(path, cache)
+    with _cache_lock:
+        data = copy.deepcopy(cache)
+    atomic_write_json(path, data)
 
 def cache_upsert(cache, rsid, build, chrom, pos, ref):
     """Insert or update assembly data for an rsID in the cache (thread-safe).
@@ -392,7 +395,9 @@ def lookup_rsid_from_cache(chrom, pos, build, cache):
     """
     chrom = str(chrom)
     pos = int(pos)
-    for rid, entry in cache.items():
+    with _cache_lock:
+        items = list(cache.items())
+    for rid, entry in items:
         hit = entry.get("assemblies", {}).get(build)
         if hit and str(hit["chrom"]) == chrom and int(hit["pos"]) == pos:
             return rid
@@ -401,6 +406,26 @@ def lookup_rsid_from_cache(chrom, pos, build, cache):
 # -----------------------------
 # Genetik
 # -----------------------------
+def normalize_chrom(chrom: str) -> str:
+    """Normalize chromosome identifiers (including numerical DTC IDs 23-26).
+
+    Args:
+        chrom: Chromosome string (e.g. 'chr1', '23', 'M', '26').
+
+    Returns:
+        Canonical chromosome string ('1'-'22', 'X', 'Y', 'MT').
+    """
+    c = str(chrom).strip().upper()
+    if c.startswith("CHR"):
+        c = c[3:]
+    if c in ("M", "26"):
+        return "MT"
+    if c in ("23", "25"):
+        return "X"
+    if c == "24":
+        return "Y"
+    return c
+
 def detect_sex_from_variants(variants):
     """Infer biological sex from Y-chromosome variant calls.
 
@@ -413,8 +438,7 @@ def detect_sex_from_variants(variants):
     valid_y = 0
     threshold = 5
     for _, chrom, _, genotype in variants:
-        chrom = chrom.upper().replace("CHR", "")
-        if chrom == "Y":
+        if normalize_chrom(chrom) == "Y":
             clean_gt = genotype.replace("_", "-").strip()
             if clean_gt not in ("--", "-", "00"):
                 valid_y += 1
@@ -432,7 +456,7 @@ def in_par(chrom: str, pos: int, build: str) -> bool:
     Returns:
         True if the position is within a PAR region.
     """
-    chrom = chrom.upper().replace("CHR", "")
+    chrom = normalize_chrom(chrom)
     if build == "GRCh37":
         par_regions = {"X": [(60001, 2699520), (154931044, 155260560)], "Y": [(10001, 2649520), (59034051, 59363566)]}
     elif build == "GRCh38":
@@ -453,10 +477,10 @@ def ploidy_for_site(chrom: str, pos: int, build: str, sex: str) -> int:
     Returns:
         Expected copy number: 0, 1, or 2.
     """
-    c = chrom.upper().replace("CHR", "")
+    c = normalize_chrom(chrom)
     s = (sex or "unknown").lower()
     if c in {str(i) for i in range(1, 23)}: return 2
-    if c == "MT" or c == "M": return 1
+    if c == "MT": return 1
     if c == "X":
         if s == "female": return 2
         if s == "male": return 2 if in_par(c, pos, build) else 1
@@ -831,13 +855,22 @@ def parse_genotype_file(file_path):
     for line in raw_lines:
         line = line.strip()
         if line.startswith("#") or not line: continue
-        # Try tab first, fall back to CSV parsing for quoted provider exports.
-        parts = line.split("\t") if "\t" in line else next(csv.reader([line]))
+        # Try tab first, then semicolon, then fall back to CSV parsing for quoted provider exports.
+        if "\t" in line:
+            parts = line.split("\t")
+        elif ";" in line:
+            parts = line.split(";")
+        else:
+            try:
+                parts = next(csv.reader([line]))
+            except (csv.Error, StopIteration):
+                parts = line.split(",")
+
         if len(parts) < 4: continue
         # Strip quotes from CSV fields
         rsid, chrom, pos, gt = (p.strip().strip('"') for p in parts[:4])
         # Skip header rows
-        if rsid.lower() in ("rsid", "snp", "marker", "name"): continue
+        if rsid.lower() in ("rsid", "snp", "marker", "name", "rs_id", "marker_id", "snp_name", "variant_id"): continue
         chrom = chrom.upper()
         if chrom.startswith("CHR"): chrom = chrom[3:]
         if chrom == "M": chrom = "MT"
