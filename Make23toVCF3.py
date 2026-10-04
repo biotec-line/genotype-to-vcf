@@ -11,6 +11,7 @@ tellmeGen) into standard VCF 4.2 format. Supports auto-detection of genome build
 import argparse
 import csv
 import gzip
+import copy
 import json
 import os
 import random
@@ -360,7 +361,7 @@ def save_cache(cache, path=CACHE_FILE):
         path: Destination JSON file path.
     """
     with _cache_lock:
-        data = dict(cache)
+        data = copy.deepcopy(cache)
     atomic_write_json(path, data)
 
 def cache_upsert(cache, rsid, build, chrom, pos, ref):

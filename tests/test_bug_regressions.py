@@ -62,9 +62,12 @@ def test_cache_thread_safety(tmp_path):
     def writer():
         for i in range(100):
             converter.cache_upsert(cache, f"rs{i}", "GRCh38", "1", i, "A")
+        # Nested mutation: same rsid, changing builds (grows entry["assemblies"])
+        for i in range(2000):
+            converter.cache_upsert(cache, "rs_shared", f"build{i}", "1", i, "A")
 
     def saver():
-        for _ in range(20):
+        for _ in range(200):
             converter.save_cache(cache, str(cache_file))
 
     def reader():
@@ -83,6 +86,24 @@ def test_cache_thread_safety(tmp_path):
         t.join()
 
     assert "rs99" in cache
+    assert len(cache["rs_shared"]["assemblies"]) == 2000
+
+
+def test_save_cache_snapshot_is_isolated_from_nested_updates(tmp_path, monkeypatch):
+    import Make23toVCF3 as converter
+
+    cache = {}
+    converter.cache_upsert(cache, "rs1", "GRCh37", "1", 1, "A")
+    seen = {}
+
+    def fake_write(path, obj):
+        # A concurrent upsert lands while the snapshot is being serialized.
+        converter.cache_upsert(cache, "rs1", "GRCh38", "1", 2, "C")
+        seen["builds"] = sorted(obj["rs1"]["assemblies"])
+
+    monkeypatch.setattr(converter, "atomic_write_json", fake_write)
+    converter.save_cache(cache, str(tmp_path / "c.json"))
+    assert seen["builds"] == ["GRCh37"]  # deep snapshot, not a live view
 
 
 def test_normalize_chrom_and_numerical_dtc_codes():

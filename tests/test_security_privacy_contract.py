@@ -1,45 +1,58 @@
-"""Security and Privacy contract test for BIO/REL-PUB_23andMe_to_VCF.
+"""Security and privacy contract test for genotype-to-vcf.
 
-Verifies:
-- No personal genomic data (.vcf, genome_*) is tracked or stored in project root.
-- No build binaries (.exe) or multi-GB reference files (.fa) sit in project root.
-- No hardcoded absolute user paths (C:\\Users\\) or API credentials in python files.
-- LICENSE and THIRD_PARTY_LICENSES.txt files are present and non-empty.
+Checks the tracked file set (``git ls-files``), not the working tree, so local
+runs that create ``cache.json``, VCFs, FASTA files or a built EXE do not fail:
+
+- No personal genomic data (.vcf, genome_*) is tracked.
+- No build binaries (.exe), reference files (.fa) or cache files are tracked.
+- No hardcoded absolute user paths (C:\\Users\\) in tracked Python files.
+- LICENSE and THIRD_PARTY_LICENSES.txt are present and non-empty.
 """
 
-from pathlib import Path
+import fnmatch
 import re
+import subprocess
+from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_no_personal_genomic_data_in_root():
-    vcf_files = list(ROOT.glob("*.vcf")) + list(ROOT.glob("*.vcf.gz"))
-    genome_files = list(ROOT.glob("genome_*"))
-    assert not vcf_files, f"Personal VCF files found in root: {vcf_files}"
-    assert not genome_files, f"Personal genome files found in root: {genome_files}"
+def tracked_files():
+    try:
+        result = subprocess.run(
+            ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True,
+            encoding="utf-8", check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip("git is unavailable or the project root is not a git repository")
+    return [line for line in result.stdout.splitlines() if line]
 
 
-def test_no_root_build_artifacts_or_caches():
-    forbidden_patterns = ["*.exe", "*.fa", "*.fa.fai", "cache.json", "_ul"]
-    found_artifacts = []
-    for pattern in forbidden_patterns:
-        found_artifacts.extend(ROOT.glob(pattern))
-    assert not found_artifacts, f"Build artifacts/caches in root: {found_artifacts}"
+def matching(files, patterns):
+    return [f for f in files if any(fnmatch.fnmatch(Path(f).name, p) for p in patterns)]
 
 
-def test_no_hardcoded_user_paths_in_python_code():
-    py_files = list(ROOT.rglob("*.py"))
+def test_no_personal_genomic_data_tracked():
+    found = matching(tracked_files(), ["*.vcf", "*.vcf.gz", "genome_*"])
+    assert not found, f"Personal genomic files are tracked: {found}"
+
+
+def test_no_build_artifacts_or_caches_tracked():
+    found = matching(tracked_files(), ["*.exe", "*.fa", "*.fa.fai", "*.fa.gz", "cache.json", "_ul"])
+    assert not found, f"Build artifacts/caches are tracked: {found}"
+
+
+def test_no_hardcoded_user_paths_in_tracked_python_code():
     user_path_pattern = re.compile(r"C:[\\/]Users[\\/]", re.IGNORECASE)
-
     violations = []
-    for py_file in py_files:
-        if ".venv" in py_file.parts or "__pycache__" in py_file.parts:
+    for name in tracked_files():
+        if not name.endswith(".py"):
             continue
-        content = py_file.read_text(encoding="utf-8", errors="ignore")
+        content = (ROOT / name).read_text(encoding="utf-8", errors="ignore")
         if user_path_pattern.search(content):
-            violations.append(str(py_file.relative_to(ROOT)))
-
+            violations.append(name)
     assert not violations, f"Hardcoded user paths found in: {violations}"
 
 
