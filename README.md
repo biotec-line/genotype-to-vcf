@@ -307,7 +307,7 @@ Local raw data (`genome_*`, `*.vcf`, provider exports), reference genomes and in
 - `START.bat`: Windows launcher for source checkouts
 - `requirements-dev.txt`: local test dependencies for regression tests
 - `.gitattributes`: line-ending and binary-file rules for stable Git diffs
-- `.github/workflows/ci.yml`: GitHub Actions test matrix for Python 3.10 through 3.12
+- `.github/workflows/ci.yml`: GitHub Actions test matrix for Python 3.10 through 3.13
 - `tests/test_fasta_dialog.py`: regression test for FASTA path, dialog, and mitochondrial alias handling
 - `README/screenshots/main.png`: screenshot without personal data
 
@@ -618,7 +618,7 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung
 - `requirements-dev.txt`: lokale Test-Abhängigkeiten für Regressionstests
 - `.gitattributes`: Zeilenend- und Binärdatei-Regeln für stabile Git-Diffs
-- `.github/workflows/ci.yml`: GitHub Actions Testmatrix für Python 3.10 bis 3.12
+- `.github/workflows/ci.yml`: GitHub Actions Testmatrix für Python 3.10 bis 3.13
 - `tests/test_fasta_dialog.py`: Regressionstest für FASTA-Pfad-, Dialog- und mitochondriales Alias-Handling
 - `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
 

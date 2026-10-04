@@ -301,7 +301,7 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung
 - `requirements-dev.txt`: lokale Test-Abhängigkeiten für Regressionstests
 - `.gitattributes`: Zeilenend- und Binärdatei-Regeln für stabile Git-Diffs
-- `.github/workflows/ci.yml`: GitHub Actions Testmatrix für Python 3.10 bis 3.12
+- `.github/workflows/ci.yml`: GitHub Actions Testmatrix für Python 3.10 bis 3.13
 - `tests/test_fasta_dialog.py`: Regressionstest für FASTA-Pfad-, Dialog- und mitochondriales Alias-Handling
 - `README/screenshots/main.png`: Screenshot ohne personenbezogene Daten
 
