@@ -1,6 +1,39 @@
 from pathlib import Path
 
+import pytest
+
 import Make23toVCF3 as converter
+
+
+@pytest.mark.parametrize("chrom, expected_sex", [("Y", "male"), ("1", "female")])
+def test_cli_auto_sex_keeps_inference_out_of_progress_logs(
+    tmp_path, monkeypatch, capsys, chrom, expected_sex
+):
+    raw = tmp_path / "input.tsv"
+    raw.write_text("".join(f"rs{i}\t{chrom}\t{100+i}\tAG\n" for i in range(1, 7)), encoding="utf-8")
+    output = tmp_path / "output.vcf"
+    cache = {f"rs{i}": {"assemblies": {"GRCh37": {
+        "chrom": chrom, "pos": 100+i, "ref": "A",
+    }}} for i in range(1, 7)}
+    monkeypatch.setattr(converter, "load_cache", lambda: cache)
+    monkeypatch.setattr(converter, "resolve_fasta_path_for_run", lambda *args, **kwargs: None)
+    original_write = converter._write_vcf_atomic
+    observed_sex = []
+
+    def write(*args, **kwargs):
+        observed_sex.append(args[5])
+        return original_write(*args, **kwargs)
+
+    monkeypatch.setattr(converter, "_write_vcf_atomic", write)
+    assert converter.main(["--input", str(raw), "--output", str(output),
+                           "--build", "GRCh37"]) == 0
+    captured = capsys.readouterr()
+    assert observed_sex == [expected_sex]
+    assert output.exists()
+    assert "VCF geschrieben." in captured.out
+    assert "male" not in (captured.out + captured.err).lower()
+    assert "female" not in (captured.out + captured.err).lower()
+    assert "Geschlechtsprüfung abgeschlossen." in captured.err
 
 
 def test_main_cli_writes_vcf_with_explicit_build(tmp_path, monkeypatch, capsys):

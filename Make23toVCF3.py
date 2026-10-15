@@ -199,7 +199,7 @@ def run_conversion_pipeline(
     if resolved_sex == "Auto":
         log_signal.emit("Ermittle Geschlecht (Y-Check)...")
         resolved_sex = detect_sex_from_variants(variants)
-        log_signal.emit(f"Geschlecht erkannt: {resolved_sex}")
+        log_signal.emit("Geschlechtsprüfung abgeschlossen.")
 
     resolved_build = build
     if resolved_build == "Auto":
