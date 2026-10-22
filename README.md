@@ -16,7 +16,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 > [!NOTE]
-> **AI Agent & LLM Integration Notice**: This repository includes [`llms.txt`](llms.txt) for machine-readable discovery and indexation. Genotype-to-VCF Pro operates 100% locally and privacy-preserving. Genetic raw data, VCF outputs, and FASTA genome indexes remain strictly local on your machine and are never transmitted to external services.
+> **AI Agent & LLM Integration Notice**: This repository includes [`llms.txt`](llms.txt) for machine-readable discovery and indexation. Conversion and file storage run locally. Automatic build detection and uncached reference lookups can send rsIDs derived from the input to NCBI; optional reference downloads contact Ensembl. Local-first does not mean network-free. See [Privacy](#privacy) before processing genetic data.
 
 ## English
 
@@ -291,11 +291,13 @@ not a replacement for the desktop or CLI converter.
 
 ### Privacy
 
-This tool processes genetic data locally on your machine. No data is sent to external servers except:
-- **NCBI dbSNP API** queries containing only rsIDs (e.g., `rs12345`) to resolve reference positions
-- **Ensembl FTP** for optional FASTA reference genome downloads
+Conversion and file storage run locally, but a conversion can initiate network requests:
+- **NCBI dbSNP API:** automatic build detection checks up to the first 200 rsIDs from the input, fetching uncached metadata. Without a local FASTA, reference lookup also fetches uncached rsIDs. These requests are not gated by a separate consent prompt. The application puts the rsID number in the request URL; it does not attach allele calls or the raw input/VCF file. The queried rsID subset still comes from the input and is not an anonymity guarantee. NCBI and network intermediaries can observe normal request metadata such as the source IP address.
+- **Ensembl reference downloads:** the GUI offers a download when the reference is missing. The configured download URLs currently use HTTP, which does not provide transport encryption.
 
-No genotype data, personal identifiers, or raw files are ever transmitted.
+For a conversion without these network requests, select the correct build explicitly, provide its local FASTA, and decline reference downloads. A local FASTA alone does not prevent the earlier automatic-build lookup. Network isolation can enforce an offline boundary; missing local metadata can prevent conversion.
+
+The static browser demo is a separate local format preview without background network requests.
 
 Local raw data (`genome_*`, `*.vcf`, provider exports), reference genomes and indexes (`*.fa`, `*.fasta`, `*.fai`), caches, executable/release artifacts, and internal work files (`AUFGABEN.txt`, `TEST.txt`, diagnostic reports) are excluded through `.gitignore`. The added `.gitattributes` keeps text files and large binary artifacts separated for stable diffs.
 
@@ -597,11 +599,11 @@ Der persistente `cache.json` speichert dbSNP API-Antworten mit Zeitstempeln. Fol
 
 ## Datenschutz
 
-Dieses Tool verarbeitet genetische Daten lokal auf Ihrem Rechner. Keine Daten werden an externe Server gesendet, außer:
-- **NCBI dbSNP API** Abfragen, die ausschließlich rsIDs enthalten (z.B. `rs12345`) zur Positionsauflösung
-- **Ensembl FTP** für optionale FASTA-Referenzgenom-Downloads
+Konvertierung und Dateispeicherung erfolgen lokal; eine Konvertierung kann jedoch Netzwerkabfragen auslösen:
+- **NCBI dbSNP API:** Die automatische Build-Erkennung prüft bis zu die ersten 200 rsIDs aus der Eingabe und lädt nicht zwischengespeicherte Metadaten nach. Ohne lokale FASTA werden auch für Referenzabfragen fehlende rsID-Metadaten geladen. Dafür gibt es keinen gesonderten Zustimmungsdialog. Die Anwendung setzt die rsID-Nummer in die Anfrage-URL; Allelwerte sowie Roh- und VCF-Dateien werden nicht angehängt. Die abgefragte rsID-Auswahl stammt dennoch aus der Eingabe und garantiert keine Anonymität. NCBI und Netzwerkvermittler können übliche Verbindungsmetadaten wie die Quell-IP-Adresse sehen.
+- **Ensembl-Referenzdownloads:** Fehlt eine Referenz, bietet die GUI einen Download an. Die konfigurierten Download-URLs verwenden derzeit HTTP ohne Transportverschlüsselung.
 
-Genotyp-Daten, persönliche Identifikatoren oder Rohdateien werden niemals übertragen.
+Für eine Konvertierung ohne diese Netzwerkabfragen wählen Sie den richtigen Build ausdrücklich, stellen dessen FASTA lokal bereit und lehnen Referenzdownloads ab. Eine lokale FASTA allein verhindert die vorherige automatische Build-Abfrage nicht. Eine Netzwerksperre kann die Offline-Grenze erzwingen; fehlende lokale Metadaten können eine Konvertierung verhindern.
 
 Die browserlokale Demo unter `docs/browser-local-demo/` arbeitet ebenfalls strikt
 ohne Uploads oder Hintergrundnetzwerk. Sie dient nur als lokaler Format- und

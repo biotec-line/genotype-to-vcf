@@ -43,6 +43,10 @@ This is local-first research and software tooling. It is not a medical device, n
 
 Repository hygiene was rechecked on 2026-09-22. Local genome exports, FASTA references and indexes, `cache.json`, EXE/release artifacts, internal planning files, and `LOCK*.txt` coordination files are intentionally ignored and must not be committed. The browser-local demo is a static, no-upload format preview and renders pasted genotype values as text rather than HTML.
 
+## Network boundary
+
+Conversion is local-first, not zero-egress. Automatic build detection queries uncached metadata for up to the first 200 input rsIDs at NCBI, even with a local FASTA. Without a FASTA, uncached rsIDs are also queried for reference lookup. Requests include rsID numbers in URLs, not allele calls or raw/VCF uploads, but can disclose an input-derived rsID subset and normal connection metadata. No separate consent prompt gates the NCBI lookups. Optional Ensembl reference downloads currently use HTTP. For an offline conversion, select the correct build explicitly, supply its local FASTA and decline downloads; enforce network isolation if required. The static browser preview has a separate no-network boundary.
+
 ## Discovery notes
 
 - GitHub topic pages surface the repo for `vcf-converter`, but broad GitHub search phrases such as `23andMe to VCF converter` and `DTC DNA raw data VCF converter` still do not reliably return the repo.
