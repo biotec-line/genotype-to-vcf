@@ -1,0 +1,4 @@
+# Compatibility redirect: see llms.txt in the repository root for the canonical LLM entrypoint.
+# Further product agent usage details: SKILL.md
+Canonical entrypoint: llms.txt
+Product skill: SKILL.md

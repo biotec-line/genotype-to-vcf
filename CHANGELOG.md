@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed / Hygiene (2026-11-18)
+- Untracked `MARKETING-LOG.txt` (`git rm --cached`) and excluded it plus agent/staging/temp artifacts in `.gitignore`.
+- Standardized `pyproject.toml` to PEP 639 (`license = "MIT"` without a conflicting OSI license classifier), added `[tool.setuptools] py-modules`, and updated `[project.urls]`.
+- Moved default pytest `basetemp` anchoring out of `addopts` (`pyproject.toml` / `pytest.ini`) into `conftest.py` (`config.rootpath / ".pytest_tmp"`) so runs from any working directory remain isolated.
+- Replaced host-scoped build paths in `build_exe.bat`, `README.md`, `README_de.md`, and `CHANGELOG.md` with `%LOCALAPPDATA%\23tovcf_pro_build` (`LOCAL_BUILD` override preserved).
+- Added P-022 LLM/agent entrypoints (`SKILL.md`, `llm.txt`), updated `llms.txt`, and added copyable LLM installation prompts to `README.md` and `README_de.md`.
+
 ## [1.0.3] - 2026-10-04
 
 ### Added / Fixed (certified from an unpushed working copy, 2026-10-04)
@@ -49,7 +56,7 @@ All notable changes to this project will be documented in this file.
 ### Build / Release
 - Release-Status am 2026-07-22 geprüft: Der nach `1.0.2` gesammelte Stand bleibt bewusst unter `[Unreleased]`; es wird kein `1.0.3`-Release-Kandidat, Versions-Bump, Artefakt-Build oder Upload impliziert. Vor einer separaten Release-Freigabe sind ein frischer Windows-EXE-/SHA256SUMS-Check und die erneut dokumentierten Source-Smokes erforderlich.
 - EXE neu gebaut 2026-06-01 (PyInstaller, 23toVCF_Pro.spec); 9/9 Tests grün, Smoke OK. EXE war 2026-05-01; Anlass: Make23toVCF3.py 2026-05-30.
-- `build_exe.bat` nutzt nun standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als lokalen Build-Root außerhalb des OneDrive-Projektbaums und führt PyInstaller mit `--clean` aus.
+- `build_exe.bat` nutzt nun standardmäßig `%LOCALAPPDATA%\23tovcf_pro_build` (überschreibbar per `LOCAL_BUILD`) als lokalen Build-Root außerhalb des Projektbaums und führt PyInstaller mit `--clean` aus.
 
 ### Added
 

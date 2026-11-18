@@ -16,7 +16,7 @@
 ![Lizenz](https://img.shields.io/badge/Lizenz-MIT-green.svg)
 
 > [!NOTE]
-> **KI-Agenten & LLM-Integrationshinweis**: Dieses Repository enthält [`llms.txt`](llms.txt) für maschinenlesbare Indexierung. Konvertierung und Dateispeicherung erfolgen lokal. Automatische Build-Erkennung und nicht zwischengespeicherte Referenzabfragen können rsIDs aus der Eingabe an NCBI senden; optionale Referenzdownloads kontaktieren Ensembl. Lokal bedeutet nicht netzwerkfrei. Beachten Sie vor der Verarbeitung genetischer Daten den Abschnitt [Datenschutz](#datenschutz).
+> **KI-Agenten & LLM-Integrationshinweis**: Dieses Repository enthält [`llms.txt`](llms.txt), [`llm.txt`](llm.txt) und [`SKILL.md`](SKILL.md) für maschinenlesbare Indexierung und sichere CLI-Nutzung. Konvertierung und Dateispeicherung erfolgen lokal. Automatische Build-Erkennung und nicht zwischengespeicherte Referenzabfragen können rsIDs aus der Eingabe an NCBI senden; optionale Referenzdownloads kontaktieren Ensembl. Lokal bedeutet nicht netzwerkfrei. Beachten Sie vor der Verarbeitung genetischer Daten den Abschnitt [Datenschutz](#datenschutz).
 
 Eine Desktop-Anwendung zur Konvertierung von DTC (Direct-to-Consumer) DNA-Rohdaten in das standardisierte **VCF 4.2**-Format. Mit moderner PySide6-Oberfläche, Unterstützung für GRCh37 und GRCh38 Referenzgenome, automatischer Build-Erkennung sowie optionalem Offline-FASTA-Modus.
 
@@ -148,7 +148,16 @@ python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 
 Die fertige EXE liegt anschließend in `dist/23toVCF_Pro.exe` und wird durch `build_exe.bat` zusätzlich nach `23toVCF_Pro.exe` im Projektwurzelverzeichnis kopiert. `build/`, `dist/`, `releases/` und `*.exe` bleiben lokale Build-Artefakte.
 
-Das Build-Skript nutzt auf Windows standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als temporären Build-Root, damit PyInstaller-Arbeitsdateien nicht im Projektbaum entstehen (sinnvoll, wenn dieser in einem Cloud-Sync-Ordner liegt).
+Das Build-Skript nutzt auf Windows standardmäßig `%LOCALAPPDATA%\23tovcf_pro_build` (überschreibbar per `LOCAL_BUILD`) als temporären Build-Root, damit PyInstaller-Arbeitsdateien nicht im Projektbaum entstehen (sinnvoll, wenn dieser in einem Cloud-Sync-Ordner liegt).
+
+### Mit deinem LLM installieren
+
+```text
+Installiere und verifiziere https://github.com/biotec-line/genotype-to-vcf (Release-Tag/Commit-Pin bevorzugen, keine ungeprüften curl|sh-Pipes):
+1. Lies zuerst llms.txt und SKILL.md im Repo-Root.
+2. Erstelle eine isolierte Umgebung (.venv) und führe den Installationsbefehl aus llms.txt aus.
+3. Prüfe die Installation mit den Verifikationsbefehlen (python -m pytest -q und python tests/source_platform_smoke.py) und berichte das Ergebnis.
+```
 
 ## Verwendung
 
@@ -295,7 +304,9 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 
 ## Repository-Inhalt
 
+- `SKILL.md`, `llms.txt`, `llm.txt`: Produkt-Skill und maschinenlesbare LLM-Einstiege
 - `Make23toVCF3.py`: aktuelle PySide6-Anwendung und Konvertierungslogik
+- `VCF_OUTPUT_SAFETY.md`: atomare VCF-Ausgabe und Pfadsicherheitsspezifikation
 - `23toVCF_Pro.spec`: PyInstaller-Buildkonfiguration
 - `build_exe.bat`: reproduzierbarer Windows-Build über die Spec-Datei
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung
@@ -307,7 +318,7 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 
 Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien samt `.fai`-Indexdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
 
-Der Repo-Hygiene-Check vom 2026-09-22 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
+Der Repo-Hygiene-Check vom 2026-11-18 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente, `MARKETING-LOG.txt` und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
 
 ## Lizenz & Attribution
 
