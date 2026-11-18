@@ -26,7 +26,7 @@ Vielen Dank für Ihr Interesse an Genotype-to-VCF Pro.
 
 ### Entwicklungsstil
 
-- Python 3.8+ kompatibel halten.
+- Python 3.10+ kompatibel halten.
 - PEP-8-Konventionen beachten.
 - Die aktuelle Single-File-Anwendungsstruktur in `Make23toVCF3.py` nur bewusst aufbrechen.
 - Komplexe bioinformatische Logik knapp kommentieren.
@@ -58,7 +58,7 @@ Thank you for your interest in contributing to Genotype-to-VCF Pro.
 
 ### Development Style
 
-- Keep Python 3.8+ compatibility.
+- Keep Python 3.10+ compatibility.
 - Follow PEP 8 conventions.
 - Only split the current single-file application structure in `Make23toVCF3.py` deliberately.
 - Add concise comments for complex bioinformatics logic.

@@ -16,7 +16,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 > [!NOTE]
-> **AI Agent & LLM Integration Notice**: This repository includes [`llms.txt`](llms.txt) for machine-readable discovery and indexation. Conversion and file storage run locally. Automatic build detection and uncached reference lookups can send rsIDs derived from the input to NCBI; optional reference downloads contact Ensembl. Local-first does not mean network-free. See [Privacy](#privacy) before processing genetic data.
+> **AI Agent & LLM Integration Notice**: This repository includes [`llms.txt`](llms.txt), [`llm.txt`](llm.txt), and [`SKILL.md`](SKILL.md) for machine-readable discovery and safe CLI usage. Conversion and file storage run locally. Automatic build detection and uncached reference lookups can send rsIDs derived from the input to NCBI; optional reference downloads contact Ensembl. Local-first does not mean network-free. See [Privacy](#privacy) before processing genetic data.
 
 ## English
 
@@ -150,7 +150,16 @@ python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 
 The executable is written to `dist/23toVCF_Pro.exe`; local `build/`, `dist/`, `releases/`, and `*.exe` artifacts are intentionally ignored.
 
-The build wrapper uses `C:\_Local_DEV\codex_build\23tovcf_pro` as its default temporary build root on Windows, so PyInstaller work files stay outside the project tree (useful when it lives in a cloud-synced folder).
+The build wrapper uses `%LOCALAPPDATA%\23tovcf_pro_build` (overridable via `LOCAL_BUILD`) as its default temporary build root on Windows, so PyInstaller work files stay outside the project tree (useful when it lives in a cloud-synced folder).
+
+#### Install with your LLM
+
+```text
+Install and verify https://github.com/biotec-line/genotype-to-vcf (prefer a release tag or commit pin; never run unverified curl|sh pipes):
+1. Read llms.txt and SKILL.md in the repository root first.
+2. Create an isolated virtual environment (.venv) and run the installation command from llms.txt.
+3. Verify the installation using the verification commands (python -m pytest -q and python tests/source_platform_smoke.py) and report the results.
+```
 
 ### Usage
 
@@ -303,7 +312,9 @@ Local raw data (`genome_*`, `*.vcf`, provider exports), reference genomes and in
 
 ### Repository Contents
 
+- `SKILL.md`, `llms.txt`, `llm.txt`: product skill and machine-readable LLM entrypoints
 - `Make23toVCF3.py`: current PySide6 application and conversion logic
+- `VCF_OUTPUT_SAFETY.md`: atomic VCF output and path-safety specification
 - `23toVCF_Pro.spec`: PyInstaller build configuration
 - `build_exe.bat`: reproducible Windows build wrapper around the spec file
 - `START.bat`: Windows launcher for source checkouts
@@ -319,7 +330,7 @@ Raw genomic data, VCF outputs, FASTA reference files plus `.fai` indexes, API ca
 
 Keep downloaded FASTA references, dbSNP caches, converted VCF outputs, and provider raw-data exports local only. The repository `.gitignore` excludes these files, but contributors should still keep them outside commits and use only synthetic or public sample data in tests and issues.
 
-Repository hygiene was rechecked on 2026-07-02: local genome exports, reference FASTA files, indexes, `cache.json`, EXE/release artifacts, internal planning docs, and `LOCK*.txt` files are ignored and must remain out of Git.
+Repository hygiene was rechecked on 2026-11-18: local genome exports, reference FASTA files, indexes, `cache.json`, EXE/release artifacts, internal planning docs, `MARKETING-LOG.txt`, and `LOCK*.txt` files are ignored and must remain out of Git.
 
 ### Contributing
 
@@ -467,7 +478,16 @@ python -m PyInstaller --noconfirm --clean 23toVCF_Pro.spec
 
 Die fertige EXE liegt anschließend in `dist/23toVCF_Pro.exe` und wird durch `build_exe.bat` zusätzlich nach `23toVCF_Pro.exe` im Projektwurzelverzeichnis kopiert. `build/`, `dist/`, `releases/` und `*.exe` bleiben lokale Build-Artefakte.
 
-Das Build-Skript nutzt auf Windows standardmäßig `C:\_Local_DEV\codex_build\23tovcf_pro` als temporären Build-Root, damit PyInstaller-Arbeitsdateien nicht im Projektbaum entstehen (sinnvoll, wenn dieser in einem Cloud-Sync-Ordner liegt).
+Das Build-Skript nutzt auf Windows standardmäßig `%LOCALAPPDATA%\23tovcf_pro_build` (überschreibbar per `LOCAL_BUILD`) als temporären Build-Root, damit PyInstaller-Arbeitsdateien nicht im Projektbaum entstehen (sinnvoll, wenn dieser in einem Cloud-Sync-Ordner liegt).
+
+### Mit deinem LLM installieren
+
+```text
+Installiere und verifiziere https://github.com/biotec-line/genotype-to-vcf (Release-Tag/Commit-Pin bevorzugen, keine ungeprüften curl|sh-Pipes):
+1. Lies zuerst llms.txt und SKILL.md im Repo-Root.
+2. Erstelle eine isolierte Umgebung (.venv) und führe den Installationsbefehl aus llms.txt aus.
+3. Prüfe die Installation mit den Verifikationsbefehlen (python -m pytest -q und python tests/source_platform_smoke.py) und berichte das Ergebnis.
+```
 
 ## Verwendung
 
@@ -614,7 +634,9 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 
 ## Repository-Inhalt
 
+- `SKILL.md`, `llms.txt`, `llm.txt`: Produkt-Skill und maschinenlesbare LLM-Einstiege
 - `Make23toVCF3.py`: aktuelle PySide6-Anwendung und Konvertierungslogik
+- `VCF_OUTPUT_SAFETY.md`: atomare VCF-Ausgabe und Pfadsicherheitsspezifikation
 - `23toVCF_Pro.spec`: PyInstaller-Buildkonfiguration
 - `build_exe.bat`: reproduzierbarer Windows-Build über die Spec-Datei
 - `START.bat`: Windows-Startdatei für Quellcode-Nutzung
@@ -626,7 +648,7 @@ Lokale Rohdaten (`genome_*`, `*.vcf`, Provider-Exports), Referenzgenome und Inde
 
 Genom-Rohdaten, VCF-Ausgaben, FASTA-Referenzdateien samt `.fai`-Indexdateien, API-Caches, lokale Release-Artefakte und interne Koordinationsdateien bleiben per `.gitignore` ausgeschlossen.
 
-Der Repo-Hygiene-Check vom 2026-09-22 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
+Der Repo-Hygiene-Check vom 2026-11-18 bestätigt: lokale Genom-Exporte, Referenz-FASTA-Dateien, Indexdateien, `cache.json`, EXE-/Release-Artefakte, interne Planungsdokumente, `MARKETING-LOG.txt` und `LOCK*.txt` bleiben ignoriert und gehören nicht in Git.
 
 ## License & Attribution
 

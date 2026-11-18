@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import re
+import subprocess
 
 try:
     import tomllib  # Python 3.11+
@@ -71,6 +72,11 @@ def test_pep621_pyproject_metadata_and_version_freeze():
     project = data.get("project", {})
     # Strict Version Freeze Rule T-20260920-167562623: Pfad A/B passes never bump versions
     assert project.get("version") == "1.0.3", "Version must be 1.0.3"
+    assert project.get("license") == "MIT", "PEP 639 license string must be 'MIT'"
+    classifiers = project.get("classifiers", [])
+    assert not any(c.startswith("License ::") for c in classifiers), (
+        "Do not combine PEP 639 string license with License :: OSI classifiers"
+    )
 
     license_files = project.get("license-files", [])
     for expected_file in ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]:
@@ -83,9 +89,16 @@ def test_pep621_pyproject_metadata_and_version_freeze():
     assert "Issues" in urls
     assert "Notice" in urls
     assert "Third-Party Licenses" in urls
+    assert "Marketing Log" not in urls
 
     pytest_opts = data.get("tool", {}).get("pytest", {}).get("ini_options", {})
-    assert "--basetemp=.pytest_tmp" in pytest_opts.get("addopts", "")
+    assert "--basetemp=" not in pytest_opts.get("addopts", "")
+    conftest_content = (ROOT / "conftest.py").read_text(encoding="utf-8")
+    assert "pytest_configure" in conftest_content
+    assert "config.rootpath" in conftest_content
+
+    pytest_ini_content = (ROOT / "pytest.ini").read_text(encoding="utf-8")
+    assert "--basetemp=" not in pytest_ini_content
 
     ruff_opts = data.get("tool", {}).get("ruff", {})
     assert ruff_opts.get("line-length") == 100
@@ -148,12 +161,39 @@ def test_security_sla_and_bgb_disclaimer():
     assert "521 BGB" in readme_content, "README.md must include § 521 BGB statutory disclaimer"
 
 
-def test_marketing_log_present_and_well_formed():
-    mkt_file = ROOT / "MARKETING-LOG.txt"
-    assert mkt_file.is_file(), "MARKETING-LOG.txt must exist"
-    mkt_content = mkt_file.read_text(encoding="utf-8")
+def test_marketing_log_not_tracked_and_ignored():
+    gitignore_content = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    assert "MARKETING-LOG.txt" in gitignore_content
 
-    assert "biotec-line" in mkt_content
-    assert "open-bricks" in mkt_content
-    assert "2026-09-22" in mkt_content
-    assert "Pfad A" in mkt_content
+    try:
+        res = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", "MARKETING-LOG.txt"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except OSError:
+        return
+    assert res.returncode != 0, "MARKETING-LOG.txt must not be tracked in git"
+
+
+def test_p022_llm_and_skill_entrypoints():
+    skill_text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    assert "Make23toVCF3.py" in skill_text
+    assert "--input" in skill_text
+    assert "--detect-build" in skill_text
+
+    llm_text = (ROOT / "llm.txt").read_text(encoding="utf-8")
+    assert "llms.txt" in llm_text
+
+    llms_text = (ROOT / "llms.txt").read_text(encoding="utf-8")
+    assert "SKILL.md" in llms_text
+    assert "1.0.3" in llms_text
+    assert "Last-checked: 2026-11-18" in llms_text
+
+    readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")
+    assert "Install with your LLM" in readme_en
+    assert "Mit deinem LLM installieren" in readme_de
+    assert "SKILL.md" in readme_en and "SKILL.md" in readme_de
