@@ -31,7 +31,7 @@ import psutil
 import requests
 from pyfaidx import Faidx
 from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QPalette
+from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPalette, QShortcut
 
 # PySide6 imports
 from PySide6.QtWidgets import (
@@ -50,6 +50,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from translator import LANGUAGE_DISPLAY_NAMES, TranslationSystem
 
 # -----------------------------
 # Konfiguration
@@ -71,6 +73,20 @@ MIN_WORKERS, MAX_WORKERS = 4, 200
 TIMEOUT_SEC, RETRY_MAX = 15, 4
 CACHE_FILE = os.path.join(BASE_DIR, "cache.json")
 APP_ICON_PATH = os.path.join(BASE_DIR, "23toVCF_Pro.ico")
+
+
+def _resource_base_dir():
+    """Return directory containing bundled read-only resources (translations, icon)."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return sys._MEIPASS
+    return BASE_DIR
+
+
+def _resolve_app_icon_path():
+    """Locate the application icon in source or PyInstaller bundle layout."""
+    if os.path.exists(APP_ICON_PATH):
+        return APP_ICON_PATH
+    return os.path.join(_resource_base_dir(), "23toVCF_Pro.ico")
 
 _cache_lock = threading.Lock()
 
@@ -1130,7 +1146,7 @@ class ConversionWorker(QThread):
     finished_signal = Signal(str)
     ask_dialog_signal = Signal(str, str) # Title, Message -> Returns bool via wait condition?
 
-    def __init__(self, file_path, sex, build, cache):
+    def __init__(self, file_path, sex, build, cache, translator=None):
         """Initialize the conversion worker.
 
         Args:
@@ -1138,12 +1154,14 @@ class ConversionWorker(QThread):
             sex: Biological sex string or 'Auto' for auto-detection.
             build: Genome build string or 'Auto' for auto-detection.
             cache: Shared rsID metadata cache dict.
+            translator: Optional TranslationSystem for localized worker messages.
         """
         super().__init__()
         self.file_path = file_path
         self.sex = sex
         self.build_input = build
         self.cache = cache
+        self.translator = translator
         self.is_interrupted = threading.Event()
         # Instanzattribute statt Klassenattribute (Thread-Safety!)
         self.dialog_result = None
@@ -1184,11 +1202,25 @@ class ConversionWorker(QThread):
             )
 
             if result is not None:
-                self.finished_signal.emit(
-                    f"Erfolg! {result['written']} Varianten geschrieben.\nDatei: {result['output_path']}"
-                )
+                if self.translator is not None:
+                    finished_msg = self.translator.t(
+                        "conversion_finished_msg",
+                        written=result["written"],
+                        output_path=result["output_path"],
+                    )
+                else:
+                    finished_msg = (
+                        f"Erfolg! {result['written']} Varianten geschrieben.\n"
+                        f"Datei: {result['output_path']}"
+                    )
+                self.finished_signal.emit(finished_msg)
             else:
-                self.log_signal.emit("Vorgang abgebrochen.")
+                cancel_msg = (
+                    self.translator.t("Vorgang abgebrochen.")
+                    if self.translator is not None
+                    else "Vorgang abgebrochen."
+                )
+                self.log_signal.emit(cancel_msg)
 
         except Exception as e:
             self.error_signal.emit(str(e))
@@ -1199,14 +1231,18 @@ class ConversionWorker(QThread):
 class MainWindow(QMainWindow):
     """Main application window for the Genotype-to-VCF converter.
 
-    Provides file selection, sex/build option controls, a start/cancel button,
-    progress bar, and a log output widget.
+    Provides file selection, sex/build/language option controls, a start/cancel
+    button, progress bar, and a log output widget.
     """
 
-    def __init__(self):
+    def __init__(self, lang=None, translator=None):
         """Initialize the main window and load the rsID cache."""
         super().__init__()
-        self.setWindowTitle(APP_TITLE)
+        self.translator = translator or TranslationSystem(
+            default_lang=lang or "de",
+            app_dir=_resource_base_dir(),
+            auto_save_missing=False,
+        )
         self.resize(900, 650)
         self.cache = load_cache()
         self.file_path = None
@@ -1226,12 +1262,12 @@ class MainWindow(QMainWindow):
         # --- Header Section ---
         header_layout = QHBoxLayout()
 
-        self.btn_file = QPushButton("📁 Genotype-Datei öffnen")
+        self.btn_file = QPushButton()
         self.btn_file.setMinimumHeight(40)
         self.btn_file.clicked.connect(self.select_file)
 
-        self.lbl_file = QLabel("Keine Datei ausgewählt")
-        self.lbl_file.setStyleSheet("color: #888; font-style: italic;")
+        self.lbl_file = QLabel()
+        self.lbl_file.setStyleSheet("color: #c0c0c0; font-style: italic;")
 
         header_layout.addWidget(self.btn_file)
         header_layout.addWidget(self.lbl_file, 1)
@@ -1242,17 +1278,36 @@ class MainWindow(QMainWindow):
         options_frame.setObjectName("OptionsFrame")
         options_layout = QHBoxLayout(options_frame)
 
-        # Sex
-        options_layout.addWidget(QLabel("Geschlecht:"))
+        # Sex (canonical values kept in itemData while labels are localized)
+        self.lbl_sex = QLabel()
         self.combo_sex = QComboBox()
-        self.combo_sex.addItems(["Auto", "female", "male"])
+        for sex_key in ("Auto", "female", "male"):
+            self.combo_sex.addItem(sex_key, sex_key)
+        self.lbl_sex.setBuddy(self.combo_sex)
+        options_layout.addWidget(self.lbl_sex)
         options_layout.addWidget(self.combo_sex)
 
-        # Build
-        options_layout.addWidget(QLabel("Build:"))
+        # Build (canonical values kept in itemData)
+        self.lbl_build = QLabel()
         self.combo_build = QComboBox()
-        self.combo_build.addItems(["Auto", "GRCh37", "GRCh38"])
+        for build_key in ("Auto", "GRCh37", "GRCh38"):
+            self.combo_build.addItem(build_key, build_key)
+        self.lbl_build.setBuddy(self.combo_build)
+        options_layout.addWidget(self.lbl_build)
         options_layout.addWidget(self.combo_build)
+
+        # Language selector (6 Tier-2 languages)
+        self.lbl_lang = QLabel()
+        self.combo_lang = QComboBox()
+        for code in self.translator.get_supported_languages():
+            self.combo_lang.addItem(LANGUAGE_DISPLAY_NAMES.get(code, code), code)
+        lang_index = self.combo_lang.findData(self.translator.get_language())
+        if lang_index >= 0:
+            self.combo_lang.setCurrentIndex(lang_index)
+        self.combo_lang.currentIndexChanged.connect(self.on_language_changed)
+        self.lbl_lang.setBuddy(self.combo_lang)
+        options_layout.addWidget(self.lbl_lang)
+        options_layout.addWidget(self.combo_lang)
 
         options_layout.addStretch()
         layout.addWidget(options_frame)
@@ -1260,12 +1315,12 @@ class MainWindow(QMainWindow):
         # --- Action Buttons ---
         btn_layout = QHBoxLayout()
 
-        self.btn_start = QPushButton("🚀 Konvertierung Starten")
+        self.btn_start = QPushButton()
         self.btn_start.setMinimumHeight(50)
         self.btn_start.setObjectName("StartButton")
         self.btn_start.clicked.connect(self.start_process)
 
-        self.btn_cancel = QPushButton("🛑 Abbrechen")
+        self.btn_cancel = QPushButton()
         self.btn_cancel.setMinimumHeight(50)
         self.btn_cancel.setObjectName("CancelButton")
         self.btn_cancel.setEnabled(False)
@@ -1285,6 +1340,116 @@ class MainWindow(QMainWindow):
         self.txt_log.setReadOnly(True)
         self.txt_log.setFont(QFont("Consolas", 9))
         layout.addWidget(self.txt_log)
+
+        # Keyboard navigation order and shortcuts
+        QWidget.setTabOrder(self.btn_file, self.combo_sex)
+        QWidget.setTabOrder(self.combo_sex, self.combo_build)
+        QWidget.setTabOrder(self.combo_build, self.combo_lang)
+        QWidget.setTabOrder(self.combo_lang, self.btn_start)
+        QWidget.setTabOrder(self.btn_start, self.btn_cancel)
+        QWidget.setTabOrder(self.btn_cancel, self.txt_log)
+
+        self.shortcut_open = QShortcut(QKeySequence("Ctrl+O"), self)
+        self.shortcut_open.activated.connect(self._trigger_open_shortcut)
+        self.shortcut_start_return = QShortcut(QKeySequence("Ctrl+Return"), self)
+        self.shortcut_start_return.activated.connect(self._trigger_start_shortcut)
+        self.shortcut_start_enter = QShortcut(QKeySequence("Ctrl+Enter"), self)
+        self.shortcut_start_enter.activated.connect(self._trigger_start_shortcut)
+        self.shortcut_cancel = QShortcut(QKeySequence("Escape"), self)
+        self.shortcut_cancel.activated.connect(self._trigger_cancel_shortcut)
+
+        self.retranslate_ui()
+
+    def _trigger_open_shortcut(self):
+        if self.btn_file.isEnabled():
+            self.select_file()
+
+    def _trigger_start_shortcut(self):
+        if self.btn_start.isEnabled():
+            self.start_process()
+
+    def _trigger_cancel_shortcut(self):
+        if self.btn_cancel.isEnabled():
+            self.cancel_process()
+
+    def set_language(self, lang: str):
+        """Switch UI language programmatically and update all visible labels."""
+        self.translator.set_language(lang)
+        if hasattr(self, "combo_lang"):
+            idx = self.combo_lang.findData(self.translator.get_language())
+            if idx >= 0 and self.combo_lang.currentIndex() != idx:
+                self.combo_lang.blockSignals(True)
+                self.combo_lang.setCurrentIndex(idx)
+                self.combo_lang.blockSignals(False)
+        self.retranslate_ui()
+
+    def on_language_changed(self, _index=0):
+        """Handle user language selection from the language combo box."""
+        lang_code = self.combo_lang.currentData()
+        if lang_code:
+            self.translator.set_language(lang_code)
+            self.retranslate_ui()
+
+    def retranslate_ui(self):
+        """Refresh all UI texts, accessibility names, descriptions, and tooltips."""
+        t = self.translator.t
+        self.setWindowTitle(t("app_title"))
+
+        self.btn_file.setText(t("📁 Genotype-Datei öffnen"))
+        self.btn_file.setAccessibleName(t("a11y_btn_file_name"))
+        self.btn_file.setAccessibleDescription(t("a11y_btn_file_desc"))
+        self.btn_file.setToolTip(t("a11y_btn_file_tip"))
+
+        if self.file_path is None:
+            self.lbl_file.setText(t("Keine Datei ausgewählt"))
+        self.lbl_file.setAccessibleName(t("a11y_lbl_file_name"))
+        self.lbl_file.setAccessibleDescription(t("a11y_lbl_file_desc"))
+
+        self.lbl_sex.setText(t("Geschlecht:"))
+        self.combo_sex.setAccessibleName(t("a11y_combo_sex_name"))
+        self.combo_sex.setAccessibleDescription(t("a11y_combo_sex_desc"))
+        self.combo_sex.setToolTip(t("a11y_combo_sex_tip"))
+        self.combo_sex.blockSignals(True)
+        for idx in range(self.combo_sex.count()):
+            canonical = self.combo_sex.itemData(idx)
+            if canonical:
+                self.combo_sex.setItemText(idx, t(canonical))
+        self.combo_sex.blockSignals(False)
+
+        self.lbl_build.setText(t("Build:"))
+        self.combo_build.setAccessibleName(t("a11y_combo_build_name"))
+        self.combo_build.setAccessibleDescription(t("a11y_combo_build_desc"))
+        self.combo_build.setToolTip(t("a11y_combo_build_tip"))
+        self.combo_build.blockSignals(True)
+        for idx in range(self.combo_build.count()):
+            canonical = self.combo_build.itemData(idx)
+            if canonical:
+                self.combo_build.setItemText(
+                    idx, t("Auto") if canonical == "Auto" else canonical
+                )
+        self.combo_build.blockSignals(False)
+
+        self.lbl_lang.setText(t("Sprache:"))
+        self.combo_lang.setAccessibleName(t("a11y_combo_lang_name"))
+        self.combo_lang.setAccessibleDescription(t("a11y_combo_lang_desc"))
+        self.combo_lang.setToolTip(t("a11y_combo_lang_tip"))
+
+        self.btn_start.setText(t("🚀 Konvertierung Starten"))
+        self.btn_start.setAccessibleName(t("a11y_btn_start_name"))
+        self.btn_start.setAccessibleDescription(t("a11y_btn_start_desc"))
+        self.btn_start.setToolTip(t("a11y_btn_start_tip"))
+
+        self.btn_cancel.setText(t("🛑 Abbrechen"))
+        self.btn_cancel.setAccessibleName(t("a11y_btn_cancel_name"))
+        self.btn_cancel.setAccessibleDescription(t("a11y_btn_cancel_desc"))
+        self.btn_cancel.setToolTip(t("a11y_btn_cancel_tip"))
+
+        self.progress_bar.setAccessibleName(t("a11y_progress_name"))
+        self.progress_bar.setAccessibleDescription(t("a11y_progress_desc"))
+
+        self.txt_log.setAccessibleName(t("a11y_log_name"))
+        self.txt_log.setAccessibleDescription(t("a11y_log_desc"))
+        self.txt_log.setPlaceholderText(t("a11y_log_placeholder"))
 
     def apply_styles(self):
         """Apply dark Fusion palette and custom stylesheet to the application."""
@@ -1308,7 +1473,7 @@ class MainWindow(QMainWindow):
         palette.setColor(QPalette.ColorRole.HighlightedText, Qt.GlobalColor.black)
         QApplication.setPalette(palette)
 
-        # Stylesheet for specific widgets
+        # Stylesheet for specific widgets (WCAG AA contrast & keyboard focus rings)
         self.setStyleSheet("""
             QPushButton {
                 background-color: #444;
@@ -1335,9 +1500,18 @@ class MainWindow(QMainWindow):
                 font-weight: bold;
             }
             QPushButton#CancelButton:hover { background-color: #d32f2f; }
-            QPushButton:disabled {
-                background-color: #333;
-                color: #777;
+            QPushButton:disabled,
+            QPushButton#StartButton:disabled,
+            QPushButton#CancelButton:disabled {
+                background-color: #2c2c2c;
+                color: #b5b5b5;
+                border: 1px solid #4a4a4a;
+            }
+
+            QPushButton:focus,
+            QComboBox:focus,
+            QTextEdit:focus {
+                border: 2px solid #64b5f6;
             }
 
             QFrame#OptionsFrame {
@@ -1357,7 +1531,13 @@ class MainWindow(QMainWindow):
 
     def select_file(self):
         """Open a file dialog and store the selected genotype file path."""
-        fname, _ = QFileDialog.getOpenFileName(self, "Genotype-Datei wählen", "", "Genotype Files (*.txt *.csv *.tsv);;All Files (*)")
+        t = self.translator.t
+        fname, _ = QFileDialog.getOpenFileName(
+            self,
+            t("Genotype-Datei wählen"),
+            "",
+            t("file_dialog_filter"),
+        )
         if fname:
             self.file_path = fname
             self.lbl_file.setText(os.path.basename(fname))
@@ -1388,8 +1568,9 @@ class MainWindow(QMainWindow):
 
     def start_process(self):
         """Validate inputs and start the ConversionWorker thread."""
+        t = self.translator.t
         if not self.file_path:
-            QMessageBox.warning(self, "Fehler", "Bitte zuerst eine Datei auswählen.")
+            QMessageBox.warning(self, t("Fehler"), t("Bitte zuerst eine Datei auswählen."))
             return
 
         self.txt_log.clear()
@@ -1398,15 +1579,17 @@ class MainWindow(QMainWindow):
         self.btn_file.setEnabled(False)
         self.btn_cancel.setEnabled(True)
 
-        # Worker Setup
-        sex = self.combo_sex.currentText()
-        build = self.combo_build.currentText()
+        # Worker Setup (always pass canonical itemData values)
+        sex = self.combo_sex.currentData() or self.combo_sex.currentText()
+        build = self.combo_build.currentData() or self.combo_build.currentText()
 
-        self.worker = ConversionWorker(self.file_path, sex, build, self.cache)
+        self.worker = ConversionWorker(
+            self.file_path, sex, build, self.cache, translator=self.translator
+        )
         self.worker.log_signal.connect(self.log)
         self.worker.progress_signal.connect(self.progress_bar.setValue)
-        self.worker.error_signal.connect(lambda e: QMessageBox.critical(self, "Fehler", e))
-        self.worker.finished_signal.connect(lambda m: QMessageBox.information(self, "Fertig", m))
+        self.worker.error_signal.connect(lambda e: QMessageBox.critical(self, t("Fehler"), e))
+        self.worker.finished_signal.connect(lambda m: QMessageBox.information(self, t("Fertig"), m))
 
         # Cleanup nach Ende (egal ob Erfolg oder Fehler)
         self.worker.finished.connect(self.process_finished)
@@ -1417,7 +1600,7 @@ class MainWindow(QMainWindow):
     def cancel_process(self):
         """Request the running worker to stop gracefully."""
         if self.worker and self.worker.isRunning():
-            self.log("🛑 Abbruch angefordert...")
+            self.log(self.translator.t("🛑 Abbruch angefordert..."))
             self.worker.stop()
             # Wir lassen den Thread 'gracefully' auslaufen, daher kein terminate()
             self.btn_cancel.setEnabled(False)
@@ -1502,13 +1685,14 @@ def run_cli(args):
 def launch_gui():
     """Start the desktop GUI."""
     app = QApplication([sys.argv[0]])
-    if os.path.exists(APP_ICON_PATH):
-        icon = QIcon(APP_ICON_PATH)
+    icon_path = _resolve_app_icon_path()
+    if os.path.exists(icon_path):
+        icon = QIcon(icon_path)
         if not icon.isNull():
             app.setWindowIcon(icon)
     window = MainWindow()
-    if os.path.exists(APP_ICON_PATH):
-        icon = QIcon(APP_ICON_PATH)
+    if os.path.exists(icon_path):
+        icon = QIcon(icon_path)
         if not icon.isNull():
             window.setWindowIcon(icon)
     window.show()

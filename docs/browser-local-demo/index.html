@@ -60,19 +60,20 @@
 
     <section class="card">
       <h2>Ergebnis</h2>
-      <div id="status-banner" class="status info">
+      <div id="status-banner" class="status info" role="status" aria-live="polite">
         Noch nichts geprüft.
       </div>
       <div id="summary" class="summary"></div>
-      <div id="warnings" class="warnings"></div>
+      <div id="warnings" class="warnings" aria-live="polite"></div>
       <div class="table-wrap">
         <table>
+          <caption class="sr-only">Vorschau der erkannten Genotyp-Zeilen</caption>
           <thead>
             <tr>
-              <th>rsID</th>
-              <th>Chromosom</th>
-              <th>Position</th>
-              <th>Genotyp</th>
+              <th scope="col">rsID</th>
+              <th scope="col">Chromosom</th>
+              <th scope="col">Position</th>
+              <th scope="col">Genotyp</th>
             </tr>
           </thead>
           <tbody id="preview-body">

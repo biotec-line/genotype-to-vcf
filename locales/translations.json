@@ -53,7 +53,7 @@
     "es": "📁 Abrir archivo de genotipo",
     "zh": "📁 打开基因型文件",
     "ja": "📁 遺伝型ファイルを開く",
-    "ru": "📁 Открыть генотип-файл"
+    "ru": "📁 Открыть файл генотипа"
   },
   "🚀 Konvertierung Starten": {
     "de": "🚀 Konvertierung Starten",
@@ -70,5 +70,325 @@
     "zh": "🛑 取消",
     "ja": "🛑 キャンセル",
     "ru": "🛑 Отмена"
+  },
+  "app_title": {
+    "de": "Genotype → VCF Pro Converter",
+    "en": "Genotype → VCF Pro Converter",
+    "es": "Genotype → VCF Pro Converter",
+    "zh": "Genotype → VCF Pro 转换器",
+    "ja": "Genotype → VCF Pro コンバーター",
+    "ru": "Конвертер Genotype → VCF Pro"
+  },
+  "Genotype-Datei wählen": {
+    "de": "Genotype-Datei wählen",
+    "en": "Select Genotype File",
+    "es": "Seleccionar archivo de genotipo",
+    "zh": "选择基因型文件",
+    "ja": "遺伝型ファイルを選択",
+    "ru": "Выберите файл генотипа"
+  },
+  "file_dialog_filter": {
+    "de": "Genotyp-Dateien (*.txt *.csv *.tsv);;Alle Dateien (*)",
+    "en": "Genotype Files (*.txt *.csv *.tsv);;All Files (*)",
+    "es": "Archivos de genotipo (*.txt *.csv *.tsv);;Todos los archivos (*)",
+    "zh": "基因型文件 (*.txt *.csv *.tsv);;所有文件 (*)",
+    "ja": "遺伝型ファイル (*.txt *.csv *.tsv);;すべてのファイル (*)",
+    "ru": "Файлы генотипов (*.txt *.csv *.tsv);;Все файлы (*)"
+  },
+  "Geschlecht:": {
+    "de": "Geschlecht:",
+    "en": "Sex:",
+    "es": "Sexo:",
+    "zh": "性别：",
+    "ja": "性別:",
+    "ru": "Пол:"
+  },
+  "Build:": {
+    "de": "Build:",
+    "en": "Build:",
+    "es": "Ensamblaje:",
+    "zh": "参考版本：",
+    "ja": "ビルド:",
+    "ru": "Сборка:"
+  },
+  "Sprache:": {
+    "de": "Sprache:",
+    "en": "Language:",
+    "es": "Idioma:",
+    "zh": "语言：",
+    "ja": "言語:",
+    "ru": "Язык:"
+  },
+  "Auto": {
+    "de": "Auto",
+    "en": "Auto",
+    "es": "Automático",
+    "zh": "自动",
+    "ja": "自動",
+    "ru": "Авто"
+  },
+  "female": {
+    "de": "Weiblich",
+    "en": "Female",
+    "es": "Femenino",
+    "zh": "女性",
+    "ja": "女性",
+    "ru": "Женский"
+  },
+  "male": {
+    "de": "Männlich",
+    "en": "Male",
+    "es": "Masculino",
+    "zh": "男性",
+    "ja": "男性",
+    "ru": "Мужской"
+  },
+  "Fehler": {
+    "de": "Fehler",
+    "en": "Error",
+    "es": "Error",
+    "zh": "错误",
+    "ja": "エラー",
+    "ru": "Ошибка"
+  },
+  "Fertig": {
+    "de": "Fertig",
+    "en": "Done",
+    "es": "Listo",
+    "zh": "完成",
+    "ja": "完了",
+    "ru": "Готово"
+  },
+  "Bitte zuerst eine Datei auswählen.": {
+    "de": "Bitte zuerst eine Datei auswählen.",
+    "en": "Please select a file first.",
+    "es": "Por favor, seleccione un archivo primero.",
+    "zh": "请先选择一个文件。",
+    "ja": "最初にファイルを選択してください。",
+    "ru": "Сначала выберите файл."
+  },
+  "🛑 Abbruch angefordert...": {
+    "de": "🛑 Abbruch angefordert...",
+    "en": "🛑 Cancellation requested...",
+    "es": "🛑 Cancelación solicitada...",
+    "zh": "🛑 已请求取消...",
+    "ja": "🛑 キャンセルを要求しました...",
+    "ru": "🛑 Запрошена отмена..."
+  },
+  "Vorgang abgebrochen.": {
+    "de": "Vorgang abgebrochen.",
+    "en": "Operation cancelled.",
+    "es": "Operación cancelada.",
+    "zh": "操作已取消。",
+    "ja": "処理がキャンセルされました。",
+    "ru": "Операция отменена."
+  },
+  "conversion_finished_msg": {
+    "de": "Erfolg! {written} Varianten geschrieben.\nDatei: {output_path}",
+    "en": "Success! {written} variants written.\nFile: {output_path}",
+    "es": "¡Éxito! Se escribieron {written} variantes.\nArchivo: {output_path}",
+    "zh": "成功！已写入 {written} 个变异位点。\n文件：{output_path}",
+    "ja": "完了しました！{written} 件のバリアントを出力しました。\nファイル: {output_path}",
+    "ru": "Готово! Записано вариантов: {written}.\nФайл: {output_path}"
+  },
+  "a11y_btn_file_name": {
+    "de": "Genotype-Datei öffnen",
+    "en": "Open Genotype File",
+    "es": "Abrir archivo de genotipo",
+    "zh": "打开基因型文件",
+    "ja": "遺伝型ファイルを開く",
+    "ru": "Открыть файл генотипа"
+  },
+  "a11y_btn_file_desc": {
+    "de": "Öffnet einen Dateidialog zur Auswahl einer lokalen 23andMe- oder DTC-Genotypdatei (Tastenkürzel Strg+O).",
+    "en": "Opens a file dialog to choose a local 23andMe or DTC genotype file (shortcut Ctrl+O).",
+    "es": "Abre un diálogo para seleccionar un archivo local de genotipo 23andMe o DTC (atajo Ctrl+O).",
+    "zh": "打开文件选择框以选择本地 23andMe 或 DTC 基因型文件（快捷键 Ctrl+O）。",
+    "ja": "ローカルの 23andMe または DTC 遺伝型ファイルを選択するダイアログを開きます（Ctrl+O）。",
+    "ru": "Открывает диалог выбора локального файла генотипа 23andMe или DTC (сочетание клавиш Ctrl+O)."
+  },
+  "a11y_btn_file_tip": {
+    "de": "Genotypdatei (.txt, .csv, .tsv) auswählen (Strg+O)",
+    "en": "Select genotype file (.txt, .csv, .tsv) (Ctrl+O)",
+    "es": "Seleccionar archivo de genotipo (.txt, .csv, .tsv) (Ctrl+O)",
+    "zh": "选择基因型文件 (.txt, .csv, .tsv) (Ctrl+O)",
+    "ja": "遺伝型ファイル (.txt, .csv, .tsv) を選択 (Ctrl+O)",
+    "ru": "Выбрать файл генотипа (.txt, .csv, .tsv) (Ctrl+O)"
+  },
+  "a11y_lbl_file_name": {
+    "de": "Ausgewählte Eingabedatei",
+    "en": "Selected input file",
+    "es": "Archivo de entrada seleccionado",
+    "zh": "已选择的输入文件",
+    "ja": "選択された入力ファイル",
+    "ru": "Выбранный входной файл"
+  },
+  "a11y_lbl_file_desc": {
+    "de": "Zeigt den Dateinamen der aktuell ausgewählten Genotypdatei an.",
+    "en": "Displays the filename of the currently selected genotype file.",
+    "es": "Muestra el nombre del archivo de genotipo seleccionado actualmente.",
+    "zh": "显示当前所选基因型文件的文件名。",
+    "ja": "現在選択されている遺伝型ファイルの名前を表示します。",
+    "ru": "Отображает имя текущего выбранного файла генотипа."
+  },
+  "a11y_combo_sex_name": {
+    "de": "Biologisches Geschlecht für X/Y-Ploidie",
+    "en": "Biological sex for X/Y ploidy",
+    "es": "Sexo biológico para ploidía X/Y",
+    "zh": "用于 X/Y 倍性的生物学性别",
+    "ja": "X/Y 倍数性のための生物学的性別",
+    "ru": "Биологический пол для плоидности X/Y"
+  },
+  "a11y_combo_sex_desc": {
+    "de": "Legt fest, ob das Geschlecht automatisch erkannt oder fest für die Ploidie-Berechnung gesetzt wird.",
+    "en": "Selects automatic sex detection or a fixed sex for VCF ploidy calculation.",
+    "es": "Elige la detección automática de sexo o un sexo fijo para el cálculo de ploidía.",
+    "zh": "选择自动检测性别或手动指定用于 VCF 倍性计算的性别。",
+    "ja": "VCF 倍数性計算の性別を自動検出または手動指定から選択します。",
+    "ru": "Выбор автоопределения пола или явного указания для расчёта плоидности VCF."
+  },
+  "a11y_combo_sex_tip": {
+    "de": "Geschlecht für X/Y-Chromosomen-Ploidie wählen",
+    "en": "Choose biological sex for X/Y chromosome ploidy",
+    "es": "Elegir sexo biológico para la ploidía de cromosomas X/Y",
+    "zh": "选择用于 X/Y 染色体倍性的生物学性别",
+    "ja": "X/Y 染色体の倍数性に使う性別を選択",
+    "ru": "Выбрать биологический пол для плоидности X/Y"
+  },
+  "a11y_combo_build_name": {
+    "de": "Referenzgenom-Build",
+    "en": "Reference genome build",
+    "es": "Ensamblaje del genoma de referencia",
+    "zh": "参考基因组版本",
+    "ja": "参照ゲノムビルド",
+    "ru": "Сборка референсного генома"
+  },
+  "a11y_combo_build_desc": {
+    "de": "Wählt automatische Build-Erkennung oder explizit GRCh37 bzw. GRCh38.",
+    "en": "Chooses automatic genome build detection or explicit GRCh37 / GRCh38.",
+    "es": "Selecciona detección automática del ensamblaje o explícitamente GRCh37 / GRCh38.",
+    "zh": "选择自动识别基因组版本或手动指定 GRCh37 / GRCh38。",
+    "ja": "参照ゲノムビルドの自動検出または GRCh37 / GRCh38 を選択します。",
+    "ru": "Выбор автоопределения сборки генома или явно GRCh37 / GRCh38."
+  },
+  "a11y_combo_build_tip": {
+    "de": "Referenz-Build (Auto, GRCh37 oder GRCh38) festlegen",
+    "en": "Set reference genome build (Auto, GRCh37, or GRCh38)",
+    "es": "Definir ensamblaje de referencia (Auto, GRCh37 o GRCh38)",
+    "zh": "设置参考基因组版本（自动、GRCh37 或 GRCh38）",
+    "ja": "参照ビルドを指定 (自動, GRCh37, GRCh38)",
+    "ru": "Указать сборку генома (Авто, GRCh37 или GRCh38)"
+  },
+  "a11y_combo_lang_name": {
+    "de": "Oberflächensprache",
+    "en": "Interface language",
+    "es": "Idioma de la interfaz",
+    "zh": "界面语言",
+    "ja": "表示言語",
+    "ru": "Язык интерфейса"
+  },
+  "a11y_combo_lang_desc": {
+    "de": "Schaltet alle sichtbaren Beschriftungen der Benutzeroberfläche sofort um.",
+    "en": "Switches all visible user interface labels immediately.",
+    "es": "Cambia de inmediato todas las etiquetas visibles de la interfaz.",
+    "zh": "立即切换所有可见界面的语言。",
+    "ja": "画面上のすべての表示テキストを即座に切り替えます。",
+    "ru": "Мгновенно переключает язык всех видимых элементов интерфейса."
+  },
+  "a11y_combo_lang_tip": {
+    "de": "Sprache der Benutzeroberfläche wählen",
+    "en": "Choose interface language",
+    "es": "Elegir el idioma de la interfaz",
+    "zh": "选择界面语言",
+    "ja": "表示言語を選択",
+    "ru": "Выбрать язык интерфейса"
+  },
+  "a11y_btn_start_name": {
+    "de": "Konvertierung starten",
+    "en": "Start conversion",
+    "es": "Iniciar conversión",
+    "zh": "开始转换",
+    "ja": "変換を開始",
+    "ru": "Начать конвертацию"
+  },
+  "a11y_btn_start_desc": {
+    "de": "Startet die lokale Konvertierung der gewählten Genotypdatei in VCF 4.2 (Tastenkürzel Strg+Eingabe).",
+    "en": "Starts local conversion of the selected genotype file to VCF 4.2 (shortcut Ctrl+Enter).",
+    "es": "Inicia la conversión local del archivo seleccionado a VCF 4.2 (atajo Ctrl+Intro).",
+    "zh": "开始将所选基因型文件本地转换为 VCF 4.2（快捷键 Ctrl+Enter）。",
+    "ja": "選択した遺伝型ファイルの VCF 4.2 ローカル変換を開始します（Ctrl+Enter）。",
+    "ru": "Запускает локальную конвертацию выбранного файла генотипа в VCF 4.2 (Ctrl+Enter)."
+  },
+  "a11y_btn_start_tip": {
+    "de": "Konvertierung nach VCF 4.2 starten (Strg+Eingabe)",
+    "en": "Start VCF 4.2 conversion (Ctrl+Enter)",
+    "es": "Iniciar conversión a VCF 4.2 (Ctrl+Intro)",
+    "zh": "开始 VCF 4.2 转换 (Ctrl+Enter)",
+    "ja": "VCF 4.2 変換を開始 (Ctrl+Enter)",
+    "ru": "Запустить конвертацию в VCF 4.2 (Ctrl+Enter)"
+  },
+  "a11y_btn_cancel_name": {
+    "de": "Laufende Konvertierung abbrechen",
+    "en": "Cancel running conversion",
+    "es": "Cancelar conversión en curso",
+    "zh": "取消正在进行的转换",
+    "ja": "実行中の変換をキャンセル",
+    "ru": "Отменить текущую конвертацию"
+  },
+  "a11y_btn_cancel_desc": {
+    "de": "Fordert einen sicheren Abbruch des laufenden Hintergrundvorgangs an (Tastenkürzel Esc).",
+    "en": "Requests graceful cancellation of the running background task (shortcut Esc).",
+    "es": "Solicita la cancelación segura de la tarea en segundo plano (atajo Esc).",
+    "zh": "请求安全取消正在进行的后台任务（快捷键 Esc）。",
+    "ja": "実行中のバックグラウンド処理を安全に中止します（Esc）。",
+    "ru": "Запрашивает корректную отмену фоновой задачи (клавиша Esc)."
+  },
+  "a11y_btn_cancel_tip": {
+    "de": "Laufende Konvertierung sicher abbrechen (Esc)",
+    "en": "Cancel running conversion safely (Esc)",
+    "es": "Cancelar de forma segura la conversión actual (Esc)",
+    "zh": "安全取消当前转换 (Esc)",
+    "ja": "現在の変換を安全にキャンセル (Esc)",
+    "ru": "Безопасно отменить текущую конвертацию (Esc)"
+  },
+  "a11y_progress_name": {
+    "de": "Konvertierungsfortschritt",
+    "en": "Conversion progress",
+    "es": "Progreso de la conversión",
+    "zh": "转换进度",
+    "ja": "変換の進行状況",
+    "ru": "Прогресс конвертации"
+  },
+  "a11y_progress_desc": {
+    "de": "Zeigt den aktuellen Fortschritt der VCF-Erstellung in Prozent an.",
+    "en": "Displays the current VCF creation progress in percent.",
+    "es": "Muestra el progreso actual de la creación del archivo VCF en porcentaje.",
+    "zh": "以百分比显示当前 VCF 生成进度。",
+    "ja": "現在の VCF 作成の進捗状況をパーセントで表示します。",
+    "ru": "Отображает текущий прогресс создания VCF в процентах."
+  },
+  "a11y_log_name": {
+    "de": "Status- und Verlaufsprotokoll",
+    "en": "Status and progress log",
+    "es": "Registro de estado y progreso",
+    "zh": "状态与进度日志",
+    "ja": "ステータスと進行状況ログ",
+    "ru": "Журнал состояния и хода работы"
+  },
+  "a11y_log_desc": {
+    "de": "Schreibgeschütztes Protokollfeld für Meldungen zur Build-Erkennung, Referenzauflösung und VCF-Ausgabe.",
+    "en": "Read-only log output for build detection, reference lookup, and VCF writing status.",
+    "es": "Registro de solo lectura para detección de ensamblaje, referencias y escritura VCF.",
+    "zh": "用于显示参考版本识别、碱基查询和 VCF 写入状态的只读日志区。",
+    "ja": "ビルド検出、参照解決、VCF 出力のメッセージを表示する読み取り専用ログです。",
+    "ru": "Журнал только для чтения с сообщениями о сборке, поиске референса и записи VCF."
+  },
+  "a11y_log_placeholder": {
+    "de": "Statusmeldungen erscheinen hier nach dem Start der Konvertierung...",
+    "en": "Status messages will appear here once conversion starts...",
+    "es": "Los mensajes de estado aparecerán aquí al iniciar la conversión...",
+    "zh": "开始转换后，状态信息将显示在此处...",
+    "ja": "変換を開始するとここにステータスメッセージが表示されます...",
+    "ru": "Сообщения о ходе работы появятся здесь после запуска конвертации..."
   }
-}
+}

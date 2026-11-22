@@ -1,18 +1,21 @@
 """
-manage_translations.py - Auto-Scanner fuer deutsche GUI-Strings
-================================================================
-Findet deutsche Strings in .py-Dateien und pflegt locales/translations.json.
+manage_translations.py - Auto-Scanner und Paritätsprüfer für GUI-Strings
+=========================================================================
+Findet deutsche Strings in .py-Dateien, pflegt locales/translations.json und
+prüft im --check-Modus auf lückenlose 6-Sprachen-Parität (de, en, es, zh, ja, ru).
 
 Verwendung:
-    python manage_translations.py [--dir PROJEKTVERZEICHNIS]
+    python manage_translations.py [PROJEKTVERZEICHNIS]
+    python manage_translations.py --check [--dir PROJEKTVERZEICHNIS]
 """
 
+import argparse
 import json
-import re
 import os
-import sys
+import re
 
 TRANSLATION_FILE = "locales/translations.json"
+SUPPORTED_LANGUAGES = ("de", "en", "es", "zh", "ja", "ru")
 
 STRING_PATTERNS = [
     re.compile(r'text\s*=\s*"([^"]+)"'),
@@ -39,7 +42,7 @@ def is_german(text):
 
 def find_german_strings(source_dir):
     german_strings = set()
-    skip_dirs = {'build', 'dist', 'venv', '.venv', '__pycache__', 'releases'}
+    skip_dirs = {"build", "dist", "venv", ".venv", "__pycache__", "releases"}
 
     for root, dirs, files in os.walk(source_dir):
         dirs[:] = [d for d in dirs if d not in skip_dirs]
@@ -56,6 +59,33 @@ def find_german_strings(source_dir):
                         if is_german(match):
                             german_strings.add(match.strip())
     return german_strings
+
+
+def check_translations(source_dir="."):
+    """Validate that locales/translations.json exists and covers all 6 languages."""
+    trans_file = os.path.join(source_dir, TRANSLATION_FILE)
+    if not os.path.isfile(trans_file):
+        return {"ok": False, "total": 0, "missing": [f"<missing file: {trans_file}>"]}
+
+    try:
+        with open(trans_file, "r", encoding="utf-8") as f:
+            translations = json.load(f)
+    except (json.JSONDecodeError, OSError) as exc:
+        return {"ok": False, "total": 0, "missing": [f"<invalid json: {exc}>"]}
+
+    if not isinstance(translations, dict) or not translations:
+        return {"ok": False, "total": 0, "missing": ["<empty catalog>"]}
+
+    missing = []
+    for key, entry in sorted(translations.items()):
+        if not isinstance(entry, dict):
+            missing.append(f"{key}: invalid entry")
+            continue
+        for lang in SUPPORTED_LANGUAGES:
+            if not str(entry.get(lang, "")).strip():
+                missing.append(f"{key}[{lang}]")
+
+    return {"ok": not missing, "total": len(translations), "missing": missing}
 
 
 def manage_translations(source_dir="."):
@@ -81,6 +111,7 @@ def manage_translations(source_dir="."):
     os.makedirs(os.path.dirname(trans_file), exist_ok=True)
     with open(trans_file, "w", encoding="utf-8") as f:
         json.dump(translations, f, indent=2, ensure_ascii=False)
+        f.write("\n")
 
     if added:
         print(f"[+] {len(added)} neue Eintraege hinzugefuegt:")
@@ -100,6 +131,25 @@ def manage_translations(source_dir="."):
     print(f"\n[i] Gesamt: {len(translations)} Strings in {trans_file}")
 
 
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Manage or verify 6-language GUI translations.")
+    parser.add_argument("legacy_dir", nargs="?", default=None, help="Optionales Zielverzeichnis.")
+    parser.add_argument("--dir", dest="target_dir", default=".", help="Projektverzeichnis.")
+    parser.add_argument("--check", action="store_true", help="Prüft 6-Sprachen-Parität (Exit 0/1).")
+    args = parser.parse_args(argv)
+
+    source_dir = args.legacy_dir or args.target_dir
+    if args.check:
+        report = check_translations(source_dir)
+        if report["ok"]:
+            print(f"[ok] 6-Sprachen-Parität vollständig ({report['total']} Keys x 6 Sprachen).")
+            return 0
+        print(f"[!] Fehlende Übersetzungen ({len(report['missing'])}): {', '.join(report['missing'][:20])}")
+        return 1
+
+    manage_translations(source_dir)
+    return 0
+
+
 if __name__ == "__main__":
-    target = sys.argv[1] if len(sys.argv) > 1 else "."
-    manage_translations(target)
+    raise SystemExit(main())

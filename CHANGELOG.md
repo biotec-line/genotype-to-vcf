@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added / Fixed (2026-11-22)
+- Wired `translator.py` (`v1.2.0`) and `locales/translations.json` (49 keys across `de`, `en`, `es`, `zh`, `ja`, `ru`) into `Make23toVCF3.py` (`MainWindow` + `ConversionWorker`), adding a live language selector (`combo_lang`) while keeping canonical internal `itemData` values (`Auto`, `female`, `male`, `GRCh37`, `GRCh38`).
+- Bundled `locales/translations.json` in `23toVCF_Pro.spec` and added `_resource_base_dir()` for PyInstaller compatibility.
+- Added `--check` 6-language parity validation mode to `manage_translations.py`.
+- Resolved GUI and browser-demo UX/accessibility findings: `setBuddy()`, localized `accessibleName`/`accessibleDescription`/`toolTip` metadata, keyboard navigation (`setTabOrder` + `Ctrl+O`/`Ctrl+Return`/`Escape`), WCAG AA contrast for disabled buttons (`#b5b5b5` on `#2c2c2c`) and placeholder label (`#c0c0c0`), visible `:focus`/`:focus-visible` outlines, accessible file input (`docs/browser-local-demo/demo.css`), `role="status"`/`aria-live="polite"`, and `<caption class="sr-only">` + `<th scope="col">`.
+- Added `tests/test_gui_i18n_and_a11y.py` covering 6-language GUI switching, canonical `itemData` preservation, A11y metadata, QSS contrast/focus rules, and browser-demo A11y markup.
+
 ### Changed / Hygiene (2026-11-18)
 - Untracked `MARKETING-LOG.txt` (`git rm --cached`) and excluded it plus agent/staging/temp artifacts in `.gitignore`.
 - Standardized `pyproject.toml` to PEP 639 (`license = "MIT"` without a conflicting OSI license classifier), added `[tool.setuptools] py-modules`, and updated `[project.urls]`.

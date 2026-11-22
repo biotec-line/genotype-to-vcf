@@ -82,7 +82,7 @@ Hilfreiche Suchphrasen sind **23andMe-Rohdaten zu VCF**, **DTC-DNA-Genotyp-Konve
 | **Persistenter Cache** | Lokaler Cache für schnelle wiederholte Konvertierungen |
 | **Adaptives Threading** | 4-200 Worker-Threads, Ziel 70% CPU-Auslastung |
 | **FASTA-Referenz** | Optionale lokale FASTA-Datei für Offline-REF-Abfrage inklusive `MT`/`chrM`-Aliasauflösung |
-| **Moderne GUI** | PySide6 Dark Theme mit Fortschrittsanzeige und Abbruch-Option |
+| **Moderne GUI** | PySide6 Dark Theme mit 6-Sprachen-Umschalter (DE/EN/ES/ZH/JA/RU), Tastaturkürzeln, Fortschrittsanzeige und Abbruch-Option |
 
 ## Unterstützte Eingabeformate
 
