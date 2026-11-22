@@ -5,7 +5,7 @@ runs that create ``cache.json``, VCFs, FASTA files or a built EXE do not fail:
 
 - No personal genomic data (.vcf, genome_*) is tracked.
 - No build binaries (.exe), reference files (.fa) or cache files are tracked.
-- No hardcoded absolute user paths (C:\\Users\\) in tracked Python files.
+- No hardcoded absolute user-home paths in tracked Python files.
 - LICENSE and THIRD_PARTY_LICENSES.txt are present and non-empty.
 """
 
@@ -45,7 +45,7 @@ def test_no_build_artifacts_or_caches_tracked():
 
 
 def test_no_hardcoded_user_paths_in_tracked_python_code():
-    user_path_pattern = re.compile(r"C:[\\/]Users[\\/]", re.IGNORECASE)
+    user_path_pattern = re.compile(r"C:[\\/]+" + r"Users[\\/]", re.IGNORECASE)
     violations = []
     for name in tracked_files():
         if not name.endswith(".py"):

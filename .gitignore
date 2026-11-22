@@ -109,13 +109,23 @@ token.json
 *.db
 keyring/
 
-# Claude Code local settings
+# Claude Code & agent local settings
 .claude/
+.codex/
+.gemini/
+.agent/
+tmpclaude-*
 # ---- Interne Steuerungsdateien ----
 DECISIONS.md
 PORTIERUNGSPLAN.md
 TODO.md
 DONE.md
+BEFUNDE.md
+STORE_READINESS.md
+STORE_CONTRACT.md
+MARKETING-LOG.txt
+*MARKETING-LOG.txt
+*STATUS-LOG.txt
 
 # Multi-Host Cloud-Sync, Lock & Cache Guards
 *conflicted copy*
@@ -147,7 +157,9 @@ uv.lock
 .nyc_output/
 .tox/
 .pytest_tmp/
+.pytest_temp/
 .ruff_cache/
+*.egg-info/
 
 # Interne Status-/Planungsanalyse (nicht fuer die Veroeffentlichung gedacht)
 Feature_Analyse_23toVCF.md

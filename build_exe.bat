@@ -8,7 +8,7 @@ if errorlevel 1 (
     exit /b 1
 )
 echo Baue 23toVCF_Pro.exe...
-if not defined LOCAL_BUILD set "LOCAL_BUILD=C:\_Local_DEV\codex_build\23tovcf_pro"
+if not defined LOCAL_BUILD set "LOCAL_BUILD=%LOCALAPPDATA%\23tovcf_pro_build"
 set "LOCAL_WORK=%LOCAL_BUILD%\build"
 set "LOCAL_DIST=%LOCAL_BUILD%\dist"
 python -c "import PyInstaller" >nul 2>&1
