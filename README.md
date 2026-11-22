@@ -84,7 +84,7 @@ Useful discovery phrases include **23andMe raw data to VCF**, **DTC DNA genotype
 | **Persistent Cache** | Local cache for fast repeated conversions |
 | **Adaptive Threading** | 4-200 worker threads, targeting 70% CPU usage |
 | **FASTA Reference** | Optional local FASTA for offline REF base lookup, including `MT`/`chrM` alias resolution |
-| **Modern GUI** | PySide6 dark theme with progress tracking and cancel support |
+| **Modern GUI** | PySide6 dark theme with 6-language switcher (DE/EN/ES/ZH/JA/RU), keyboard shortcuts, progress tracking, and cancel support |
 
 ### Supported Input Formats
 

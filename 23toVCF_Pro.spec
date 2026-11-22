@@ -5,7 +5,7 @@ a = Analysis(
     ['Make23toVCF3.py'],
     pathex=[],
     binaries=[],
-    datas=[('23toVCF_Pro.ico', '.')],
+    datas=[('23toVCF_Pro.ico', '.'), ('locales/translations.json', 'locales')],
     hiddenimports=[
         'PySide6.QtWidgets',
         'PySide6.QtCore',
