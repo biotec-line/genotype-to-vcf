@@ -91,6 +91,22 @@ def test_pep621_pyproject_metadata_and_version_freeze():
     assert "Third-Party Licenses" in urls
     assert "Marketing Log" not in urls
 
+    scripts = project.get("scripts", {})
+    assert scripts.get("genotype-to-vcf") == "Make23toVCF3:main"
+
+    declared_deps = {
+        re.split(r"[><=~!\[]", dep)[0].strip().lower()
+        for dep in project.get("dependencies", [])
+    }
+    req_deps = {
+        re.split(r"[><=~!\[]", line)[0].strip().lower()
+        for line in (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+    assert req_deps <= declared_deps, (
+        f"pyproject.toml dependencies {declared_deps} must cover requirements.txt {req_deps}"
+    )
+
     pytest_opts = data.get("tool", {}).get("pytest", {}).get("ini_options", {})
     assert "--basetemp=" not in pytest_opts.get("addopts", "")
     conftest_content = (ROOT / "conftest.py").read_text(encoding="utf-8")
@@ -183,6 +199,10 @@ def test_p022_llm_and_skill_entrypoints():
     assert "Make23toVCF3.py" in skill_text
     assert "--input" in skill_text
     assert "--detect-build" in skill_text
+    assert "--preflight" in skill_text
+    assert "--fasta" in skill_text
+    assert "--cache" in skill_text
+    assert "--version" in skill_text
 
     llm_text = (ROOT / "llm.txt").read_text(encoding="utf-8")
     assert "llms.txt" in llm_text
@@ -190,7 +210,7 @@ def test_p022_llm_and_skill_entrypoints():
     llms_text = (ROOT / "llms.txt").read_text(encoding="utf-8")
     assert "SKILL.md" in llms_text
     assert "1.0.3" in llms_text
-    assert "Last-checked: 2026-11-18" in llms_text
+    assert "Last-checked: 2026-11-23" in llms_text
 
     readme_en = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (ROOT / "README_de.md").read_text(encoding="utf-8")

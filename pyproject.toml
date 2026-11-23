@@ -43,8 +43,12 @@ classifiers = [
 dependencies = [
     "PySide6>=6.5.0",
     "pyfaidx>=0.7.0",
-    "requests>=2.28.0",
+    "requests>=2.33.1",
+    "psutil>=5.9.0",
 ]
+
+[project.scripts]
+genotype-to-vcf = "Make23toVCF3:main"
 
 [project.urls]
 Homepage = "https://github.com/biotec-line/genotype-to-vcf"

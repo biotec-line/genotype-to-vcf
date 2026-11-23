@@ -172,10 +172,10 @@ Install and verify https://github.com/biotec-line/genotype-to-vcf (prefer a rele
 #### Browser-Local Demo
 
 For a quick privacy-preserving preflight, open `docs/browser-local-demo/index.html`
-locally in your browser. The demo:
+locally in your browser (6 languages: DE/EN/ES/ZH/JA/RU, enforced `connect-src 'none'` CSP). The demo:
 
-- reads a selected or pasted genotype export entirely locally
-- checks for the expected four-column TSV/CSV shape
+- reads a selected or pasted genotype export entirely locally (sampling the first 2 MiB on huge exports so the browser tab stays responsive)
+- checks for the expected four-column TSV, comma-CSV, or semicolon-CSV shape (including numerical DTC chromosome codes `23..26` and explicit 5-column AncestryDNA hints)
 - shows a small read-only preview plus warnings for unsupported layouts
 
 It does **not** upload files, call APIs, store genetic data, or generate a VCF in
@@ -183,14 +183,19 @@ the browser. The desktop app and CLI remain the only supported conversion paths.
 
 #### CLI / Headless Usage
 
-For Linux/macOS source runs, batch workflows, or LLM-driven automation, the
-same conversion pipeline is also available without launching the GUI:
+For Linux/macOS source runs (including display-free servers without `PySide6`/EGL libraries), batch workflows, or LLM-driven automation, the
+same conversion pipeline is also available without launching the GUI (`python Make23toVCF3.py` or `genotype-to-vcf` after `pip install -e .`):
 
 ```bash
+python Make23toVCF3.py --version
+python Make23toVCF3.py --input sample.txt --preflight --json
 python Make23toVCF3.py --input sample.txt --build GRCh37 --sex female --output sample.vcf
+python Make23toVCF3.py --input sample.txt --build GRCh38 --sex female --fasta /data/ref/GRCh38.fa --cache ~/.cache/genotype-to-vcf/cache.json --output sample.vcf
 python Make23toVCF3.py --input sample.txt --detect-build
 ```
 
+- `--preflight [--json]` validates 4-column TSV/CSV/semicolon-CSV layout completely offline without reading/creating `cache.json` or emitting file paths/rsIDs.
+- `--fasta <path>` and `--cache <path>` let Linux/macOS workstations keep large reference FASTA files and caches outside the repository or read-only `site-packages` directory (protected against `--output` overwrite).
 - `--build Auto` and `--sex Auto` keep the existing auto-detection behavior.
 - `--build` is case-insensitive and also accepts `hg19` / `hg38` as aliases for `GRCh37` / `GRCh38`.
 - `--sex` is case-insensitive (`Auto`, `female`, `male`).
@@ -412,7 +417,7 @@ Hilfreiche Suchphrasen sind **23andMe-Rohdaten zu VCF**, **DTC-DNA-Genotyp-Konve
 | **Persistenter Cache** | Lokaler Cache für schnelle wiederholte Konvertierungen |
 | **Adaptives Threading** | 4-200 Worker-Threads, Ziel 70% CPU-Auslastung |
 | **FASTA-Referenz** | Optionale lokale FASTA-Datei für Offline-REF-Abfrage inklusive `MT`/`chrM`-Aliasauflösung |
-| **Moderne GUI** | PySide6 Dark Theme mit Fortschrittsanzeige und Abbruch-Option |
+| **Moderne GUI** | PySide6 Dark Theme mit 6-Sprachen-Umschalter (DE/EN/ES/ZH/JA/RU), Tastaturkürzeln, Fortschrittsanzeige und Abbruch-Option |
 
 ## Unterstützte Eingabeformate
 
@@ -500,10 +505,10 @@ Installiere und verifiziere https://github.com/biotec-line/genotype-to-vcf (Rele
 ### Browserlokale Demo
 
 Für einen schnellen datenschutzfreundlichen Vorabcheck kann
-`docs/browser-local-demo/index.html` lokal im Browser geöffnet werden. Die Demo:
+`docs/browser-local-demo/index.html` lokal im Browser geöffnet werden (6 Sprachen: DE/EN/ES/ZH/JA/RU, strikte `connect-src 'none'`-CSP). Die Demo:
 
-- liest eine ausgewählte oder eingefügte Genotyp-Datei vollständig lokal
-- prüft nur das erwartete Vier-Spalten-TSV/CSV-Format
+- liest eine ausgewählte oder eingefügte Genotyp-Datei vollständig lokal (mit 2-MiB-Stichprobengrenze bei sehr großen Dateien, damit der Browser-Tab flüssig bleibt)
+- prüft das erwartete Vier-Spalten-TSV-, Komma-CSV- oder Semikolon-CSV-Format (inkl. numerischer DTC-Chromosomencodes `23..26` und gezieltem 5-Spalten-AncestryDNA-Hinweis)
 - zeigt eine kleine read-only Vorschau und Hinweise auf nicht unterstützte Layouts
 
 Sie lädt **nichts** hoch, ruft keine APIs auf, speichert keine genetischen Daten
@@ -511,14 +516,19 @@ und erzeugt kein VCF im Browser. Produktive Konvertierung bleibt Desktop-App bzw
 
 ### CLI / Headless-Nutzung
 
-Für Linux-/macOS-Source-Starts, Batch-Workflows oder LLM-/Pipeline-Nutzung
-steht dieselbe Konvertierungslogik auch ohne GUI zur Verfügung:
+Für Linux-/macOS-Source-Starts (auch auf displayfreien Servern ohne `PySide6`/EGL-Bibliotheken), Batch-Workflows oder LLM-/Pipeline-Nutzung
+steht dieselbe Konvertierungslogik auch ohne GUI zur Verfügung (`python Make23toVCF3.py` bzw. `genotype-to-vcf` nach `pip install -e .`):
 
 ```bash
+python Make23toVCF3.py --version
+python Make23toVCF3.py --input sample.txt --preflight --json
 python Make23toVCF3.py --input sample.txt --build GRCh37 --sex female --output sample.vcf
+python Make23toVCF3.py --input sample.txt --build GRCh38 --sex female --fasta /data/ref/GRCh38.fa --cache ~/.cache/genotype-to-vcf/cache.json --output sample.vcf
 python Make23toVCF3.py --input sample.txt --detect-build
 ```
 
+- `--preflight [--json]` prüft Vier-Spalten-TSV/CSV/Semikolon-CSV rein lokal ohne `cache.json`-, FASTA- oder API-Zugriff und ohne Ausgabe von Dateipfaden oder rsIDs.
+- `--fasta <pfad>` und `--cache <pfad>` erlauben auf Linux-/macOS-Workstations die Ablage großer Referenzgenome und Caches außerhalb des Programm- bzw. `site-packages`-Ordners (geschützt gegen Überschreiben durch `--output`).
 - `--build Auto` und `--sex Auto` behalten die bestehende Auto-Erkennung bei.
 - `--build` ist nicht case-sensitiv und akzeptiert zusätzlich `hg19` / `hg38` als Alias für `GRCh37` / `GRCh38`.
 - `--sex` ist ebenfalls nicht case-sensitiv (`Auto`, `female`, `male`).

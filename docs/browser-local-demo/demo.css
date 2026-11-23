@@ -36,13 +36,40 @@ body {
   margin-bottom: 22px;
 }
 
+.hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
 .eyebrow {
-  margin: 0 0 8px;
+  margin: 0;
   color: var(--accent-2);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.78rem;
+}
+
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.lang-switcher select {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
 }
 
 h1,
@@ -116,7 +143,8 @@ button.secondary {
 button:focus-visible,
 .button:focus-within,
 textarea:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 3px solid var(--accent-2);
   outline-offset: 2px;
 }
