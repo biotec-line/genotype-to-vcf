@@ -358,7 +358,9 @@ def atomic_write_json(path, obj):
                 if attempt == 2: raise
                 time.sleep(0.5)
     except Exception as e:
-        print(f"[ERROR] Fehler beim Schreiben von {path}: {e}")
+        # Pfadfrei auf stderr, damit stdout-Maschinenausgaben sauber bleiben.
+        print(f"[ERROR] JSON-Datei konnte nicht geschrieben werden ({type(e).__name__}).",
+              file=sys.stderr)
         if os.path.exists(tmp): os.remove(tmp)
 
 def cpu_count():
@@ -392,11 +394,24 @@ def backoff_time(attempt):
     """
     return min(30.0, (2 ** attempt) + random.random())
 
-def load_cache(path=CACHE_FILE):
+def _looks_like_rsid_cache(data):
+    """True, wenn ``data`` dem rsID-Cache-Schema entspricht (leer erlaubt)."""
+    for key, entry in data.items():
+        if not (isinstance(key, str) and is_rs_id(key)):
+            return False
+        if not (isinstance(entry, dict) and isinstance(entry.get("assemblies"), dict)):
+            return False
+    return True
+
+
+def load_cache(path=CACHE_FILE, strict=False):
     """Load the rsID metadata cache from disk, creating it if absent.
 
     Args:
         path: Path to the JSON cache file.
+        strict: If True, refuse to replace an existing file that is not a
+            JSON object (protects user-chosen ``--cache`` paths from being
+            overwritten with ``{}``).
 
     Returns:
         Dict mapping rsID strings to assembly metadata.
@@ -404,8 +419,19 @@ def load_cache(path=CACHE_FILE):
     if os.path.exists(path):
         try:
             with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception: pass
+                data = json.load(f)
+            if isinstance(data, dict) and (not strict or _looks_like_rsid_cache(data)):
+                return data
+        except Exception:
+            data = None
+        if strict:
+            raise ValueError(
+                "--cache verweist auf eine vorhandene Datei, die kein rsID-Cache ist "
+                "(leer, kein JSON oder fremdes JSON-Schema); "
+                "sie wird nicht überschrieben."
+            )
+        if data is not None:
+            return {}
     empty = {}
     atomic_write_json(path, empty)
     return empty
@@ -901,6 +927,9 @@ HEADER_RSID_TOKENS = frozenset(
     ("rsid", "snp", "marker", "name", "rs_id", "marker_id", "snp_name", "variant_id")
 )
 NO_CALL_GENOTYPES = frozenset(("--", "-", "00"))
+PREFLIGHT_CANONICAL_CHROMS = frozenset(
+    [str(i) for i in range(1, 23)] + ["X", "Y", "MT"]
+)
 
 
 def _read_genotype_lines(file_path):
@@ -956,6 +985,7 @@ def inspect_genotype_file(file_path):
     skipped_unsupported_layout = 0
     skipped_five_column_layout = 0
     skipped_invalid_position = 0
+    skipped_empty_genotype = 0
     chrom_counts = {}
     delimiters = set()
 
@@ -990,9 +1020,16 @@ def inspect_genotype_file(file_path):
             skipped_invalid_position += 1
             continue
 
+        clean_gt = gt_raw.strip().upper().replace("_", "-")
+        if not clean_gt:
+            skipped_empty_genotype += 1
+            continue
+
         delimiters.add(delim)
         chrom = normalize_chrom(chrom_raw)
-        clean_gt = gt_raw.strip().upper().replace("_", "-")
+        if chrom not in PREFLIGHT_CANONICAL_CHROMS:
+            # Keine freien Spalteninhalte (z. B. vertauschte rsIDs) auf stdout spiegeln.
+            chrom = "other"
         if clean_gt in NO_CALL_GENOTYPES:
             no_call_records += 1
         valid_records += 1
@@ -1010,6 +1047,7 @@ def inspect_genotype_file(file_path):
         not compatible
         or skipped_unsupported_layout > 0
         or skipped_invalid_position > 0
+        or skipped_empty_genotype > 0
     )
     return {
         "compatible": compatible,
@@ -1023,6 +1061,7 @@ def inspect_genotype_file(file_path):
         "skipped_unsupported_layout": skipped_unsupported_layout,
         "skipped_five_column_layout": skipped_five_column_layout,
         "skipped_invalid_position": skipped_invalid_position,
+        "skipped_empty_genotype": skipped_empty_genotype,
         "chromosomes": chrom_counts,
     }
 
@@ -1111,35 +1150,54 @@ def _vcf_resource_paths(fasta_path=None, cache_path=None):
 
 def _validate_vcf_output(out_path, protected_paths=(), fasta_path=None):
     """Verhindert die Veröffentlichung über Eingabe, Referenzen und App-Ressourcen."""
+    _validate_write_target(
+        out_path,
+        (*protected_paths, *_vcf_resource_paths(fasta_path)),
+        "VCF-Ausgabe",
+    )
+
+
+def _validate_cache_path(cache_path, input_path=None, output_path=None, fasta_path=None):
+    """Verhindert, dass ``--cache`` Eingabe, Ausgabe, Referenzen oder App-Code ersetzt."""
+    references = list(FASTA_PATHS.values())
+    if fasta_path:
+        references.append(fasta_path)
+    protected = [input_path, output_path, __file__]
+    for reference in references:
+        protected.extend((reference, str(reference) + ".fai", str(reference) + ".gz"))
+    _validate_write_target(cache_path, protected, "Cache-Datei")
+
+
+def _validate_write_target(target_path, protected, label):
+    """Prüft einen Schreibpfad gegen geschützte Pfade (inkl. Symlinks/Hardlinks)."""
     def key(path):
         absolute = os.path.abspath(os.fspath(path))
         if os.name == "nt":
             if ":" in os.path.splitdrive(absolute)[1]:
-                raise ValueError("VCF-Ausgabe darf kein alternativer Datenstrom sein.")
+                raise ValueError(f"{label} darf kein alternativer Datenstrom sein.")
             absolute = "\\".join(part.rstrip(" .") for part in absolute.split("\\"))
         return os.path.normcase(absolute)
 
-    protected = (*protected_paths, *_vcf_resource_paths(fasta_path))
-    output_key = key(out_path)
-    resolved_key = key(os.path.realpath(out_path))
+    output_key = key(target_path)
+    resolved_key = key(os.path.realpath(target_path))
     try:
-        target_stat = os.stat(out_path)
+        target_stat = os.stat(target_path)
     except FileNotFoundError:
         target_stat = None
     if target_stat is not None and not stat.S_ISREG(target_stat.st_mode):
-        raise ValueError("VCF-Ausgabe muss eine reguläre Datei sein.")
+        raise ValueError(f"{label} muss eine reguläre Datei sein.")
     for path in protected:
         if path is None:
             continue
         if output_key == key(path) or resolved_key == key(os.path.realpath(path)):
-            raise ValueError("VCF-Ausgabe darf keine Eingabe oder geschützte Ressource ersetzen.")
+            raise ValueError(f"{label} darf keine Eingabe oder geschützte Ressource ersetzen.")
         if target_stat is not None:
             try:
                 original_stat = os.stat(path)
             except FileNotFoundError:
                 continue
             if os.path.samestat(target_stat, original_stat):
-                raise ValueError("VCF-Ausgabe besitzt einen Alias zu einer geschützten Datei.")
+                raise ValueError(f"{label} besitzt einen Alias zu einer geschützten Datei.")
 
 
 @contextmanager
@@ -1876,7 +1934,11 @@ def run_cli(args):
         protected_inputs = (args.input, *_vcf_resource_paths(args.fasta, args.cache))
         if not args.detect_build and args.output:
             _validate_vcf_output(args.output, protected_inputs, args.fasta)
-        cache = load_cache(args.cache) if args.cache else load_cache()
+        if args.cache:
+            _validate_cache_path(args.cache, args.input, args.output, args.fasta)
+            cache = load_cache(args.cache, strict=True)
+        else:
+            cache = load_cache()
         if args.detect_build:
             variants = parse_genotype_file(args.input)
             if not variants:
@@ -1908,6 +1970,11 @@ def run_cli(args):
             log_signal=log_signal,
             **extra_kwargs,
         )
+    except OSError as exc:
+        # Keine Dateipfade ausgeben (OSError.__str__ enthält den Dateinamen).
+        reason = exc.strerror or type(exc).__name__
+        print(f"Datei-Fehler: {reason}", file=sys.stderr)
+        return 1
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         return 1
@@ -1961,6 +2028,10 @@ def main(argv=None):
         return launch_gui()
     if not args.input:
         parser.error("--input ist erforderlich, wenn nicht die GUI gestartet wird.")
+    if args.json and not args.preflight:
+        parser.error("--json ist nur zusammen mit --preflight erlaubt.")
+    if args.preflight and (args.output or args.detect_build):
+        parser.error("--preflight kann nicht mit --output oder --detect-build kombiniert werden.")
 
     return run_cli(args)
 

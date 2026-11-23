@@ -427,6 +427,7 @@ export function parseGenotypeText(text) {
       skippedUnsupportedLayout: 0,
       skippedFiveColumnLayout: 0,
       skippedInvalidPosition: 0,
+      skippedEmptyGenotype: 0,
       noCallRecords: 0,
     },
   };
@@ -466,6 +467,11 @@ export function parseGenotypeText(text) {
     }
 
     const normalizedGenotype = genotype.trim().toUpperCase();
+    if (!normalizedGenotype) {
+      // Gleichlauf mit Make23toVCF3.inspect_genotype_file (skipped_empty_genotype).
+      result.stats.skippedEmptyGenotype += 1;
+      continue;
+    }
     if (NO_CALL_GENOTYPES.has(normalizedGenotype.replace(/_/gu, "-"))) {
       result.stats.noCallRecords += 1;
     }
@@ -583,6 +589,7 @@ function renderStatus(statusBanner, result, locale = "de") {
   const hasWarnings =
     result.stats.skippedUnsupportedLayout > 0 ||
     result.stats.skippedInvalidPosition > 0 ||
+    (result.stats.skippedEmptyGenotype ?? 0) > 0 ||
     result.records.length === 0;
   statusBanner.className = `status ${hasWarnings ? "warn" : "ok"}`;
   statusBanner.textContent = hasWarnings

@@ -413,3 +413,136 @@ print("HEADLESS_NO_QT_OK")
         if not line.startswith("#")
     ]
     assert records == ["1\t2\trs1\tC\tT\t.\tPASS\t.\tGT\t0/1"]
+
+
+def test_cli_cache_cannot_replace_input_or_reference(tmp_path, capsys):
+    raw = tmp_path / "raw.tsv"
+    raw_payload = "rs1\t1\t3\tGA\n"
+    raw.write_text(raw_payload, encoding="utf-8")
+    fasta = tmp_path / "ref.fa"
+    fasta.write_bytes(b">1\nACGTACGTAC\n")
+
+    rc = converter.main(["--input", str(raw), "--detect-build", "--cache", str(raw)])
+    assert rc == 1
+    assert raw.read_text(encoding="utf-8") == raw_payload
+
+    rc = converter.main(
+        ["--input", str(raw), "--output", str(tmp_path / "o.vcf"), "--build", "GRCh38",
+         "--fasta", str(fasta), "--cache", str(fasta)]
+    )
+    assert rc == 1
+    assert fasta.read_bytes() == b">1\nACGTACGTAC\n"
+    capsys.readouterr()
+
+
+def test_cli_cache_refuses_existing_non_json_file(tmp_path, capsys):
+    raw = tmp_path / "raw.tsv"
+    raw.write_text("rs1\t1\t3\tGA\n", encoding="utf-8")
+    notes = tmp_path / "notes.txt"
+    notes.write_text("keep me", encoding="utf-8")
+    rc = converter.main(["--input", str(raw), "--detect-build", "--cache", str(notes)])
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert notes.read_text(encoding="utf-8") == "keep me"
+    assert str(notes) not in captured.out
+
+
+def test_atomic_write_json_failure_is_pathfree_on_stderr(tmp_path, monkeypatch, capsys):
+    target = tmp_path / "secret_dir" / "cache.json"
+
+    def _boom(*_a, **_k):
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(converter.os, "replace", _boom)
+    monkeypatch.setattr(converter.time, "sleep", lambda *_a: None)
+    converter.atomic_write_json(str(target), {})
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "secret_dir" not in captured.err
+    assert "[ERROR]" in captured.err
+
+
+def test_cli_preflight_masks_noncanonical_chrom_and_empty_genotype(tmp_path, capsys):
+    import json
+
+    raw = tmp_path / "swapped.csv"
+    raw.write_text(
+        "rs1,1,100,AA\n"
+        "rs2,rs777,200,CC\n"
+        "rs3,2,300,\n",
+        encoding="utf-8",
+    )
+    rc = converter.main(["--input", str(raw), "--preflight", "--json"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    report = json.loads(out)
+    assert "rs777" not in out
+    assert report["chromosomes"] == {"1": 1, "other": 1}
+    assert report["valid_records"] == 2
+    assert report["skipped_empty_genotype"] == 1
+    assert report["has_warnings"] is True
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [
+        ["--json"],
+        ["--preflight", "--output", "x.vcf"],
+        ["--preflight", "--detect-build"],
+    ],
+)
+def test_cli_rejects_incompatible_flag_combinations(tmp_path, extra, capsys):
+    raw = tmp_path / "raw.tsv"
+    raw.write_text("rs1\t1\t3\tGA\n", encoding="utf-8")
+    with pytest.raises(SystemExit) as exc:
+        converter.main(["--input", str(raw), *extra])
+    assert exc.value.code == 2
+    capsys.readouterr()
+
+
+def test_cli_cache_refuses_foreign_json_object(tmp_path, capsys):
+    import json
+
+    raw = tmp_path / "raw.tsv"
+    raw.write_text("rs1\t1\t3\tGA\n", encoding="utf-8")
+    foreign = tmp_path / "translations.json"
+    payload = {"de": {"key": "Wert"}}
+    foreign.write_text(json.dumps(payload), encoding="utf-8")
+    rc = converter.main(["--input", str(raw), "--detect-build", "--cache", str(foreign)])
+    capsys.readouterr()
+    assert rc == 1
+    assert json.loads(foreign.read_text(encoding="utf-8")) == payload
+
+
+def test_load_cache_strict_accepts_valid_rsid_cache(tmp_path):
+    import json
+
+    cache = tmp_path / "c.json"
+    data = {"rs1": {"assemblies": {"GRCh38": {"chrom": "1", "pos": 3, "ref": "G"}}, "last_update": 0}}
+    cache.write_text(json.dumps(data), encoding="utf-8")
+    assert converter.load_cache(str(cache), strict=True) == data
+
+
+@pytest.mark.parametrize("missing_name", ["secret_patient_name.txt"])
+def test_cli_file_errors_are_pathfree(tmp_path, missing_name, capsys):
+    missing = tmp_path / missing_name
+    rc = converter.main(["--input", str(missing), "--preflight", "--json"])
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "secret_patient_name" not in captured.out + captured.err
+    rc = converter.main(["--input", str(tmp_path), "--preflight"])
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert str(tmp_path) not in captured.out + captured.err
+
+
+@pytest.mark.parametrize(
+    "content",
+    ['{"de": {"key": "Wert"}}', '{"rs1": 5}', "", "[1, 2]"],
+)
+def test_load_cache_strict_rejects_non_cache_files(tmp_path, content):
+    target = tmp_path / "foreign.json"
+    target.write_text(content, encoding="utf-8")
+    with pytest.raises(ValueError):
+        converter.load_cache(str(target), strict=True)
+    assert target.read_text(encoding="utf-8") == content
