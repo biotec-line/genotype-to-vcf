@@ -394,6 +394,16 @@ def backoff_time(attempt):
     """
     return min(30.0, (2 ** attempt) + random.random())
 
+def _looks_like_rsid_cache(data):
+    """True, wenn ``data`` dem rsID-Cache-Schema entspricht (leer erlaubt)."""
+    for key, entry in data.items():
+        if not (isinstance(key, str) and is_rs_id(key)):
+            return False
+        if not (isinstance(entry, dict) and isinstance(entry.get("assemblies"), dict)):
+            return False
+    return True
+
+
 def load_cache(path=CACHE_FILE, strict=False):
     """Load the rsID metadata cache from disk, creating it if absent.
 
@@ -410,13 +420,14 @@ def load_cache(path=CACHE_FILE, strict=False):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            if isinstance(data, dict):
+            if isinstance(data, dict) and (not strict or _looks_like_rsid_cache(data)):
                 return data
         except Exception:
             data = None
         if strict:
             raise ValueError(
-                "--cache verweist auf eine vorhandene Datei, die kein JSON-Cache ist; "
+                "--cache verweist auf eine vorhandene Datei, die kein rsID-Cache ist "
+                "(leer, kein JSON oder fremdes JSON-Schema); "
                 "sie wird nicht überschrieben."
             )
         if data is not None:
@@ -1959,6 +1970,11 @@ def run_cli(args):
             log_signal=log_signal,
             **extra_kwargs,
         )
+    except OSError as exc:
+        # Keine Dateipfade ausgeben (OSError.__str__ enthält den Dateinamen).
+        reason = exc.strerror or type(exc).__name__
+        print(f"Datei-Fehler: {reason}", file=sys.stderr)
+        return 1
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         return 1

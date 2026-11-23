@@ -192,3 +192,9 @@ test("browser demo enforces zero-egress CSP, language selector A11y, and zero ne
   assert.doesNotMatch(js, /\bWebSocket\b/u);
   assert.doesNotMatch(js, /\bsendBeacon\b/u);
 });
+
+test("analyzeText skips empty genotypes like the CLI preflight", () => {
+  const result = analyzeText(["rs1,1,100,AA", "rs2,2,200,"].join("\n"));
+  assert.equal(result.records.length, 1);
+  assert.equal(result.stats.skippedEmptyGenotype, 1);
+});

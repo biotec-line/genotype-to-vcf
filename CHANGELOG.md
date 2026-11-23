@@ -5,8 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Fixed / Review-Nachsorge zu #12 (2026-11-23)
-- **`--cache` überschreibt keine Nutzerdateien mehr:** Neuer `_validate_cache_path()` blockiert `--cache` auf `--input`, `--output`, `--fasta` (inkl. `.fai`/`.gz`), konfigurierte Referenzen und den Programmcode (inkl. Symlink/Hardlink-Aliasse). `load_cache(..., strict=True)` ersetzt eine vorhandene Nicht-JSON-Datei nicht mehr mit `{}`.
-- **Pfadfreie Fehlerausgabe:** `atomic_write_json()` meldet Schreibfehler ohne Zielpfad auf `stderr`, damit `--detect-build`-stdout maschinenlesbar bleibt.
+- **`--cache` überschreibt keine Nutzerdateien mehr:** Neuer `_validate_cache_path()` blockiert `--cache` auf `--input`, `--output`, `--fasta` (inkl. `.fai`/`.gz`), konfigurierte Referenzen und den Programmcode (inkl. Symlink/Hardlink-Aliasse). `load_cache(..., strict=True)` überschreibt nur noch vorhandene Dateien im rsID-Cache-Schema (`{"rs…": {"assemblies": {…}}}`); leere, Nicht-JSON- oder fremde JSON-Dateien werden abgelehnt.
+- **Pfadfreie Fehlerausgabe:** `atomic_write_json()` meldet Schreibfehler ohne Zielpfad auf `stderr`, damit `--detect-build`-stdout maschinenlesbar bleibt; CLI-Dateifehler (`OSError`, z. B. fehlende Eingabe) werden ohne Pfad gemeldet.
+- **Browser-Preflight im Gleichlauf:** `docs/browser-local-demo/demo.mjs` überspringt leere Genotypen ebenfalls (`skippedEmptyGenotype`).
 - **`--preflight --json` gehärtet:** Nicht-kanonische Chromosomenwerte werden als `other` gezählt (keine freien Spalteninhalte auf stdout), leere Genotypen zählen nicht mehr als gültig (`skipped_empty_genotype`).
 - **CLI-Kombinationen:** `--json` ohne `--preflight` sowie `--preflight` mit `--output`/`--detect-build` enden mit `parser.error()` (Exit 2).
 

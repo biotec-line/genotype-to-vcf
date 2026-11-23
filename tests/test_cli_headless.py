@@ -498,3 +498,51 @@ def test_cli_rejects_incompatible_flag_combinations(tmp_path, extra, capsys):
         converter.main(["--input", str(raw), *extra])
     assert exc.value.code == 2
     capsys.readouterr()
+
+
+def test_cli_cache_refuses_foreign_json_object(tmp_path, capsys):
+    import json
+
+    raw = tmp_path / "raw.tsv"
+    raw.write_text("rs1\t1\t3\tGA\n", encoding="utf-8")
+    foreign = tmp_path / "translations.json"
+    payload = {"de": {"key": "Wert"}}
+    foreign.write_text(json.dumps(payload), encoding="utf-8")
+    rc = converter.main(["--input", str(raw), "--detect-build", "--cache", str(foreign)])
+    capsys.readouterr()
+    assert rc == 1
+    assert json.loads(foreign.read_text(encoding="utf-8")) == payload
+
+
+def test_load_cache_strict_accepts_valid_rsid_cache(tmp_path):
+    import json
+
+    cache = tmp_path / "c.json"
+    data = {"rs1": {"assemblies": {"GRCh38": {"chrom": "1", "pos": 3, "ref": "G"}}, "last_update": 0}}
+    cache.write_text(json.dumps(data), encoding="utf-8")
+    assert converter.load_cache(str(cache), strict=True) == data
+
+
+@pytest.mark.parametrize("missing_name", ["secret_patient_name.txt"])
+def test_cli_file_errors_are_pathfree(tmp_path, missing_name, capsys):
+    missing = tmp_path / missing_name
+    rc = converter.main(["--input", str(missing), "--preflight", "--json"])
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "secret_patient_name" not in captured.out + captured.err
+    rc = converter.main(["--input", str(tmp_path), "--preflight"])
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert str(tmp_path) not in captured.out + captured.err
+
+
+@pytest.mark.parametrize(
+    "content",
+    ['{"de": {"key": "Wert"}}', '{"rs1": 5}', "", "[1, 2]"],
+)
+def test_load_cache_strict_rejects_non_cache_files(tmp_path, content):
+    target = tmp_path / "foreign.json"
+    target.write_text(content, encoding="utf-8")
+    with pytest.raises(ValueError):
+        converter.load_cache(str(target), strict=True)
+    assert target.read_text(encoding="utf-8") == content
