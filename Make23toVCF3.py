@@ -27,29 +27,39 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
 
-import psutil
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
 import requests
 from pyfaidx import Faidx
-from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPalette, QShortcut
 
-# PySide6 imports
-from PySide6.QtWidgets import (
-    QApplication,
-    QComboBox,
-    QFileDialog,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QMainWindow,
-    QMessageBox,
-    QProgressBar,
-    QPushButton,
-    QStyleFactory,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
+try:
+    from PySide6.QtCore import Qt, QThread, Signal
+    from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPalette, QShortcut
+    from PySide6.QtWidgets import (
+        QApplication,
+        QComboBox,
+        QFileDialog,
+        QFrame,
+        QHBoxLayout,
+        QLabel,
+        QMainWindow,
+        QMessageBox,
+        QProgressBar,
+        QPushButton,
+        QStyleFactory,
+        QTextEdit,
+        QVBoxLayout,
+        QWidget,
+    )
+
+    PYSIDE6_AVAILABLE = True
+    _PYSIDE6_IMPORT_ERROR = None
+except ImportError as _qt_exc:
+    PYSIDE6_AVAILABLE = False
+    _PYSIDE6_IMPORT_ERROR = _qt_exc
 
 from translator import LANGUAGE_DISPLAY_NAMES, TranslationSystem
 
@@ -194,6 +204,9 @@ def run_conversion_pipeline(
     log_signal=None,
     progress_signal=None,
     ask_callback=None,
+    *,
+    fasta_override=None,
+    cache_path=None,
 ):
     """Run the shared genotype-to-VCF conversion pipeline for GUI and CLI."""
     log_signal = make_signal(log_signal)
@@ -202,9 +215,13 @@ def run_conversion_pipeline(
 
     if stop_event.is_set():
         return None
-    protected_paths = (file_path, *_vcf_resource_paths())
+    if fasta_override is not None:
+        fasta_override = os.fspath(fasta_override)
+    if cache_path is not None:
+        cache_path = os.fspath(cache_path)
+    protected_paths = (file_path, *_vcf_resource_paths(fasta_override, cache_path))
     if output_path:
-        _validate_vcf_output(output_path, protected_paths)
+        _validate_vcf_output(output_path, protected_paths, fasta_override)
 
     log_signal.emit("Loading variants...")
     variants = parse_genotype_file(file_path)
@@ -220,7 +237,12 @@ def run_conversion_pipeline(
     resolved_build = build
     if resolved_build == "Auto":
         log_signal.emit("Ermittle Build (dbSNP Check)...")
-        resolved_build = detect_build_robust(variants, cache, log_signal, stop_event)
+        if cache_path is not None:
+            resolved_build = detect_build_robust(
+                variants, cache, log_signal, stop_event, cache_path=cache_path
+            )
+        else:
+            resolved_build = detect_build_robust(variants, cache, log_signal, stop_event)
         if not resolved_build:
             if stop_event.is_set():
                 return None
@@ -230,16 +252,25 @@ def run_conversion_pipeline(
     if resolved_build not in FASTA_PATHS:
         raise ValueError("Ungültiger Build.")
 
-    fasta_path = resolve_fasta_path_for_run(
-        resolved_build,
-        log_signal,
-        stop_event=stop_event,
-        ask_callback=ask_callback,
-    )
+    if fasta_override is not None:
+        if not os.path.isfile(fasta_override):
+            raise ValueError("Angegebene FASTA-Datei wurde nicht gefunden.")
+        fai_override = str(fasta_override) + ".fai"
+        if not os.path.exists(fai_override):
+            log_signal.emit("Erstelle FASTA-Index (.fai)...")
+            build_fasta_index(fasta_override)
+        fasta_path = fasta_override
+    else:
+        fasta_path = resolve_fasta_path_for_run(
+            resolved_build,
+            log_signal,
+            stop_event=stop_event,
+            ask_callback=ask_callback,
+        )
     if stop_event.is_set():
         return None
 
-    protected_paths += _vcf_resource_paths(fasta_path)
+    protected_paths += _vcf_resource_paths(fasta_path, cache_path)
     if fasta_path:
         log_signal.emit("Lokale FASTA wird genutzt (Schnellmodus).")
         log_signal.emit("Überspringe dbSNP-Download für SNPs.")
@@ -248,7 +279,12 @@ def run_conversion_pipeline(
         missing = [v[0] for v in variants if is_rs_id(v[0]) and v[0] not in cache]
         if missing:
             log_signal.emit(f"Lade {len(missing)} Metadaten nach...")
-            adaptive_parallel_fetch(missing, cache, log_signal, stop_event)
+            if cache_path is not None:
+                adaptive_parallel_fetch(
+                    missing, cache, log_signal, stop_event, cache_path=cache_path
+                )
+            else:
+                adaptive_parallel_fetch(missing, cache, log_signal, stop_event)
 
     if stop_event.is_set():
         return None
@@ -307,6 +343,9 @@ def atomic_write_json(path, obj):
         path: Destination file path.
         obj: JSON-serializable Python object to write.
     """
+    parent = os.path.dirname(os.path.abspath(path))
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     tmp = f"{path}.tmp.{''.join(random.choices(string.ascii_lowercase, k=6))}"
     try:
         with open(tmp, "w", encoding="utf-8") as f:
@@ -337,6 +376,8 @@ def get_cpu_usage_percent():
     Returns:
         Float CPU usage (0.0-100.0); falls back to 30.0 on error.
     """
+    if psutil is None:
+        return 30.0
     try: return psutil.cpu_percent(interval=0.1)
     except Exception: return 30.0
 
@@ -544,6 +585,7 @@ def build_fasta_index(fasta_path):
     Returns:
         Path string of the generated .fai index file.
     """
+    fasta_path = os.fspath(fasta_path)
     if not os.path.exists(fasta_path + ".fai"):
         Faidx(fasta_path)
     return fasta_path + ".fai"
@@ -789,7 +831,7 @@ def fetch_single_refsnp(rsid, session):
             attempt += 1
     return rsid, None
 
-def adaptive_parallel_fetch(rsids, cache, signal_callback, stop_event):
+def adaptive_parallel_fetch(rsids, cache, signal_callback, stop_event, cache_path=None):
     """Fetch dbSNP metadata for multiple rsIDs in parallel with adaptive concurrency.
 
     Skips rsIDs already present in the cache. Saves cache incrementally every
@@ -800,6 +842,7 @@ def adaptive_parallel_fetch(rsids, cache, signal_callback, stop_event):
         cache: Shared metadata cache dict (mutated in place).
         signal_callback: PyQt signal with emit(str) for progress messages.
         stop_event: threading.Event that cancels fetching when set.
+        cache_path: Optional destination JSON file path overriding CACHE_FILE.
     """
     to_fetch = [r for r in rsids if r not in cache]
     if not to_fetch: return
@@ -836,7 +879,10 @@ def adaptive_parallel_fetch(rsids, cache, signal_callback, stop_event):
                 save_cnt += 1
 
         if save_cnt >= 500:
-            save_cache(cache)
+            if cache_path is not None:
+                save_cache(cache, cache_path)
+            else:
+                save_cache(cache)
             save_cnt = 0
 
         if not stop_event.is_set():
@@ -844,57 +890,170 @@ def adaptive_parallel_fetch(rsids, cache, signal_callback, stop_event):
             speed = len(chunk)/max(0.01, dt)
             signal_callback.emit(f"Download: {processed}/{total} (Speed: {speed:.1f}/s)")
 
-    save_cache(cache)
+    if cache_path is not None:
+        save_cache(cache, cache_path)
+    else:
+        save_cache(cache)
     session.close()
+
+
+HEADER_RSID_TOKENS = frozenset(
+    ("rsid", "snp", "marker", "name", "rs_id", "marker_id", "snp_name", "variant_id")
+)
+NO_CALL_GENOTYPES = frozenset(("--", "-", "00"))
+
+
+def _read_genotype_lines(file_path):
+    """Read raw lines with UTF-8 BOM stripping and latin-1 fallback."""
+    for encoding in ("utf-8-sig", "latin-1"):
+        try:
+            with open(file_path, "r", encoding=encoding) as f:
+                return f.readlines()
+        except UnicodeDecodeError:
+            continue
+    raise ValueError("Genotyp-Datei konnte nicht gelesen werden (unbekanntes Encoding).")
+
+
+def _split_genotype_fields(line):
+    """Split a non-empty, non-comment genotype line into fields and delimiter label."""
+    if "\t" in line:
+        raw_parts = line.split("\t")
+        delim = "tsv"
+    elif ";" in line:
+        try:
+            raw_parts = next(csv.reader([line], delimiter=";"))
+        except (csv.Error, StopIteration):
+            raw_parts = line.split(";")
+        if len(raw_parts) == 1 and "," in line:
+            try:
+                raw_parts = next(csv.reader([line]))
+            except (csv.Error, StopIteration):
+                raw_parts = line.split(",")
+            delim = "csv"
+        else:
+            delim = "semicolon"
+    else:
+        try:
+            raw_parts = next(csv.reader([line]))
+        except (csv.Error, StopIteration):
+            raw_parts = line.split(",")
+        delim = "csv" if "," in line else "unknown"
+    return [p.strip().strip('"') for p in raw_parts], delim
+
+
+def inspect_genotype_file(file_path):
+    """Run a local, zero-network structural preflight on a genotype file.
+
+    Never emits file paths or personal rsID/genotype payloads in the returned
+    summary dictionary, making it safe for CLI --preflight and P-022 assistants.
+    """
+    raw_lines = _read_genotype_lines(file_path)
+    valid_records = 0
+    no_call_records = 0
+    skipped_blank = 0
+    skipped_comment = 0
+    skipped_header = 0
+    skipped_unsupported_layout = 0
+    skipped_five_column_layout = 0
+    skipped_invalid_position = 0
+    chrom_counts = {}
+    delimiters = set()
+
+    for raw_line in raw_lines:
+        line = raw_line.strip()
+        if not line:
+            skipped_blank += 1
+            continue
+        if line.startswith("#"):
+            skipped_comment += 1
+            continue
+
+        parts, delim = _split_genotype_fields(line)
+        first_lower = parts[0].lower() if parts else ""
+        if first_lower in HEADER_RSID_TOKENS and len(parts) in (4, 5):
+            skipped_header += 1
+            continue
+
+        if len(parts) != 4:
+            skipped_unsupported_layout += 1
+            if len(parts) == 5:
+                skipped_five_column_layout += 1
+            continue
+
+        _, chrom_raw, pos_raw, gt_raw = parts
+        try:
+            pos_val = int(pos_raw)
+        except ValueError:
+            skipped_invalid_position += 1
+            continue
+        if pos_val < 1:
+            skipped_invalid_position += 1
+            continue
+
+        delimiters.add(delim)
+        chrom = normalize_chrom(chrom_raw)
+        clean_gt = gt_raw.strip().upper().replace("_", "-")
+        if clean_gt in NO_CALL_GENOTYPES:
+            no_call_records += 1
+        valid_records += 1
+        chrom_counts[chrom] = chrom_counts.get(chrom, 0) + 1
+
+    if not delimiters:
+        delimiter_label = "none"
+    elif len(delimiters) == 1:
+        delimiter_label = next(iter(delimiters))
+    else:
+        delimiter_label = "mixed"
+
+    compatible = valid_records > 0
+    has_warnings = (
+        not compatible
+        or skipped_unsupported_layout > 0
+        or skipped_invalid_position > 0
+    )
+    return {
+        "compatible": compatible,
+        "has_warnings": has_warnings,
+        "delimiter": delimiter_label,
+        "valid_records": valid_records,
+        "no_call_records": no_call_records,
+        "skipped_blank": skipped_blank,
+        "skipped_comment": skipped_comment,
+        "skipped_header": skipped_header,
+        "skipped_unsupported_layout": skipped_unsupported_layout,
+        "skipped_five_column_layout": skipped_five_column_layout,
+        "skipped_invalid_position": skipped_invalid_position,
+        "chromosomes": chrom_counts,
+    }
+
 
 def parse_genotype_file(file_path):
     """Parse DTC genotype files in 23andMe-style TSV format.
 
     Supports any provider using tab-separated: rsid, chromosome, position, genotype
-    Also handles comma-separated (CSV) files from MyHeritage, FTDNA, tellmeGen.
+    Also handles comma- or semicolon-separated CSV files from MyHeritage, FTDNA, tellmeGen.
     """
     variants = []
-    # Versuche UTF-8 mit BOM-Stripping (Standard 23andMe/MyHeritage/tellmeGen);
-    # Fallback auf latin-1 für Windows-ANSI-Exporte (z.B. einige FTDNA-Versionen).
-    raw_lines = None
-    for encoding in ("utf-8-sig", "latin-1"):
-        try:
-            with open(file_path, "r", encoding=encoding) as f:
-                raw_lines = f.readlines()
-            break
-        except UnicodeDecodeError:
-            continue
-    if raw_lines is None:
-        raise ValueError(
-            f"Genotyp-Datei konnte nicht gelesen werden (unbekanntes Encoding): {file_path}"
-        )
+    raw_lines = _read_genotype_lines(file_path)
     for line in raw_lines:
         line = line.strip()
         if line.startswith("#") or not line: continue
-        # Try tab first, then semicolon, then fall back to CSV parsing for quoted provider exports.
-        if "\t" in line:
-            parts = line.split("\t")
-        elif ";" in line:
-            parts = line.split(";")
-        else:
-            try:
-                parts = next(csv.reader([line]))
-            except (csv.Error, StopIteration):
-                parts = line.split(",")
-
+        parts, _ = _split_genotype_fields(line)
         if len(parts) < 4: continue
-        # Strip quotes from CSV fields
-        rsid, chrom, pos, gt = (p.strip().strip('"') for p in parts[:4])
+        rsid, chrom, pos, gt = parts[:4]
         # Skip header rows
-        if rsid.lower() in ("rsid", "snp", "marker", "name", "rs_id", "marker_id", "snp_name", "variant_id"): continue
-        chrom = chrom.upper()
-        if chrom.startswith("CHR"): chrom = chrom[3:]
-        if chrom == "M": chrom = "MT"
-        try: variants.append((rsid, chrom, int(pos), gt.strip().upper()))
-        except ValueError: continue
+        if rsid.lower() in HEADER_RSID_TOKENS: continue
+        chrom = normalize_chrom(chrom)
+        try:
+            pos_val = int(pos)
+        except ValueError:
+            continue
+        if pos_val < 1:
+            continue
+        variants.append((rsid, chrom, pos_val, gt.strip().upper()))
     return variants
 
-def detect_build_robust(variants, cache, signal_callback, stop_event):
+def detect_build_robust(variants, cache, signal_callback, stop_event, cache_path=None):
     """Auto-detect genome build by comparing variant positions against dbSNP.
 
     Fetches up to 200 rsID positions and counts positional matches for
@@ -905,12 +1064,18 @@ def detect_build_robust(variants, cache, signal_callback, stop_event):
         cache: rsID metadata cache dict.
         signal_callback: PyQt signal with emit(str) for log messages.
         stop_event: threading.Event for cancellation.
+        cache_path: Optional destination JSON file path overriding CACHE_FILE.
 
     Returns:
         'GRCh37' or 'GRCh38' string, or None if cancelled.
     """
     candidates = [v for v in variants if is_rs_id(v[0])][:200]
-    adaptive_parallel_fetch([c[0] for c in candidates], cache, signal_callback, stop_event)
+    if cache_path is not None:
+        adaptive_parallel_fetch(
+            [c[0] for c in candidates], cache, signal_callback, stop_event, cache_path=cache_path
+        )
+    else:
+        adaptive_parallel_fetch([c[0] for c in candidates], cache, signal_callback, stop_event)
 
     if stop_event.is_set(): return None
 
@@ -931,12 +1096,14 @@ def detect_build_robust(variants, cache, signal_callback, stop_event):
 
     return "GRCh38" if m38 > m37 else "GRCh37"
 
-def _vcf_resource_paths(fasta_path=None):
+def _vcf_resource_paths(fasta_path=None, cache_path=None):
     """Erfasst Ressourcenpfade, damit spätere Callbacks ihren Schutz nicht aufheben."""
     references = list(FASTA_PATHS.values())
     if fasta_path:
         references.append(fasta_path)
     protected = [CACHE_FILE, __file__]
+    if cache_path:
+        protected.append(cache_path)
     for reference in references:
         protected.extend((reference, str(reference) + ".fai", str(reference) + ".gz"))
     return tuple(protected)
@@ -1040,6 +1207,8 @@ def _write_vcf_atomic(variants, build, out_path, cache, fasta_path=None, sex="un
     """
     if stop_event and stop_event.is_set():
         return None
+    if fasta_path is not None:
+        fasta_path = os.fspath(fasta_path)
     protected_paths = (*protected_paths, *_vcf_resource_paths(fasta_path))
     _validate_vcf_output(out_path, protected_paths, fasta_path)
     fai_index = load_fai_index(fasta_path + ".fai") if fasta_path else {}
@@ -1074,6 +1243,7 @@ def _write_vcf_atomic(variants, build, out_path, cache, fasta_path=None, sex="un
                     signal_callback.emit("Schreiben abgebrochen.")
                     return None
 
+            chrom = normalize_chrom(chrom)
             genotype = genotype.strip().upper().replace("_", "-")
             if genotype in ("--", "-", "00"): continue
 
@@ -1133,7 +1303,21 @@ def _write_vcf_atomic(variants, build, out_path, cache, fasta_path=None, sex="un
 # -----------------------------
 # PySide6 worker thread
 # -----------------------------
-class ConversionWorker(QThread):
+if PYSIDE6_AVAILABLE:
+    _QT_THREAD_BASE = QThread
+    _QT_WINDOW_BASE = QMainWindow
+else:
+    _QT_THREAD_BASE = object
+    _QT_WINDOW_BASE = object
+
+    class Signal:  # type: ignore[no-redef]
+        """No-op descriptor placeholder when PySide6 is absent in headless mode."""
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+
+class ConversionWorker(_QT_THREAD_BASE):
     """Background QThread that orchestrates the full genotype-to-VCF conversion.
 
     Emits log, progress, error, and finished signals for GUI updates.
@@ -1228,7 +1412,7 @@ class ConversionWorker(QThread):
 # -----------------------------
 # Modern GUI Class
 # -----------------------------
-class MainWindow(QMainWindow):
+class MainWindow(_QT_WINDOW_BASE):
     """Main application window for the Genotype-to-VCF converter.
 
     Provides file selection, sex/build/language option controls, a start/cancel
@@ -1615,7 +1799,7 @@ class MainWindow(QMainWindow):
 def build_cli_parser():
     """Create the command-line argument parser."""
     parser = argparse.ArgumentParser(
-        description="Konvertiert DTC-Genotypdateien in VCF 4.2 oder prüft den Genome-Build."
+        description="Konvertiert DTC-Genotypdateien in VCF 4.2 oder prüft Format/Genome-Build."
     )
     parser.add_argument("--input", help="Pfad zur Genotypdatei (.txt/.csv/.tsv).")
     parser.add_argument("--output", help="Pfad zur Ausgabedatei (.vcf).")
@@ -1632,9 +1816,32 @@ def build_cli_parser():
         help="Biologisches Geschlecht explizit setzen oder automatisch erkennen (case-insensitive).",
     )
     parser.add_argument(
+        "--fasta",
+        help="Optionaler Pfad zu einer lokalen Referenz-FASTA (.fa/.fasta) außerhalb des Programmordners.",
+    )
+    parser.add_argument(
+        "--cache",
+        help="Optionaler Pfad zur lokalen dbSNP-Cache-Datei (Standard: cache.json im Programmordner).",
+    )
+    parser.add_argument(
         "--detect-build",
         action="store_true",
         help="Nur den erkannten Build ausgeben, keine VCF-Datei schreiben.",
+    )
+    parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="Nur lokalen, netzwerkfreien Struktur- und Formatcheck ausführen (keine VCF/Cache/API-Zugriffe).",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Strukturierte JSON-Ausgabe für --preflight aktivieren (ohne Dateipfade oder Rohdaten).",
+    )
+    parser.add_argument(
+        "--version",
+        action="store_true",
+        help="Programmversion ausgeben und beenden.",
     )
     parser.add_argument(
         "--gui",
@@ -1649,19 +1856,49 @@ def run_cli(args):
     log_signal = CallbackSignal(lambda message: print(message, file=sys.stderr))
 
     try:
+        if args.preflight:
+            report = inspect_genotype_file(args.input)
+            if args.json:
+                print(json.dumps(report, ensure_ascii=False))
+            elif report["compatible"]:
+                print(
+                    f"Format-Preflight OK ({report['delimiter']}, "
+                    f"valid={report['valid_records']}, "
+                    f"unsupported={report['skipped_unsupported_layout']})."
+                )
+            else:
+                print(
+                    "Format-Preflight fehlgeschlagen: keine kompatiblen Vier-Spalten-Zeilen erkannt.",
+                    file=sys.stderr,
+                )
+            return 0 if report["compatible"] else 1
+
+        protected_inputs = (args.input, *_vcf_resource_paths(args.fasta, args.cache))
         if not args.detect_build and args.output:
-            _validate_vcf_output(args.output, (args.input,))
-        cache = load_cache()
+            _validate_vcf_output(args.output, protected_inputs, args.fasta)
+        cache = load_cache(args.cache) if args.cache else load_cache()
         if args.detect_build:
             variants = parse_genotype_file(args.input)
             if not variants:
                 raise ValueError("Keine gültigen Varianten in Datei gefunden.")
-            detected_build = detect_build_robust(variants, cache, log_signal, threading.Event())
+            if args.cache:
+                detected_build = detect_build_robust(
+                    variants, cache, log_signal, threading.Event(), cache_path=args.cache
+                )
+            else:
+                detected_build = detect_build_robust(
+                    variants, cache, log_signal, threading.Event()
+                )
             if not detected_build:
                 raise ValueError("Build konnte nicht erkannt werden.")
             print(detected_build)
             return 0
 
+        extra_kwargs = {}
+        if args.fasta is not None:
+            extra_kwargs["fasta_override"] = args.fasta
+        if args.cache is not None:
+            extra_kwargs["cache_path"] = args.cache
         result = run_conversion_pipeline(
             args.input,
             args.sex,
@@ -1669,6 +1906,7 @@ def run_cli(args):
             cache,
             output_path=args.output,
             log_signal=log_signal,
+            **extra_kwargs,
         )
     except Exception as exc:
         print(str(exc), file=sys.stderr)
@@ -1684,6 +1922,14 @@ def run_cli(args):
 
 def launch_gui():
     """Start the desktop GUI."""
+    if not PYSIDE6_AVAILABLE:
+        print(
+            f"GUI nicht verfügbar (PySide6/Qt konnte nicht geladen werden: {_PYSIDE6_IMPORT_ERROR}). "
+            "Nutzen Sie den Headless-CLI-Modus (--input ...) oder installieren Sie PySide6 "
+            "(unter Linux zusätzlich libegl1 libgl1 libxkbcommon-x11-0 libxcb-cursor0).",
+            file=sys.stderr,
+        )
+        return 1
     app = QApplication([sys.argv[0]])
     icon_path = _resolve_app_icon_path()
     if os.path.exists(icon_path):
@@ -1708,6 +1954,9 @@ def main(argv=None):
     parser = build_cli_parser()
     args = parser.parse_args(argv)
 
+    if args.version:
+        print(f"Genotype-to-VCF Pro {APP_VERSION}")
+        return 0
     if args.gui:
         return launch_gui()
     if not args.input:

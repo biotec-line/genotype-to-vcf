@@ -170,10 +170,10 @@ Installiere und verifiziere https://github.com/biotec-line/genotype-to-vcf (Rele
 ### Browserlokale Demo
 
 Für einen schnellen datenschutzfreundlichen Vorabcheck kann
-`docs/browser-local-demo/index.html` lokal im Browser geöffnet werden. Die Demo:
+`docs/browser-local-demo/index.html` lokal im Browser geöffnet werden (6 Sprachen: DE/EN/ES/ZH/JA/RU, strikte `connect-src 'none'`-CSP). Die Demo:
 
-- liest eine ausgewählte oder eingefügte Genotyp-Datei vollständig lokal
-- prüft nur das erwartete Vier-Spalten-TSV/CSV-Format
+- liest eine ausgewählte oder eingefügte Genotyp-Datei vollständig lokal (mit 2-MiB-Stichprobengrenze bei sehr großen Dateien, damit der Browser-Tab flüssig bleibt)
+- prüft das erwartete Vier-Spalten-TSV-, Komma-CSV- oder Semikolon-CSV-Format (inkl. numerischer DTC-Chromosomencodes `23..26` und gezieltem 5-Spalten-AncestryDNA-Hinweis)
 - zeigt eine kleine read-only Vorschau und Hinweise auf nicht unterstützte Layouts
 
 Sie lädt **nichts** hoch, ruft keine APIs auf, speichert keine genetischen Daten
@@ -181,14 +181,19 @@ und erzeugt kein VCF im Browser. Produktive Konvertierung bleibt Desktop-App bzw
 
 ### CLI / Headless-Nutzung
 
-Für Linux-/macOS-Source-Starts, Batch-Workflows oder LLM-/Pipeline-Nutzung
-steht dieselbe Konvertierungslogik auch ohne GUI zur Verfügung:
+Für Linux-/macOS-Source-Starts (auch auf displayfreien Servern ohne `PySide6`/EGL-Bibliotheken), Batch-Workflows oder LLM-/Pipeline-Nutzung
+steht dieselbe Konvertierungslogik auch ohne GUI zur Verfügung (`python Make23toVCF3.py` bzw. `genotype-to-vcf` nach `pip install -e .`):
 
 ```bash
+python Make23toVCF3.py --version
+python Make23toVCF3.py --input sample.txt --preflight --json
 python Make23toVCF3.py --input sample.txt --build GRCh37 --sex female --output sample.vcf
+python Make23toVCF3.py --input sample.txt --build GRCh38 --sex female --fasta /data/ref/GRCh38.fa --cache ~/.cache/genotype-to-vcf/cache.json --output sample.vcf
 python Make23toVCF3.py --input sample.txt --detect-build
 ```
 
+- `--preflight [--json]` prüft Vier-Spalten-TSV/CSV/Semikolon-CSV rein lokal ohne `cache.json`-, FASTA- oder API-Zugriff und ohne Ausgabe von Dateipfaden oder rsIDs.
+- `--fasta <pfad>` und `--cache <pfad>` erlauben auf Linux-/macOS-Workstations die Ablage großer Referenzgenome und Caches außerhalb des Programm- bzw. `site-packages`-Ordners (geschützt gegen Überschreiben durch `--output`).
 - `--build Auto` und `--sex Auto` behalten die bestehende Auto-Erkennung bei.
 - `--build` ist nicht case-sensitiv und akzeptiert zusätzlich `hg19` / `hg38` als Alias für `GRCh37` / `GRCh38`.
 - `--sex` ist ebenfalls nicht case-sensitiv (`Auto`, `female`, `male`).
